@@ -1,0 +1,15 @@
+{
+    "id": "0d3ac5b3-dd0b-43d3-924a-5a157b748d10",
+    "version": "0.0.1",
+    "requiredApiVersion": "^1.4.0",
+    "iconFile": "icon.png",
+    "author": {
+        "name": "Prajval Raval",
+        "homepage": "Prajval Raval",
+        "support": "Prajval Raval"
+    },
+    "name": "Saleforce Live Agent Integration",
+    "nameSlug": "salesforce-chat",
+    "classFile": "SalesforcePluginApp.ts",
+    "description": "Interface for Salesforce Live Agent"
+}
