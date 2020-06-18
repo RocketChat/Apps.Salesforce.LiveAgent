@@ -256,7 +256,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                   let retries = 20;
 
-                  const callback = (data?, error?) => {
+                  const callback = async (data?, error?) => {
                     if (error) {
                       console.log(
                         'Check whether agent accepted request, Callback error:',
@@ -274,7 +274,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                       RocketChatAssociationModel.ROOM,
                       message.room.id,
                     );
-                    persistence.createWithAssociation(sessionIdParsedResponse, assoc);
+                    await persistence.createWithAssociation(sessionIdParsedResponse, assoc);
 
                     const authHttpRequest: IHttpRequest = {
                       headers: {
@@ -479,9 +479,9 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
             `${salesforceChatApiEndpoint}Chasitor/ChatEnd`,
             closeLiveAgentChatHttpRequest,
           )
-          .then((res) => {
+          .then(async (res) => {
             console.log('Closing Liveagent Chat, Response:');
-            persistence.removeByAssociation(assoc);
+            await persistence.removeByAssociation(assoc);
             console.log(res);
           })
           .catch((error) => {
@@ -533,7 +533,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
           `${salesforceChatApiEndpoint}System/Messages`,
           pullingMesssagesSFAHttpRequest,
         )
-        .then((response) => {
+        .then(async (response) => {
           const { content } = response;
           const contentParsed = JSON.parse(content || '{}');
 
@@ -601,7 +601,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                     .setText('Closed By Agent')
                     .setSender(LcAgent);
 
-                  persistence.removeByAssociation(assoc);
+                  await persistence.removeByAssociation(assoc);
 
                   modify.getCreator().finish(chatEndedMessagebuilder);
                   break;
