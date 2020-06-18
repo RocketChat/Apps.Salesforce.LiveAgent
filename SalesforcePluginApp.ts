@@ -98,6 +98,12 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
         .getSettings()
         .getById('handover_department_name')
     ).value;
+    const rocketChatServerUrl: string = (
+      await read
+        .getEnvironmentReader()
+        .getSettings()
+        .getById('rocketchat_server_url')
+    ).value;
 
     if (message.sender.username === dialogflowBotUsername) {
       return;
@@ -288,7 +294,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                     http
                       .post(
-                        'http://localhost:3000/api/v1/login',
+                        `${rocketChatServerUrl}api/v1/login`,
                         authHttpRequest,
                       )
                       .then((loginResponse) => {
@@ -309,7 +315,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                         http
                           .get(
-                            'http://localhost:3000/api/v1/livechat/department',
+                            `${rocketChatServerUrl}api/v1/livechat/department`,
                             deptHttpRequest,
                           )
                           .then((deptResponse) => {
@@ -345,7 +351,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                             };
                             http
                               .post(
-                                'http://localhost:3000/api/v1/livechat/room.forward',
+                                `${rocketChatServerUrl}api/v1/livechat/room.forward`,
                                 ForwardHttpRequest,
                               )
                               .then((forwardResponse) => {
@@ -706,6 +712,16 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
         'Enter Live Chat department name containing Salesforce agent user.',
       required: true,
     };
+    const rocketChatServerUrl: ISetting = {
+      id: 'rocketchat_server_url',
+      public: true,
+      type: SettingType.STRING,
+      packageValue: '',
+      i18nLabel: 'Rocket Chat Server URL',
+      i18nDescription:
+        'Enter your current Rocket Chat server URL.',
+      required: true,
+    };
 
     configuration.settings.provideSetting(dialogflowBotUsername);
     configuration.settings.provideSetting(dialogflowBotPassword);
@@ -715,5 +731,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
     configuration.settings.provideSetting(salesforceDeploymentId);
     configuration.settings.provideSetting(salesforceButtonId);
     configuration.settings.provideSetting(handoverTargetDepartmentName);
+    configuration.settings.provideSetting(rocketChatServerUrl);
   }
 }
