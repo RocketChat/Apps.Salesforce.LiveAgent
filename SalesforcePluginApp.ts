@@ -141,7 +141,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
       const generateSessionIdHttpRequest: IHttpRequest = {
         headers: {
-          'X-LIVEAGENT-API-VERSION': '48',
+          'X-LIVEAGENT-API-VERSION': '49',
           'X-LIVEAGENT-AFFINITY': 'null',
         },
       };
@@ -179,7 +179,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
           const sendChatRequestHttpRequest: IHttpRequest = {
             headers: {
-              'X-LIVEAGENT-API-VERSION': '48',
+              'X-LIVEAGENT-API-VERSION': '49',
               'X-LIVEAGENT-AFFINITY': sessionIdParsedResponse.affinityToken,
               'X-LIVEAGENT-SESSION-KEY': sessionIdParsedResponse.key,
               'X-LIVEAGENT-SEQUENCE': '1',
@@ -248,7 +248,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
               const pullingChatStatusHttpRequest: IHttpRequest = {
                 headers: {
-                  'X-LIVEAGENT-API-VERSION': '48',
+                  'X-LIVEAGENT-API-VERSION': '49',
                   'X-LIVEAGENT-AFFINITY': sessionIdParsedResponse.affinityToken,
                   'X-LIVEAGENT-SESSION-KEY': sessionIdParsedResponse.key,
                 },
@@ -495,7 +495,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
       if (message.text === 'Closed by visitor') {
         const closeLiveAgentChatHttpRequest: IHttpRequest = {
           headers: {
-            'X-LIVEAGENT-API-VERSION': '48',
+            'X-LIVEAGENT-API-VERSION': '49',
             'X-LIVEAGENT-AFFINITY': persisantAffinity,
             'X-LIVEAGENT-SESSION-KEY': persistantKey,
           },
@@ -526,7 +526,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
       ) {
         const sendMessageToLiveAgentHttpRequest: IHttpRequest = {
           headers: {
-            'X-LIVEAGENT-API-VERSION': '48',
+            'X-LIVEAGENT-API-VERSION': '49',
             'X-LIVEAGENT-AFFINITY': persisantAffinity,
             'X-LIVEAGENT-SESSION-KEY': persistantKey,
           },
@@ -552,7 +552,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
       const pullingMesssagesSFAHttpRequest: IHttpRequest = {
         headers: {
-          'X-LIVEAGENT-API-VERSION': '48',
+          'X-LIVEAGENT-API-VERSION': '49',
           'X-LIVEAGENT-AFFINITY': persisantAffinity,
           'X-LIVEAGENT-SESSION-KEY': persistantKey,
         },
