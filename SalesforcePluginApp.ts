@@ -116,6 +116,13 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
     const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : message.sender;
     const LcVisitor: IVisitor = lroom.visitor;
     const LcVisitorName = LcVisitor.name;
+    const LcVisitorEmailsArr = LcVisitor.visitorEmails;
+
+    let LcVisitorEmail = 'No Email Provided';
+    if (LcVisitorEmailsArr) {
+      const t = LcVisitorEmailsArr[0].address;
+      LcVisitorEmail = t;
+    }
 
     if (message.text === 'initiate_salesforce_session') {
       // check whether the bot is currently handling the Visitor, if not then return back
@@ -186,7 +193,23 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
               language: 'en-US',
               screenResolution: '1900x1080',
               visitorName: LcVisitorName,
-              prechatDetails: [],
+              prechatDetails: [
+                {
+                  label: 'E-mail Address',
+                  value: LcVisitorEmail,
+                  entityFieldMaps: [
+                    {
+                      entityName: 'Contact',
+                      fieldName: 'Email',
+                      isFastFillable: false,
+                      isAutoQueryable: true,
+                      isExactMatchable: true,
+                    },
+                  ],
+                  transcriptFields: ['c__EmailAddress'],
+                  displayToAgent: true,
+                },
+              ],
               prechatEntities: [],
               receiveQueueUpdates: true,
               isPost: true,
@@ -280,7 +303,10 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                       RocketChatAssociationModel.ROOM,
                       message.room.id,
                     );
-                    await persistence.createWithAssociation(sessionIdParsedResponse, assoc);
+                    await persistence.createWithAssociation(
+                      sessionIdParsedResponse,
+                      assoc,
+                    );
 
                     const authHttpRequest: IHttpRequest = {
                       headers: {
@@ -718,8 +744,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
       type: SettingType.STRING,
       packageValue: '',
       i18nLabel: 'Rocket Chat Server URL',
-      i18nDescription:
-        'Enter your current Rocket Chat server URL.',
+      i18nDescription: 'Enter your current Rocket Chat server URL.',
       required: true,
     };
 
