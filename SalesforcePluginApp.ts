@@ -420,10 +420,8 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                         const checkMessageArray = checkParsedResponse.messages;
 
-                        if (checkMessageArray[0]) {
-                          if (checkMessageArray[0].type === 'ChatEstablished') {
+                        if (checkMessageArray[0] && checkMessageArray[0].type === 'ChatEstablished') {
                             callback(response);
-                          }
                         } else {
                           if (retries > 0) {
                             --retries;
