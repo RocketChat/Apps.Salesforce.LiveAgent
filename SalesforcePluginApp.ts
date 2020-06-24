@@ -11,8 +11,10 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import {
+  IDepartment,
   ILivechatMessage,
   ILivechatRoom,
+  ILivechatTransferData,
   IVisitor,
 } from '@rocket.chat/apps-engine/definition/livechat';
 import {
@@ -62,11 +64,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
         .getSettings()
         .getById('salesforce_bot_username')
     ).value;
-    const dialogflowBotPassword: string = (
+    const salesforceBotPassword: string = (
       await read
         .getEnvironmentReader()
         .getSettings()
-        .getById('dialogflow_bot_password')
+        .getById('salesforce_bot_password')
     ).value;
     const salesforceChatApiEndpoint: string = (
       await read
@@ -259,7 +261,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                   `${salesforceChatApiEndpoint}System/Messages`,
                   pullingChatStatusHttpRequest,
                 )
-                .then((pullingChatStatusResponse) => {
+                .then(async (pullingChatStatusResponse) => {
                   console.log(
                     'Check whether agent accepted request, Response:',
                   );
@@ -281,7 +283,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                     )
                     .setSender(LcAgent);
 
-                  modify.getCreator().finish(pullingResponsekeybuilder);
+                  await modify.getCreator().finish(pullingResponsekeybuilder);
 
                   let retries = 20;
 
@@ -299,110 +301,144 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                     );
                     console.log(data);
 
-                    const assoc = new RocketChatAssociationRecord(
-                      RocketChatAssociationModel.ROOM,
-                      message.room.id,
-                    );
-                    await persistence.createWithAssociation(
-                      sessionIdParsedResponse,
-                      assoc,
-                    );
+                    try {
+                      const targetagent = await read
+                        .getUserReader()
+                        .getByUsername(salesforceBotUsername);
 
-                    const authHttpRequest: IHttpRequest = {
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                      data: {
-                        user: dialogflowBotUsername,
-                        password: dialogflowBotPassword,
-                      },
-                    };
+                      console.log(
+                        'Target Agent Status: ',
+                        targetagent.statusConnection,
+                      );
 
-                    http
-                      .post(
-                        `${rocketChatServerUrl}api/v1/login`,
-                        authHttpRequest,
-                      )
-                      .then((loginResponse) => {
-                        const loginResponseJSON = JSON.parse(
-                          loginResponse.content || '{}',
+                      if (targetagent.statusConnection === 'online') {
+                        const assoc = new RocketChatAssociationRecord(
+                          RocketChatAssociationModel.ROOM,
+                          message.room.id,
                         );
-                        console.log(
-                          'Check whether agent accepted request, Handoff Login Response:',
+                        await persistence.createWithAssociation(
+                          sessionIdParsedResponse,
+                          assoc,
                         );
-                        console.log(loginResponse);
 
-                        const deptHttpRequest: IHttpRequest = {
+                        const roomId = message.room.id;
+                        const room: ILivechatRoom = (await read
+                          .getRoomReader()
+                          .getById(roomId)) as ILivechatRoom;
+
+                        const targetDepartment: IDepartment = (await read
+                          .getLivechatReader()
+                          .getLivechatDepartmentByIdOrName(
+                            targetDeptName,
+                          )) as IDepartment;
+
+                        const transferData: ILivechatTransferData = {
+                          currentRoom: room,
+                          targetDepartment: targetDepartment.id,
+                          targetAgent: targetagent,
+                        };
+
+                        await modify
+                          .getUpdater()
+                          .getLivechatUpdater()
+                          .transferVisitor(LcVisitor, transferData);
+                      } else {
+                        const authHttpRequest: IHttpRequest = {
                           headers: {
-                            'X-Auth-Token': loginResponseJSON.data.authToken,
-                            'X-User-Id': loginResponseJSON.data.userId,
+                            'Content-Type': 'application/json',
+                          },
+                          data: {
+                            user: salesforceBotUsername,
+                            password: salesforceBotPassword,
                           },
                         };
 
                         http
-                          .get(
-                            `${rocketChatServerUrl}api/v1/livechat/department`,
-                            deptHttpRequest,
+                          .post(
+                            `${rocketChatServerUrl}api/v1/login`,
+                            authHttpRequest,
                           )
-                          .then((deptResponse) => {
-                            const deptResponseJSON = JSON.parse(
-                              deptResponse.content || '{}',
+                          .then((loginResponse) => {
+                            const loginResponseJSON = JSON.parse(
+                              loginResponse.content || '{}',
                             );
-
                             console.log(
-                              'Check whether agent accepted request, Handoff Department Response:',
+                              'Performing Salesforce Bot Login, Response:',
                             );
-                            console.log(deptResponse);
+                            console.log(loginResponse);
 
-                            let targetDeptId: string = '';
-                            deptResponseJSON.departments.forEach(
-                              (department) => {
-                                if (department.name === targetDeptName) {
-                                  targetDeptId = department._id;
-                                }
-                              },
-                            );
-
-                            const ForwardHttpRequest: IHttpRequest = {
+                            const setStatusHttpRequest: IHttpRequest = {
                               headers: {
-                                'Content-Type': 'application/json',
                                 'X-Auth-Token':
                                   loginResponseJSON.data.authToken,
                                 'X-User-Id': loginResponseJSON.data.userId,
                               },
                               data: {
-                                roomId: message.room.id,
-                                departmentId: targetDeptId,
+                                message: 'online',
+                                status: 'online',
                               },
                             };
+
                             http
                               .post(
-                                `${rocketChatServerUrl}api/v1/livechat/room.forward`,
-                                ForwardHttpRequest,
+                                `${rocketChatServerUrl}api/v1/users.setStatus`,
+                                setStatusHttpRequest,
                               )
-                              .then((forwardResponse) => {
+                              .then(async (statusResponse) => {
                                 console.log(
-                                  'Check whether agent accepted request, Handoff Forward Response:',
+                                  'Setting Salesforce Bot Status, Response:',
                                 );
-                                console.log(forwardResponse);
+                                console.log(statusResponse);
+
+                                const assoc = new RocketChatAssociationRecord(
+                                  RocketChatAssociationModel.ROOM,
+                                  message.room.id,
+                                );
+                                await persistence.createWithAssociation(
+                                  sessionIdParsedResponse,
+                                  assoc,
+                                );
+
+                                const roomId = message.room.id;
+                                const room: ILivechatRoom = (await read
+                                  .getRoomReader()
+                                  .getById(roomId)) as ILivechatRoom;
+                                // tslint:disable-next-line: max-line-length
+                                const targetDepartment: IDepartment = (await read
+                                  .getLivechatReader()
+                                  .getLivechatDepartmentByIdOrName(
+                                    targetDeptName,
+                                  )) as IDepartment;
+
+                                const transferData: ILivechatTransferData = {
+                                  currentRoom: room,
+                                  targetDepartment: targetDepartment.id,
+                                  targetAgent: targetagent,
+                                };
+
+                                await modify
+                                  .getUpdater()
+                                  .getLivechatUpdater()
+                                  .transferVisitor(LcVisitor, transferData);
                               })
-                              .catch((forwardError) => {
+                              .catch((statusErr) => {
                                 console.log(
-                                  'Check whether agent accepted request, Handoff Forward Error:',
+                                  'Setting Salesforce Bot Status, Error:',
                                 );
-                                console.log(forwardError);
+                                console.log(statusErr);
                               });
                           })
-                          .catch((deptError) => {
+                          .catch((loginErr) => {
                             console.log(
-                              'Check whether agent accepted request, Handoff Department Error:',
+                              'Performing Salesforce Bot Login, Error:',
                             );
-                            console.log(deptError);
+                            console.log(loginErr);
                           });
-                      })
-                      .catch((loginError) => {
-                        console.log(loginError);
-                      });
+                      }
+                    } catch (err) {
+                      console.log('Perfoming Handoff, Error:');
+                      console.log(err);
+                    }
                   };
 
                   // tslint:disable-next-line: no-shadowed-variable
@@ -413,6 +449,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                         pullingChatStatusHttpRequest,
                       )
                       .then((response) => {
+                        console.log(
+                          'Check whether agent accepted request, Response:',
+                        );
+                        console.log(response);
+
                         const checkCurrentChatStatusContent = response.content;
                         const checkParsedResponse = JSON.parse(
                           checkCurrentChatStatusContent || '{}',
@@ -420,8 +461,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                         const checkMessageArray = checkParsedResponse.messages;
 
-                        if (checkMessageArray[0] && checkMessageArray[0].type === 'ChatEstablished') {
-                            callback(response);
+                        if (
+                          checkMessageArray[0] &&
+                          checkMessageArray[0].type === 'ChatEstablished'
+                        ) {
+                          callback(response);
                         } else {
                           if (retries > 0) {
                             --retries;
@@ -444,7 +488,24 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                       });
                   }
 
-                  checkCurrentChatStatus(callback);
+                  if (
+                    pullingKey.messages[0].type === 'ChatRequestFail' &&
+                    pullingKey.messages[0].message.reason === 'Unavailable'
+                  ) {
+                    const chatRequestFailbuilder = modify
+                      .getNotifier()
+                      .getMessageBuilder();
+
+                    chatRequestFailbuilder
+                      .setRoom(message.room)
+                      .setText('No Agent available for chat.')
+                      .setSender(LcAgent);
+
+                    modify.getCreator().finish(chatRequestFailbuilder);
+                  } else {
+                    console.log('Check whether agent accepted request, Executing Function:');
+                    checkCurrentChatStatus(callback);
+                  }
                 })
                 .catch((error) => {
                   console.log('Check whether agent accepted request, Error:');
@@ -492,7 +553,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
         );
       }
 
-      if (message.text === 'Closed by visitor') {
+      if (
+        message.text === 'Closed by visitor' &&
+        persisantAffinity &&
+        persistantKey
+      ) {
         const closeLiveAgentChatHttpRequest: IHttpRequest = {
           headers: {
             'X-LIVEAGENT-API-VERSION': '49',
@@ -522,7 +587,9 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
       if (
         message.sender.username !== salesforceBotUsername &&
-        message.text !== 'Closed by visitor'
+        message.text !== 'Closed by visitor' &&
+        persisantAffinity &&
+        persistantKey
       ) {
         const sendMessageToLiveAgentHttpRequest: IHttpRequest = {
           headers: {
@@ -550,106 +617,110 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
           });
       }
 
-      const pullingMesssagesSFAHttpRequest: IHttpRequest = {
-        headers: {
-          'X-LIVEAGENT-API-VERSION': '49',
-          'X-LIVEAGENT-AFFINITY': persisantAffinity,
-          'X-LIVEAGENT-SESSION-KEY': persistantKey,
-        },
-      };
+      if (persisantAffinity && persistantKey) {
+        const pullingMesssagesSFAHttpRequest: IHttpRequest = {
+          headers: {
+            'X-LIVEAGENT-API-VERSION': '49',
+            'X-LIVEAGENT-AFFINITY': persisantAffinity,
+            'X-LIVEAGENT-SESSION-KEY': persistantKey,
+          },
+        };
 
-      http
-        .get(
-          `${salesforceChatApiEndpoint}System/Messages`,
-          pullingMesssagesSFAHttpRequest,
-        )
-        .then(async (response) => {
-          const { content } = response;
-          const contentParsed = JSON.parse(content || '{}');
+        http
+          .get(
+            `${salesforceChatApiEndpoint}System/Messages`,
+            pullingMesssagesSFAHttpRequest,
+          )
+          .then(async (response) => {
+            const { content } = response;
+            const contentParsed = JSON.parse(content || '{}');
 
-          const messageArray = contentParsed.messages;
+            const messageArray = contentParsed.messages;
 
-          if (messageArray) {
-            console.log('Pulling Messages from Liveagent, messageArray here:');
-            console.log(messageArray);
-            if (messageArray[0]) {
+            if (messageArray) {
               console.log(
-                'Pulling Messages from Liveagent, messageArray[0] here:',
+                'Pulling Messages from Liveagent, messageArray here:',
               );
-              console.log(messageArray[0]);
+              console.log(messageArray);
+              if (messageArray[0]) {
+                console.log(
+                  'Pulling Messages from Liveagent, messageArray[0] here:',
+                );
+                console.log(messageArray[0]);
 
-              const messageType = messageArray[0].type;
-              switch (messageType) {
-                case 'ChatMessage':
-                  const messageText = messageArray[0].message.text;
+                const messageType = messageArray[0].type;
+                switch (messageType) {
+                  case 'ChatMessage':
+                    const messageText = messageArray[0].message.text;
 
-                  const agentMessagebuilder = modify
-                    .getNotifier()
-                    .getMessageBuilder();
+                    const agentMessagebuilder = modify
+                      .getNotifier()
+                      .getMessageBuilder();
 
-                  agentMessagebuilder
-                    .setRoom(message.room)
-                    .setText(messageText)
-                    .setSender(LcAgent);
+                    agentMessagebuilder
+                      .setRoom(message.room)
+                      .setText(messageText)
+                      .setSender(LcAgent);
 
-                  modify.getCreator().finish(agentMessagebuilder);
-                  break;
+                    modify.getCreator().finish(agentMessagebuilder);
+                    break;
 
-                case 'AgentTyping':
-                  const agentTypingMessagebuilder = modify
-                    .getNotifier()
-                    .getMessageBuilder();
+                  case 'AgentTyping':
+                    const agentTypingMessagebuilder = modify
+                      .getNotifier()
+                      .getMessageBuilder();
 
-                  agentTypingMessagebuilder
-                    .setRoom(message.room)
-                    .setText('Agent Typing')
-                    .setSender(LcAgent);
+                    agentTypingMessagebuilder
+                      .setRoom(message.room)
+                      .setText('Agent Typing')
+                      .setSender(LcAgent);
 
-                  modify.getCreator().finish(agentTypingMessagebuilder);
-                  break;
+                    modify.getCreator().finish(agentTypingMessagebuilder);
+                    break;
 
-                case 'AgentNotTyping':
-                  const agentNotTypingMessagebuilder = modify
-                    .getNotifier()
-                    .getMessageBuilder();
+                  case 'AgentNotTyping':
+                    const agentNotTypingMessagebuilder = modify
+                      .getNotifier()
+                      .getMessageBuilder();
 
-                  agentNotTypingMessagebuilder
-                    .setRoom(message.room)
-                    .setText('Agent Not Typing')
-                    .setSender(LcAgent);
+                    agentNotTypingMessagebuilder
+                      .setRoom(message.room)
+                      .setText('Agent Not Typing')
+                      .setSender(LcAgent);
 
-                  modify.getCreator().finish(agentNotTypingMessagebuilder);
-                  break;
+                    modify.getCreator().finish(agentNotTypingMessagebuilder);
+                    break;
 
-                case 'ChatEnded':
-                  const chatEndedMessagebuilder = modify
-                    .getNotifier()
-                    .getMessageBuilder();
+                  case 'ChatEnded':
+                    const chatEndedMessagebuilder = modify
+                      .getNotifier()
+                      .getMessageBuilder();
 
-                  chatEndedMessagebuilder
-                    .setRoom(message.room)
-                    .setText('Closed By Agent')
-                    .setSender(LcAgent);
+                    chatEndedMessagebuilder
+                      .setRoom(message.room)
+                      .setText('Closed By Agent')
+                      .setSender(LcAgent);
 
-                  await persistence.removeByAssociation(assoc);
+                    await persistence.removeByAssociation(assoc);
 
-                  modify.getCreator().finish(chatEndedMessagebuilder);
-                  break;
+                    modify.getCreator().finish(chatEndedMessagebuilder);
+                    break;
 
-                default:
-                  console.log(
-                    'Pulling Messages from Liveagent, Default messageType:',
-                  );
-                  console.log(messageType);
-                  break;
+                  default:
+                    console.log(
+                      'Pulling Messages from Liveagent, Default messageType:',
+                    );
+                    console.log(messageType);
+                    break;
+                }
               }
             }
-          }
-        })
-        .catch((error) => {
-          console.log('Pulling Messages from Liveagent, Error:');
-          console.log(error);
-        });
+          })
+          .catch((error) => {
+            console.log('Pulling Messages from Liveagent, Error:');
+            console.log(error);
+          });
+      }
     }
   }
 
@@ -666,16 +737,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
         'Enter Live Chat agent username, hadling requests from Dialogflow Bot.',
       required: true,
     };
-    const dialogflowBotPassword: ISetting = {
-      id: 'dialogflow_bot_password',
-      public: true,
-      type: SettingType.STRING,
-      packageValue: '',
-      i18nLabel: 'Dialogflow Bot Password',
-      i18nDescription:
-        'Enter Live Chat agent password, hadling requests from Dialogflow Bot.',
-      required: true,
-    };
     const salesforceBotUsername: ISetting = {
       id: 'salesforce_bot_username',
       public: true,
@@ -683,7 +744,17 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
       packageValue: '',
       i18nLabel: 'Salesforce Bot Username',
       i18nDescription:
-        'Enter Live Chat agent username we will be using as Salesforce Agent.',
+        'Enter Live Chat agent username we will be using as Salesforce Live Agent.',
+      required: true,
+    };
+    const salesforceBotPassword: ISetting = {
+      id: 'salesforce_bot_password',
+      public: true,
+      type: SettingType.STRING,
+      packageValue: '',
+      i18nLabel: 'Salesforce Bot Password',
+      i18nDescription:
+        'Enter Live Chat agent password we will be using as Salesforce Live Agent.',
       required: true,
     };
     const salesforceChatApiEndpoint: ISetting = {
@@ -747,8 +818,8 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
     };
 
     configuration.settings.provideSetting(dialogflowBotUsername);
-    configuration.settings.provideSetting(dialogflowBotPassword);
     configuration.settings.provideSetting(salesforceBotUsername);
+    configuration.settings.provideSetting(salesforceBotPassword);
     configuration.settings.provideSetting(salesforceChatApiEndpoint);
     configuration.settings.provideSetting(salesforceOrganisationId);
     configuration.settings.provideSetting(salesforceDeploymentId);
