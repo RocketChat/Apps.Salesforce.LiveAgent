@@ -503,7 +503,9 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                     modify.getCreator().finish(chatRequestFailbuilder);
                   } else {
-                    console.log('Check whether agent accepted request, Executing Function:');
+                    console.log(
+                      'Check whether agent accepted request, Executing Function:',
+                    );
                     checkCurrentChatStatus(callback);
                   }
                 })
@@ -642,16 +644,13 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                 'Pulling Messages from Liveagent, messageArray here:',
               );
               console.log(messageArray);
-              if (messageArray[0]) {
-                console.log(
-                  'Pulling Messages from Liveagent, messageArray[0] here:',
-                );
-                console.log(messageArray[0]);
 
-                const messageType = messageArray[0].type;
-                switch (messageType) {
+              messageArray.forEach(async (i) => {
+                const type = i.type;
+
+                switch (type) {
                   case 'ChatMessage':
-                    const messageText = messageArray[0].message.text;
+                    const messageText = i.message.text;
 
                     const agentMessagebuilder = modify
                       .getNotifier()
@@ -662,7 +661,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                       .setText(messageText)
                       .setSender(LcAgent);
 
-                    modify.getCreator().finish(agentMessagebuilder);
+                    await modify.getCreator().finish(agentMessagebuilder);
                     break;
 
                   case 'AgentTyping':
@@ -675,7 +674,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                       .setText('Agent Typing')
                       .setSender(LcAgent);
 
-                    modify.getCreator().finish(agentTypingMessagebuilder);
+                    await modify.getCreator().finish(agentTypingMessagebuilder);
                     break;
 
                   case 'AgentNotTyping':
@@ -688,7 +687,9 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                       .setText('Agent Not Typing')
                       .setSender(LcAgent);
 
-                    modify.getCreator().finish(agentNotTypingMessagebuilder);
+                    await modify
+                      .getCreator()
+                      .finish(agentNotTypingMessagebuilder);
                     break;
 
                   case 'ChatEnded':
@@ -703,17 +704,17 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                     await persistence.removeByAssociation(assoc);
 
-                    modify.getCreator().finish(chatEndedMessagebuilder);
+                    await modify.getCreator().finish(chatEndedMessagebuilder);
                     break;
 
                   default:
                     console.log(
                       'Pulling Messages from Liveagent, Default messageType:',
                     );
-                    console.log(messageType);
+                    console.log(type);
                     break;
                 }
-              }
+              });
             }
           })
           .catch((error) => {
