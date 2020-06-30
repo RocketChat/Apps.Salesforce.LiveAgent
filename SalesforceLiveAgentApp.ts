@@ -674,27 +674,13 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                     break;
 
                   case 'AgentTyping':
-                    const actions = [
-                      {
-                        type: MessageActionType.BUTTON,
-                        msg_in_chat_window: true,
-                        msg_processing_type:
-                            MessageProcessingType.SendMessage,
-                        text: 'Agent Typing',
-                        msg: 'agentTyping',
-                      },
-                  ];
-
-                    const test: IMessageAttachment = {
-                      actions,
-                  };
                     const agentTypingMessagebuilder = modify
                       .getNotifier()
                       .getMessageBuilder();
 
                     agentTypingMessagebuilder
                       .setRoom(message.room)
-                      .setAttachments([test])
+                      .setText('Agent Typing')
                       .setSender(LcAgent);
 
                     await modify.getCreator().finish(agentTypingMessagebuilder);
@@ -727,7 +713,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                     await persistence.removeByAssociation(assoc);
 
-                    await modify.getUpdater().finish(chatEndedMessagebuilder);
+                    await modify.getCreator().finish(chatEndedMessagebuilder);
                     break;
 
                   default:
