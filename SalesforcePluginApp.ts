@@ -403,7 +403,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                                 const room: ILivechatRoom = (await read
                                   .getRoomReader()
                                   .getById(roomId)) as ILivechatRoom;
-                                // tslint:disable-next-line: max-line-length
+
                                 const targetDepartment: IDepartment = (await read
                                   .getLivechatReader()
                                   .getLivechatDepartmentByIdOrName(
@@ -413,7 +413,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                                 const transferData: ILivechatTransferData = {
                                   currentRoom: room,
                                   targetDepartment: targetDepartment.id,
-                                  targetAgent: targetagent,
                                 };
 
                                 await modify
@@ -634,6 +633,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
             pullingMesssagesSFAHttpRequest,
           )
           .then(async (response) => {
+            console.log(
+              'Pulling Messages from Liveagent, response here:',
+            );
+            console.log(response);
+
             const { content } = response;
             const contentParsed = JSON.parse(content || '{}');
 
