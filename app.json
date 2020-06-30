@@ -1,15 +1,15 @@
 {
-    "id": "0d3ac5b3-dd0b-43d3-924a-5a157b748d10",
-    "version": "0.0.1",
-    "requiredApiVersion": "^1.4.0",
+    "id": "0d3ac5b3-dd0b-43d3-924a-5a7433902589",
+    "version": "1.0.0",
+    "requiredApiVersion": "^1.15.0",
     "iconFile": "icon.png",
     "author": {
-        "name": "Prajval Raval",
-        "homepage": "Prajval Raval",
-        "support": "Prajval Raval"
+        "name": "Rocket.Chat",
+        "homepage": "https://rocket.chat/",
+        "support": "support@rocket.chat"
     },
     "name": "Saleforce Live Agent Integration",
-    "nameSlug": "salesforce-chat",
-    "classFile": "SalesforcePluginApp.ts",
+    "nameSlug": "salesforce-live-agent",
+    "classFile": "SalesforceLiveAgentApp.ts",
     "description": "Interface for Salesforce Live Agent"
 }

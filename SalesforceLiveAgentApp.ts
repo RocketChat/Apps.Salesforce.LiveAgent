@@ -19,7 +19,10 @@ import {
 } from '@rocket.chat/apps-engine/definition/livechat';
 import {
   IMessage,
+  IMessageAttachment,
   IPostMessageSent,
+  MessageActionType,
+  MessageProcessingType,
 } from '@rocket.chat/apps-engine/definition/messages';
 import {
   IAppInfo,
@@ -410,6 +413,8 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                                     targetDeptName,
                                   )) as IDepartment;
 
+                                console.log('targetDepartment: ', targetDepartment);
+
                                 const transferData: ILivechatTransferData = {
                                   currentRoom: room,
                                   targetDepartment: targetDepartment.id,
@@ -669,13 +674,27 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
                     break;
 
                   case 'AgentTyping':
+                    const actions = [
+                      {
+                        type: MessageActionType.BUTTON,
+                        msg_in_chat_window: true,
+                        msg_processing_type:
+                            MessageProcessingType.SendMessage,
+                        text: 'Agent Typing',
+                        msg: 'agentTyping',
+                      },
+                  ];
+
+                    const test: IMessageAttachment = {
+                      actions,
+                  };
                     const agentTypingMessagebuilder = modify
                       .getNotifier()
                       .getMessageBuilder();
 
                     agentTypingMessagebuilder
                       .setRoom(message.room)
-                      .setText('Agent Typing')
+                      .setAttachments([test])
                       .setSender(LcAgent);
 
                     await modify.getCreator().finish(agentTypingMessagebuilder);
@@ -708,7 +727,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent {
 
                     await persistence.removeByAssociation(assoc);
 
-                    await modify.getCreator().finish(chatEndedMessagebuilder);
+                    await modify.getUpdater().finish(chatEndedMessagebuilder);
                     break;
 
                   default:
