@@ -86,9 +86,9 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 ## App Usage
 
-1. App should be running right away once you complete all required above configuration. Make sure your Live Agent is online, before making this session request.
+1. App should be running right away once you complete all required above configuration. Make sure your Live Agent is online, before making any session request.
 
-   - To change your Live Agent status to online, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> On the right hand side, you will find an icon named **App Launcher** -> Click on it and go to **Service Console**.
+   - To change your Live Agent status to online, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> On the right hand side, you will find an icon named **App Launcher** <img width="32" alt="Screenshot 2020-07-08 at 9 03 50 PM" src="https://user-images.githubusercontent.com/41849970/86938913-9939a580-c15e-11ea-8544-9aefab50555b.png"> -> Click on it and go to **Service Console**.
 
    - On Bottom Bar, click on **Omni-channel** and change status from `Offline` to `Available - Chat`.
 
