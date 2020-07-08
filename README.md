@@ -78,6 +78,10 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - Enter your current Rocket Chat server URL. You can find it in the URL Bar of your browser.
 
+1. **Debug Mode**
+
+   - Debug mode will send logs and debug messages to the Live Chat users. Dev only setting, keep it to default setting (false).
+
 1. That's it for the configuration. Now let's look at the usage.
 
 ## App Usage
@@ -94,6 +98,6 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
    initiate_salesforce_session
    ```
 
-1. Once the Live Agent accepts your chat request, it will perform handoff to our Salesforce bot user and then you can send and recieve messages.
+1. Once the Live Agent accepts your chat request, it will perform handoff to our Salesforce bot user and then you can send and recieve messages from Salesforce Live Agent.
 
-1. Due to Long Message Polling Loop, if your user is idle for `40` seconds. Session is automatically expired.
+1. Due to Long Message Polling Loop, if Live Chat user is idle for `40` seconds. Session is automatically expired.
