@@ -420,7 +420,7 @@ export class InitiateSalesforceSession {
                     );
 
                     console.log(
-                      'Check whether agent accepted request, Error: Agent available for chat.',
+                      'Check whether agent accepted request, Error: No Agent available for chat.',
                     );
                   } else if (
                     pullMessagesContentParsed.messages[0].message.reason ===
