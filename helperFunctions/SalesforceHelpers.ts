@@ -143,7 +143,7 @@ export class SalesforceHelpers {
     };
 
     try {
-      const response = await http.get(
+      const response = await http.post(
         closeLiveAgentChatEndpoint,
         closeLiveAgentChatHttpRequest,
       );
