@@ -12,7 +12,6 @@ export enum AppSettingId {
   SalesforceDeploymentId = 'salesforce_deployment_id',
   SalesforceButtonId = 'salesforce_button_id',
   HandoverDepartmentName = 'handover_department_name',
-  RocketChatServerUrl = 'rocketchat_server_url',
   DebugButton = 'debug_button',
 }
 
@@ -95,15 +94,6 @@ export const AppSettings: Array<ISetting> = [
     i18nLabel: 'Handover Target Department Name',
     i18nDescription:
       'Enter Live Chat department name containing Salesforce agent user.',
-    required: true,
-  },
-  {
-    id: AppSettingId.RocketChatServerUrl,
-    public: true,
-    type: SettingType.STRING,
-    packageValue: '',
-    i18nLabel: 'Rocket Chat Server URL',
-    i18nDescription: 'Enter your current Rocket Chat server URL.',
     required: true,
   },
   {

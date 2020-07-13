@@ -74,10 +74,6 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of buttonId from Chat Code Snippet.
 
-1. **Rocket Chat Server URL**
-
-   - Enter your current Rocket Chat server URL. You can find it in the URL Bar of your browser.
-
 1. **Debug Mode**
 
    - Debug mode will send logs and debug messages to the Live Chat users. Dev only setting, keep it to default setting (false).

@@ -18,7 +18,7 @@ import {
   RocketChatAssociationRecord,
 } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { sendDebugLCMessage } from '../helperFunctions/GeneralHelpers';
+import { getServerSettingValue, sendDebugLCMessage } from '../helperFunctions/GeneralHelpers';
 import { SalesforceHelpers } from '../helperFunctions/SalesforceHelpers';
 
 export class InitiateSalesforceSession {
@@ -79,12 +79,7 @@ export class InitiateSalesforceSession {
         .getSettings()
         .getById('handover_department_name')
     ).value;
-    const rocketChatServerUrl: string = (
-      await this.read
-        .getEnvironmentReader()
-        .getSettings()
-        .getById('rocketchat_server_url')
-    ).value;
+    const rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
 
     const lmessage: ILivechatMessage = this.message;
     const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;

@@ -32,3 +32,7 @@ export async function sendDebugLCMessage(
   messageBuilder.setRoom(room).setText(messageText).setSender(sender);
   modify.getCreator().finish(messageBuilder);
 }
+
+export const getServerSettingValue = async (read: IRead, id: string) => {
+  return id  && (await read.getEnvironmentReader().getServerSettings().getValueById(id));
+};
