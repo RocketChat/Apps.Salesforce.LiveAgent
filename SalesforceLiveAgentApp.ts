@@ -77,9 +77,10 @@ export class SalesforcePluginApp extends App
 		data.room.id,
 	);
 
-	const {
+	let {
 		persisantAffinity,
 		persistantKey,
+		// tslint:disable-next-line: prefer-const
 		persistantagentName,
 	} = await retrievePersistentTokens(read, assoc);
 
@@ -124,7 +125,7 @@ export class SalesforcePluginApp extends App
 		// PROBABLY ADD A CHECK TO LET USER DECIDE WHETHER TO REINITIATE SESSION
 		};
 
-	async function subscribeToLiveAgent(retries: number, callback: any) {
+	async function subscribeToLiveAgent(/*retries: number,*/ callback: any) {
 		await salesforceHelpers
 			.pullMessages(
 			http,
@@ -138,29 +139,44 @@ export class SalesforcePluginApp extends App
 				'Pulling Messages using Subscribe Function, Session Expired.',
 				);
 				callback('Chat Session Expired');
+
+				return;
 			} else if (
 				response.statusCode === 204 ||
 				response.statusCode === 409
 			) {
 				console.log(
 				'Pulling Messages using Subscribe Function, Empty Response.',
+				response,
 				);
 
-				if (retries > 0) {
-				console.log(
-					'Executing Subscribe Function, EMPTY RESPONSE ENTRY, Retries Remaining: ',
-					retries,
-				);
-				await subscribeToLiveAgent(
-					--retries,
-					callback,
-					// persisantAffinity,
-					// persistantKey,
-				);
+				// if (retries > 0) {
+				// console.log(
+				// 	'Executing Subscribe Function, EMPTY RESPONSE ENTRY, Retries Remaining: ',
+				// 	retries,
+				// );
+
+				const persistantData = await retrievePersistentTokens(read, assoc);
+				persisantAffinity = persistantData.persisantAffinity;
+				persistantKey = persistantData.persistantKey;
+
+				if (persisantAffinity && persistantKey) {
+					await subscribeToLiveAgent(
+						// --retries,
+						callback,
+						// persisantAffinity,
+						// persistantKey,
+					);
 				} else {
-				// no retries left, calling callback with error
-				callback([], 'out of retries');
+					console.log(
+						'Pulling Messages using Subscribe Function, Session Expired.',
+					);
+					return;
 				}
+				// } else {
+				// // no retries left, calling callback with error
+				// callback([], 'out of retries');
+				// }
 			} else {
 				// request successful
 				console.log(
@@ -197,21 +213,32 @@ export class SalesforcePluginApp extends App
 					messageArray,
 				);
 
-				if (retries > 0) {
-					console.log(
-					'Executing Subscribe Function, MESSAGE RESPONSE ENTRY, Retries Remaining: ',
-					retries,
-					);
+				// if (retries > 0) {
+				// 	console.log(
+				// 	'Executing Subscribe Function, MESSAGE RESPONSE ENTRY, Retries Remaining: ',
+				// 	retries,
+				// 	);
+				const persistantData = await retrievePersistentTokens(read, assoc);
+				persisantAffinity = persistantData.persisantAffinity;
+				persistantKey = persistantData.persistantKey;
+
+				if (persisantAffinity && persistantKey) {
 					await subscribeToLiveAgent(
-					--retries,
-					callback,
-					// persisantAffinity,
-					// persistantKey,
+						// --retries,
+						callback,
+						// persisantAffinity,
+						// persistantKey,
 					);
 				} else {
-					// no retries left, calling callback with error
-					callback([], 'out of retries');
+					console.log(
+						'Pulling Messages using Subscribe Function, Session Expired.',
+					);
+					return;
 				}
+				// } else {
+				// 	// no retries left, calling callback with error
+				// 	callback([], 'out of retries');
+				// }
 				}
 			}
 			})
@@ -223,29 +250,40 @@ export class SalesforcePluginApp extends App
 			// ajax error occurred
 			// would be better to not retry on 404, 500 and other unrecoverable HTTP errors
 			// retry, if any retries left
-			if (retries > 0) {
-				console.log(
-				'Executing Subscribe Function, CATCH ENTRY, Retries Remaining: ',
-				retries,
-				);
-				await subscribeToLiveAgent(
-				--retries,
-				callback,
-				// persisantAffinity,
-				// persistantKey,
-				);
+			// if (retries > 0) {
+			// 	console.log(
+			// 	'Executing Subscribe Function, CATCH ENTRY, Retries Remaining: ',
+			// 	retries,
+			// 	);
+			const persistantData = await retrievePersistentTokens(read, assoc);
+			persisantAffinity = persistantData.persisantAffinity;
+			persistantKey = persistantData.persistantKey;
+
+			if (persisantAffinity && persistantKey) {
+					await subscribeToLiveAgent(
+						// --retries,
+						callback,
+						// persisantAffinity,
+						// persistantKey,
+					);
 			} else {
-				// no retries left, calling callback with error
-				callback([], error);
+				console.log(
+					'Pulling Messages using Subscribe Function, Session Expired.',
+				);
+				return;
 			}
+			// } else {
+			// 	// no retries left, calling callback with error
+			// 	callback([], error);
+			// }
 			});
 		}
 
 	if (persisantAffinity && persistantKey) {
 		console.log(
-			'Executing Subscribe Function, MAIN ENTRY, Retries Remaining: 100',
+			'Executing Subscribe Function, MAIN ENTRY',
 		);
-		await subscribeToLiveAgent(100, handleEndChatCallback);
+		await subscribeToLiveAgent(handleEndChatCallback);
 		}
   }
 

@@ -47,8 +47,8 @@ export class LiveAgentSession {
 			.getById('salesforce_bot_username')
 		).value;
 
-		const lmessage: ILivechatMessage = this.message;
-		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
+		// const lmessage: ILivechatMessage = this.message;
+		// const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
 		// const LcAgent: IUser = lroom.servedBy
 		// ? lroom.servedBy
 		// : this.message.sender;
@@ -74,8 +74,8 @@ export class LiveAgentSession {
 
 		if (
 		this.message.text === 'Closed by visitor' &&
-		persisantAffinity !== null &&
-		persistantKey !== null
+		persisantAffinity &&
+		persistantKey
 		) {
 		await salesforceHelpers
 			.closeChat(
