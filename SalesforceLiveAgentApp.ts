@@ -28,7 +28,10 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettings } from './AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
-import { retrievePersistentTokens, sendLCMessage } from './helperFunctions/GeneralHelpers';
+import {
+  retrievePersistentTokens,
+  sendLCMessage,
+} from './helperFunctions/GeneralHelpers';
 import { SalesforceHelpers } from './helperFunctions/SalesforceHelpers';
 
 export class SalesforcePluginApp extends App
@@ -87,204 +90,140 @@ export class SalesforcePluginApp extends App
 	greetingMessage = greetingMessage.replace('%s', persistantagentName);
 	sendLCMessage(modify, data.room, greetingMessage, data.agent);
 
-	// RUN SUBSCRIBE FUNCTION HERE
-	// ADD An object in Persistence data to check whether or not to run subscribe function
-
 	const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
 
 	let salesforceChatApiEndpoint: string = (
 		await read
-			.getEnvironmentReader()
-			.getSettings()
-			.getById('salesforce_chat_api_endpoint')
-		).value;
-	salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(
-		/\/?$/,
-		'/',
-		);
+		.getEnvironmentReader()
+		.getSettings()
+		.getById('salesforce_chat_api_endpoint')
+	).value;
+	salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
-	// your callback gets executed automatically once the data is received
 	const handleEndChatCallback = async (endChatdata, error) => {
 		if (error) {
-			console.error(error);
+		console.error(error);
 
-			if (error === 'out of retries') {
-			await sendLCMessage(
-				modify,
-				data.room,
-				'Connection lost',
-				data.agent,
-			);
-			}
-			return;
+		if (error === 'out of retries') {
+			await sendLCMessage(modify, data.room, 'Connection lost', data.agent);
+		}
+		return;
 		}
 
 		await persistence.removeByAssociation(assoc);
 		await sendLCMessage(modify, data.room, endChatdata, data.agent);
 		return;
-		// PROBABLY ADD A CHECK TO LET USER DECIDE WHETHER TO REINITIATE SESSION
-		};
+		// PERFORM HANDOVER TO BOT
+	};
 
-	async function subscribeToLiveAgent(/*retries: number,*/ callback: any) {
+	async function subscribeToLiveAgent(callback: any) {
 		await salesforceHelpers
-			.pullMessages(
+		.pullMessages(
 			http,
 			salesforceChatApiEndpoint,
 			persisantAffinity,
 			persistantKey,
-			)
-			.then(async (response) => {
+		)
+		.then(async (response) => {
 			if (response.statusCode === 403) {
-				console.log(
+			console.log(
 				'Pulling Messages using Subscribe Function, Session Expired.',
-				);
-				callback('Chat Session Expired');
+			);
+			callback('Chat Session Expired');
 
-				return;
+			return;
 			} else if (
-				response.statusCode === 204 ||
-				response.statusCode === 409
+			response.statusCode === 204 ||
+			response.statusCode === 409
 			) {
-				console.log(
+			console.log(
 				'Pulling Messages using Subscribe Function, Empty Response.',
 				response,
-				);
-
-				// if (retries > 0) {
-				// console.log(
-				// 	'Executing Subscribe Function, EMPTY RESPONSE ENTRY, Retries Remaining: ',
-				// 	retries,
-				// );
-
-				const persistantData = await retrievePersistentTokens(read, assoc);
-				persisantAffinity = persistantData.persisantAffinity;
-				persistantKey = persistantData.persistantKey;
-
-				if (persisantAffinity && persistantKey) {
-					await subscribeToLiveAgent(
-						// --retries,
-						callback,
-						// persisantAffinity,
-						// persistantKey,
-					);
-				} else {
-					console.log(
-						'Pulling Messages using Subscribe Function, Session Expired.',
-					);
-					return;
-				}
-				// } else {
-				// // no retries left, calling callback with error
-				// callback([], 'out of retries');
-				// }
-			} else {
-				// request successful
-				console.log(
-				'Pulling Messages using Subscribe Function, response here:',
-				response,
-				);
-
-				const { content } = response;
-				const contentParsed = JSON.parse(content || '{}');
-
-				const messageArray = contentParsed.messages;
-				const isEndChat = salesforceHelpers.checkForEvent(
-				messageArray,
-				'ChatEnded',
-				);
-				console.log('Chat ended by Agent: ', isEndChat);
-
-				if (isEndChat === true) {
-				console.log(
-					'Pulling Messages using Subscribe Function, Chat Ended By Live Agent.',
-				);
-				callback('Chat Ended By Live Agent');
-				} else {
-				// server not done yet
-				// retry, if any retries left
-
-				await salesforceHelpers.messageFilter(
-					modify,
-					read,
-					// persistence,
-					// assoc,
-					data.room,
-					data.agent,
-					messageArray,
-				);
-
-				// if (retries > 0) {
-				// 	console.log(
-				// 	'Executing Subscribe Function, MESSAGE RESPONSE ENTRY, Retries Remaining: ',
-				// 	retries,
-				// 	);
-				const persistantData = await retrievePersistentTokens(read, assoc);
-				persisantAffinity = persistantData.persisantAffinity;
-				persistantKey = persistantData.persistantKey;
-
-				if (persisantAffinity && persistantKey) {
-					await subscribeToLiveAgent(
-						// --retries,
-						callback,
-						// persisantAffinity,
-						// persistantKey,
-					);
-				} else {
-					console.log(
-						'Pulling Messages using Subscribe Function, Session Expired.',
-					);
-					return;
-				}
-				// } else {
-				// 	// no retries left, calling callback with error
-				// 	callback([], 'out of retries');
-				// }
-				}
-			}
-			})
-			.catch(async (error) => {
-			console.log(
-				'Pulling Messages using Subscribe Function, error here:',
-				error,
 			);
-			// ajax error occurred
-			// would be better to not retry on 404, 500 and other unrecoverable HTTP errors
-			// retry, if any retries left
-			// if (retries > 0) {
-			// 	console.log(
-			// 	'Executing Subscribe Function, CATCH ENTRY, Retries Remaining: ',
-			// 	retries,
-			// 	);
+
 			const persistantData = await retrievePersistentTokens(read, assoc);
 			persisantAffinity = persistantData.persisantAffinity;
 			persistantKey = persistantData.persistantKey;
 
 			if (persisantAffinity && persistantKey) {
-					await subscribeToLiveAgent(
-						// --retries,
-						callback,
-						// persisantAffinity,
-						// persistantKey,
-					);
+				await subscribeToLiveAgent(callback);
 			} else {
+				console.log(
+				'Pulling Messages using Subscribe Function, Session Expired.',
+				);
+				return;
+			}
+			} else {
+			console.log(
+				'Pulling Messages using Subscribe Function, response here:',
+				response,
+			);
+
+			const { content } = response;
+			const contentParsed = JSON.parse(content || '{}');
+
+			const messageArray = contentParsed.messages;
+			const isEndChat = salesforceHelpers.checkForEvent(
+				messageArray,
+				'ChatEnded',
+			);
+			console.log('Chat ended by Agent: ', isEndChat);
+
+			if (isEndChat === true) {
+				console.log(
+				'Pulling Messages using Subscribe Function, Chat Ended By Live Agent.',
+				);
+				callback('Chat Ended By Live Agent');
+			} else {
+				await salesforceHelpers.messageFilter(
+				modify,
+				read,
+				data.room,
+				data.agent,
+				messageArray,
+				);
+				const persistantData = await retrievePersistentTokens(
+				read,
+				assoc,
+				);
+				persisantAffinity = persistantData.persisantAffinity;
+				persistantKey = persistantData.persistantKey;
+
+				if (persisantAffinity && persistantKey) {
+				await subscribeToLiveAgent(callback);
+				} else {
 				console.log(
 					'Pulling Messages using Subscribe Function, Session Expired.',
 				);
 				return;
+				}
 			}
-			// } else {
-			// 	// no retries left, calling callback with error
-			// 	callback([], error);
-			// }
-			});
-		}
+			}
+		})
+		.catch(async (error) => {
+			console.log(
+			'Pulling Messages using Subscribe Function, error here:',
+			error,
+			);
+			const persistantData = await retrievePersistentTokens(read, assoc);
+			persisantAffinity = persistantData.persisantAffinity;
+			persistantKey = persistantData.persistantKey;
+
+			if (persisantAffinity && persistantKey) {
+			await subscribeToLiveAgent(callback);
+			} else {
+			console.log(
+				'Pulling Messages using Subscribe Function, Session Expired.',
+			);
+			return;
+			}
+		});
+	}
 
 	if (persisantAffinity && persistantKey) {
-		console.log(
-			'Executing Subscribe Function, MAIN ENTRY',
-		);
+		console.log('Executing Subscribe Function, MAIN ENTRY');
 		await subscribeToLiveAgent(handleEndChatCallback);
-		}
+	}
   }
 
   public async executePostMessageSent(
