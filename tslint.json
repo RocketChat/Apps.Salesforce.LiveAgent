@@ -2,6 +2,7 @@
     "extends": "tslint:recommended",
     "rules": {
       "array-type": [true, "generic"],
+      "indent": [true, "tabs", 4],
       "member-access": true,
       "no-console": [false],
       "no-duplicate-variable": true,

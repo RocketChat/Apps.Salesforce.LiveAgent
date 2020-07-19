@@ -48,13 +48,36 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - Create a new user in Rocket Chat from **Administration** -> **Users**. This user should be created with `bot` and `livechat-agent` roles. Optionally, you can also connect this bot user to Dialogflow using this [app](https://github.com/RocketChat/Apps.Dialogflow/tree/develop-gsoc).
 
-   - Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment.
+   - Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment. After creating this department, add the following function with this department name, to your Live Chat installation script:
+
+   ```
+   RocketChat(function() {
+    this.setDepartment('YOUR DEPARMENT NAME');
+	});
+   ```
+   - For example, your script should look like this:
+
+   ```
+   <script type="text/javascript">
+	(function(w, d, s, u) {
+		w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
+		var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
+		j.async = true; j.src = 'http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000';
+		h.parentNode.insertBefore(j, h);
+	})(window, document, 'script', 'http://localhost:3000/livechat');
+
+	RocketChat(function() {
+    this.setDepartment('bot');
+	});
+
+	</script>
+   ```
 
    - Then go to **Administration** -> **Livechat** -> **Routing**. There enable `Assign new conversations to bot agent` Setting. This setting will automatically assign a visitor to this bot.
 
    - Copy and paste this newly created Bot user's username in respective field of our app setting.
 
-1. **Salesforce Bot Username & Password** and **Handover Target Department Name**
+2. **Salesforce Bot Username & Password** and **Handover Target Department Name**
 
    - Again create a new user, from **Administration** -> **Users**, with `bot` and `livechat-agent` roles and paste this user's username and password in respective fields in our app setting.
 
@@ -62,23 +85,23 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - Make sure that Dialogflow Bot user and Salesforce Bot user are in different departments.
 
-1. **Salesforce Organization ID**
+3. **Salesforce Organization ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for company information -> Click on Company Information option -> Copy Salesforce.com Organization ID value.
 
-1. **Salesforce Deployment ID**
+4. **Salesforce Deployment ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of deploymentId from Chat Code Snippet.
 
-1. **Salesforce Button ID**
+5. **Salesforce Button ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of buttonId from Chat Code Snippet.
 
-1. **Debug Mode**
+6. **Debug Mode**
 
    - Debug mode will send logs and debug messages to the Live Chat users. Dev only setting, keep it to default setting (false).
 
-1. That's it for the configuration. Now let's look at the usage.
+7. That's it for the configuration. Now let's look at the usage.
 
 ## App Usage
 
