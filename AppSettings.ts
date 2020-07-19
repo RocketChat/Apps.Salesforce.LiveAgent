@@ -101,10 +101,10 @@ export const AppSettings: Array<ISetting> = [
 	id: AppSettingId.GreetingMessage,
 	public: true,
 	type: SettingType.STRING,
-	packageValue: '',
+	packageValue: '%s will help you today.',
 	i18nLabel: 'Greeting Message',
 	i18nDescription:
-		'Enter Greeting Message.',
+		'Enter greeting to show user after handoff. Use %s to place Agent Name.',
 	required: true,
   },
   {

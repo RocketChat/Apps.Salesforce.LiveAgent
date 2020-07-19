@@ -19,14 +19,19 @@ import {
   IMessage,
   IPostMessageSent,
 } from '@rocket.chat/apps-engine/definition/messages';
-import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
+import {
+  IAppInfo,
+  RocketChatAssociationModel,
+  RocketChatAssociationRecord,
+} from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettings } from './AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
-import { sendLCMessage } from './helperFunctions/GeneralHelpers';
+import { retrievePersistentTokens, sendLCMessage } from './helperFunctions/GeneralHelpers';
 
-export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
+export class SalesforcePluginApp extends App
+  implements IPostMessageSent, IPostLivechatAgentAssigned {
   constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
 	super(info, logger, accessors);
   }
@@ -39,20 +44,45 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	this.getLogger().log('App Initialized');
   }
 
-  public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence) {
+  public async executePostLivechatAgentAssigned(
+	data: ILivechatEventContext,
+	read: IRead,
+	http: IHttp,
+	persistence: IPersistence,
+	modify: IModify,
+  ) {
 	console.log('executeLivechatAssignAgentHandler', { data });
 
-	const greetingMessage: string = (
+	const salesforceBotUsername: string = (
+		await read
+		.getEnvironmentReader()
+		.getSettings()
+		.getById('salesforce_bot_username')
+	).value;
+
+	if (data.agent.username !== salesforceBotUsername) {
+		return;
+	}
+
+	let greetingMessage: string = (
 		await read
 		.getEnvironmentReader()
 		.getSettings()
 		.getById('salesforce_greeting_message')
 	).value;
 
-	console.log('executeLivechatAssignAgentHandler', { greetingMessage });
+	const assoc = new RocketChatAssociationRecord(
+		RocketChatAssociationModel.ROOM,
+		data.room.id,
+	);
 
-	// sendLCMessage(modify, data.room, greetingMessage, data.agent);
+	const persistantData = await retrievePersistentTokens(read, assoc);
+	const agentName = persistantData.persistantagentName;
 
+	greetingMessage = greetingMessage.replace('%s', agentName);
+	sendLCMessage(modify, data.room, greetingMessage, data.agent);
+
+	// RUN SUBSCRIBE FUNCTION HERE
 	// ADD An object in Persistence data to check whether or not to run subscribe function
   }
 
@@ -74,7 +104,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		.getEnvironmentReader()
 		.getSettings()
 		.getById('salesforce_bot_username')
-  ).value;
+	).value;
 
 	if (message.sender.username === dialogflowBotUsername) {
 		return;

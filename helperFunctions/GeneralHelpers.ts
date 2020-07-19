@@ -47,6 +47,7 @@ export async function retrievePersistentTokens(
 ) {
   let persisantAffinity;
   let persistantKey;
+  let persistantagentName;
 
   const awayDatas = await read.getPersistenceReader().readByAssociation(assoc);
 
@@ -60,10 +61,12 @@ export async function retrievePersistentTokens(
 
   persisantAffinity = contentParsed.affinityToken;
   persistantKey = contentParsed.key;
+  persistantagentName = contentParsed.agentName;
 
   return {
 	persisantAffinity,
-	persistantKey,
+  persistantKey,
+  persistantagentName,
   };
 }
 

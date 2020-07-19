@@ -218,10 +218,16 @@ export class InitiateSalesforceSession {
 						this.message.room.id,
 						);
 
+						const { content } = data;
+						const contentParsed = JSON.parse(content || '{}');
+
+						const agentName = contentParsed.messages[0].message.name;
+
 						const sessionTokens = {
 						id,
 						affinityToken,
 						key,
+						agentName,
 						};
 
 						await this.persistence.createWithAssociation(
@@ -302,10 +308,16 @@ export class InitiateSalesforceSession {
 								this.message.room.id,
 								);
 
+								const { content } = data;
+								const contentParsed = JSON.parse(content || '{}');
+
+								const agentName = contentParsed.messages[0].message.name;
+
 								const sessionTokens = {
 								id,
 								affinityToken,
 								key,
+								agentName,
 								};
 
 								await this.persistence.createWithAssociation(
