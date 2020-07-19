@@ -29,6 +29,7 @@ import { AppSettings } from './AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
 import { retrievePersistentTokens, sendLCMessage } from './helperFunctions/GeneralHelpers';
+import { SalesforceHelpers } from './helperFunctions/SalesforceHelpers';
 
 export class SalesforcePluginApp extends App
   implements IPostMessageSent, IPostLivechatAgentAssigned {
@@ -76,14 +77,176 @@ export class SalesforcePluginApp extends App
 		data.room.id,
 	);
 
-	const persistantData = await retrievePersistentTokens(read, assoc);
-	const agentName = persistantData.persistantagentName;
+	const {
+		persisantAffinity,
+		persistantKey,
+		persistantagentName,
+	} = await retrievePersistentTokens(read, assoc);
 
-	greetingMessage = greetingMessage.replace('%s', agentName);
+	greetingMessage = greetingMessage.replace('%s', persistantagentName);
 	sendLCMessage(modify, data.room, greetingMessage, data.agent);
 
 	// RUN SUBSCRIBE FUNCTION HERE
 	// ADD An object in Persistence data to check whether or not to run subscribe function
+
+	const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
+
+	let salesforceChatApiEndpoint: string = (
+		await read
+			.getEnvironmentReader()
+			.getSettings()
+			.getById('salesforce_chat_api_endpoint')
+		).value;
+	salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(
+		/\/?$/,
+		'/',
+		);
+
+	// your callback gets executed automatically once the data is received
+	const handleEndChatCallback = async (endChatdata, error) => {
+		if (error) {
+			console.error(error);
+
+			if (error === 'out of retries') {
+			await sendLCMessage(
+				modify,
+				data.room,
+				'Connection lost',
+				data.agent,
+			);
+			}
+			return;
+		}
+
+		await persistence.removeByAssociation(assoc);
+		await sendLCMessage(modify, data.room, endChatdata, data.agent);
+		return;
+		// PROBABLY ADD A CHECK TO LET USER DECIDE WHETHER TO REINITIATE SESSION
+		};
+
+	async function subscribeToLiveAgent(retries: number, callback: any) {
+		await salesforceHelpers
+			.pullMessages(
+			http,
+			salesforceChatApiEndpoint,
+			persisantAffinity,
+			persistantKey,
+			)
+			.then(async (response) => {
+			if (response.statusCode === 403) {
+				console.log(
+				'Pulling Messages using Subscribe Function, Session Expired.',
+				);
+				callback('Chat Session Expired');
+			} else if (
+				response.statusCode === 204 ||
+				response.statusCode === 409
+			) {
+				console.log(
+				'Pulling Messages using Subscribe Function, Empty Response.',
+				);
+
+				if (retries > 0) {
+				console.log(
+					'Executing Subscribe Function, EMPTY RESPONSE ENTRY, Retries Remaining: ',
+					retries,
+				);
+				await subscribeToLiveAgent(
+					--retries,
+					callback,
+					// persisantAffinity,
+					// persistantKey,
+				);
+				} else {
+				// no retries left, calling callback with error
+				callback([], 'out of retries');
+				}
+			} else {
+				// request successful
+				console.log(
+				'Pulling Messages using Subscribe Function, response here:',
+				response,
+				);
+
+				const { content } = response;
+				const contentParsed = JSON.parse(content || '{}');
+
+				const messageArray = contentParsed.messages;
+				const isEndChat = salesforceHelpers.checkForEvent(
+				messageArray,
+				'ChatEnded',
+				);
+				console.log('Chat ended by Agent: ', isEndChat);
+
+				if (isEndChat === true) {
+				console.log(
+					'Pulling Messages using Subscribe Function, Chat Ended By Live Agent.',
+				);
+				callback('Chat Ended By Live Agent');
+				} else {
+				// server not done yet
+				// retry, if any retries left
+
+				await salesforceHelpers.messageFilter(
+					modify,
+					read,
+					// persistence,
+					// assoc,
+					data.room,
+					data.agent,
+					messageArray,
+				);
+
+				if (retries > 0) {
+					console.log(
+					'Executing Subscribe Function, MESSAGE RESPONSE ENTRY, Retries Remaining: ',
+					retries,
+					);
+					await subscribeToLiveAgent(
+					--retries,
+					callback,
+					// persisantAffinity,
+					// persistantKey,
+					);
+				} else {
+					// no retries left, calling callback with error
+					callback([], 'out of retries');
+				}
+				}
+			}
+			})
+			.catch(async (error) => {
+			console.log(
+				'Pulling Messages using Subscribe Function, error here:',
+				error,
+			);
+			// ajax error occurred
+			// would be better to not retry on 404, 500 and other unrecoverable HTTP errors
+			// retry, if any retries left
+			if (retries > 0) {
+				console.log(
+				'Executing Subscribe Function, CATCH ENTRY, Retries Remaining: ',
+				retries,
+				);
+				await subscribeToLiveAgent(
+				--retries,
+				callback,
+				// persisantAffinity,
+				// persistantKey,
+				);
+			} else {
+				// no retries left, calling callback with error
+				callback([], error);
+			}
+			});
+		}
+
+	if (persisantAffinity && persistantKey) {
+		console.log(
+			'Executing Subscribe Function, MAIN ENTRY, Retries Remaining: 100',
+		);
+		await subscribeToLiveAgent(100, handleEndChatCallback);
+		}
   }
 
   public async executePostMessageSent(
