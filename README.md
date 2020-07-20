@@ -67,7 +67,7 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 	})(window, document, 'script', 'http://localhost:3000/livechat');
 
 	RocketChat(function() {
-    this.setDepartment('bot');
+    this.setDepartment('botDepartment');
 	});
 
 	</script>
