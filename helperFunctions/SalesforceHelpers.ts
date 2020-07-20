@@ -1,9 +1,4 @@
-import {
-	IHttp,
-	IHttpRequest,
-	IModify,
-	IRead,
-} from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IHttpRequest, IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { sendDebugLCMessage, sendLCMessage } from './GeneralHelpers';
@@ -20,10 +15,7 @@ export class SalesforceHelpers {
 		};
 
 		try {
-			const response = await http.get(
-				generateTokenEndpoint,
-				generateSessionIdHttpRequest,
-			);
+			const response = await http.get(generateTokenEndpoint, generateSessionIdHttpRequest);
 			const responseJSON = JSON.parse(response.content || '{}');
 
 			const { id, affinityToken, key } = responseJSON;
@@ -91,22 +83,14 @@ export class SalesforceHelpers {
 		};
 
 		try {
-			const response = await http.post(
-				sendChatRequestEndpoint,
-				sendChatRequestHttpRequest,
-			);
+			const response = await http.post(sendChatRequestEndpoint, sendChatRequestHttpRequest);
 			return response;
 		} catch (error) {
 			throw Error(error);
 		}
 	}
 
-	public async pullMessages(
-		http: IHttp,
-		liveAgentUrl: string,
-		affinityToken: string,
-		key: string,
-	) {
+	public async pullMessages(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string) {
 		const pullMessagesEndpoint = liveAgentUrl + 'System/Messages';
 
 		const pullMessagesHttpRequest: IHttpRequest = {
@@ -118,10 +102,7 @@ export class SalesforceHelpers {
 		};
 
 		try {
-			const response = await http.get(
-				pullMessagesEndpoint,
-				pullMessagesHttpRequest,
-			);
+			const response = await http.get(pullMessagesEndpoint, pullMessagesHttpRequest);
 
 			return response;
 		} catch (error) {
@@ -129,12 +110,7 @@ export class SalesforceHelpers {
 		}
 	}
 
-	public async closeChat(
-		http: IHttp,
-		liveAgentUrl: string,
-		affinityToken: string,
-		key: string,
-	) {
+	public async closeChat(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string) {
 		const closeLiveAgentChatEndpoint = liveAgentUrl + 'Chasitor/ChatEnd';
 		const closeLiveAgentChatHttpRequest: IHttpRequest = {
 			headers: {
@@ -148,10 +124,7 @@ export class SalesforceHelpers {
 		};
 
 		try {
-			const response = await http.post(
-				closeLiveAgentChatEndpoint,
-				closeLiveAgentChatHttpRequest,
-			);
+			const response = await http.post(closeLiveAgentChatEndpoint, closeLiveAgentChatHttpRequest);
 
 			return response;
 		} catch (error) {
@@ -159,13 +132,7 @@ export class SalesforceHelpers {
 		}
 	}
 
-	public async sendMessages(
-		http: IHttp,
-		liveAgentUrl: string,
-		affinityToken: string,
-		key: string,
-		messageText: string,
-	) {
+	public async sendMessages(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string, messageText: string) {
 		const sendMessagesEndpoint = liveAgentUrl + 'Chasitor/ChatMessage';
 		const sendMessagesHttpRequest: IHttpRequest = {
 			headers: {
@@ -179,10 +146,7 @@ export class SalesforceHelpers {
 		};
 
 		try {
-			const response = await http.post(
-				sendMessagesEndpoint,
-				sendMessagesHttpRequest,
-			);
+			const response = await http.post(sendMessagesEndpoint, sendMessagesHttpRequest);
 
 			return response;
 		} catch (error) {
@@ -190,13 +154,7 @@ export class SalesforceHelpers {
 		}
 	}
 
-	public async messageFilter(
-		modify: IModify,
-		read: IRead,
-		messageRoom: IRoom,
-		LcAgent: IUser,
-		messageArray: any,
-	) {
+	public async messageFilter(modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any) {
 		messageArray.forEach(async (i) => {
 			const type = i.type;
 
@@ -207,20 +165,11 @@ export class SalesforceHelpers {
 					break;
 
 				case 'AgentTyping':
-					await sendDebugLCMessage(
-						read,
-						modify,
-						messageRoom,
-						'Agent Typing',
-						LcAgent,
-					);
+					await sendDebugLCMessage(read, modify, messageRoom, 'Agent Typing', LcAgent);
 					break;
 
 				default:
-					console.log(
-						'Pulling Messages from Liveagent, Default messageType:',
-						type,
-					);
+					console.log('Pulling Messages from Liveagent, Default messageType:', type);
 					break;
 			}
 		});
@@ -228,14 +177,13 @@ export class SalesforceHelpers {
 
 	public checkForEvent(messageArray: any, eventToCheck: string) {
 		if (messageArray && messageArray.length > 0) {
-		  // tslint:disable-next-line: prefer-for-of
-		  for (let i = 0; i < messageArray.length; i++) {
-			  if (messageArray[i].type === eventToCheck) {
-			  return true;
-			  }
-		  }
+			for (let i = 0; i < messageArray.length; i++) {
+				if (messageArray[i].type === eventToCheck) {
+					return true;
+				}
+			}
 		}
 
 		return false;
-	  }
+	}
 }

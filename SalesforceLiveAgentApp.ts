@@ -1,292 +1,173 @@
 import {
-  IAppAccessors,
-  IConfigurationExtend,
-  IEnvironmentRead,
-  IHttp,
-  ILogger,
-  IModify,
-  IPersistence,
-  IRead,
+	IAppAccessors,
+	IConfigurationExtend,
+	IEnvironmentRead,
+	IHttp,
+	ILogger,
+	IModify,
+	IPersistence,
+	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { App } from '@rocket.chat/apps-engine/definition/App';
-import {
-  ILivechatEventContext,
-  ILivechatMessage,
-  ILivechatRoom,
-  IPostLivechatAgentAssigned,
-} from '@rocket.chat/apps-engine/definition/livechat';
-import {
-  IMessage,
-  IPostMessageSent,
-} from '@rocket.chat/apps-engine/definition/messages';
-import {
-  IAppInfo,
-  RocketChatAssociationModel,
-  RocketChatAssociationRecord,
-} from '@rocket.chat/apps-engine/definition/metadata';
+import { ILivechatEventContext, ILivechatMessage, ILivechatRoom, IPostLivechatAgentAssigned } from '@rocket.chat/apps-engine/definition/livechat';
+import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
+import { IAppInfo, RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettings } from './AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
-import {
-  retrievePersistentTokens,
-  sendLCMessage,
-} from './helperFunctions/GeneralHelpers';
+import { retrievePersistentTokens, sendLCMessage } from './helperFunctions/GeneralHelpers';
 import { SalesforceHelpers } from './helperFunctions/SalesforceHelpers';
 
-export class SalesforcePluginApp extends App
-  implements IPostMessageSent, IPostLivechatAgentAssigned {
-  constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
-	super(info, logger, accessors);
-  }
-
-  public async initialize(
-	configurationExtend: IConfigurationExtend,
-	environmentRead: IEnvironmentRead,
-  ): Promise<void> {
-	await this.extendConfiguration(configurationExtend);
-	this.getLogger().log('App Initialized');
-  }
-
-  public async executePostLivechatAgentAssigned(
-	data: ILivechatEventContext,
-	read: IRead,
-	http: IHttp,
-	persistence: IPersistence,
-	modify: IModify,
-  ) {
-	console.log('executeLivechatAssignAgentHandler', { data });
-
-	const salesforceBotUsername: string = (
-		await read
-		.getEnvironmentReader()
-		.getSettings()
-		.getById('salesforce_bot_username')
-	).value;
-
-	if (data.agent.username !== salesforceBotUsername) {
-		return;
+export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
+	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
+		super(info, logger, accessors);
 	}
 
-	let greetingMessage: string = (
-		await read
-		.getEnvironmentReader()
-		.getSettings()
-		.getById('salesforce_greeting_message')
-	).value;
+	public async initialize(configurationExtend: IConfigurationExtend, environmentRead: IEnvironmentRead): Promise<void> {
+		await this.extendConfiguration(configurationExtend);
+		this.getLogger().log('App Initialized');
+	}
 
-	const assoc = new RocketChatAssociationRecord(
-		RocketChatAssociationModel.ROOM,
-		data.room.id,
-	);
+	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
+		console.log('executeLivechatAssignAgentHandler', { data });
 
-	const persitedData = await retrievePersistentTokens(read, assoc);
+		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
 
-	let {
-		persisantAffinity,
-		persistantKey,
-	} = persitedData;
-
-	const { persistantagentName } = persitedData;
-
-	greetingMessage = greetingMessage.replace('%s', persistantagentName);
-	sendLCMessage(modify, data.room, greetingMessage, data.agent);
-
-	const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
-
-	let salesforceChatApiEndpoint: string = (
-		await read
-		.getEnvironmentReader()
-		.getSettings()
-		.getById('salesforce_chat_api_endpoint')
-	).value;
-	salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-
-	const handleEndChatCallback = async (endChatdata) => {
-		await persistence.removeByAssociation(assoc);
-		await sendLCMessage(modify, data.room, endChatdata, data.agent);
-		return;
-		// PERFORM HANDOVER TO BOT
-	};
-
-	async function subscribeToLiveAgent(callback: any) {
-		await salesforceHelpers
-		.pullMessages(
-			http,
-			salesforceChatApiEndpoint,
-			persisantAffinity,
-			persistantKey,
-		)
-		.then(async (response) => {
-			if (response.statusCode === 403) {
-			console.log(
-				'Pulling Messages using Subscribe Function, Session Expired.',
-			);
-			callback('Chat Session Expired');
-
+		if (data.agent.username !== salesforceBotUsername) {
 			return;
-			} else if (
-			response.statusCode === 204 ||
-			response.statusCode === 409
-			) {
-			console.log(
-				'Pulling Messages using Subscribe Function, Empty Response.',
-				response,
-			);
+		}
 
-			const persistantData = await retrievePersistentTokens(read, assoc);
-			persisantAffinity = persistantData.persisantAffinity;
-			persistantKey = persistantData.persistantKey;
+		let greetingMessage: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_greeting_message')).value;
 
-			if (persisantAffinity && persistantKey) {
-				await subscribeToLiveAgent(callback);
-			} else {
-				console.log(
-				'Pulling Messages using Subscribe Function, Session Expired.',
-				);
-				return;
-			}
-			} else {
-			console.log(
-				'Pulling Messages using Subscribe Function, response here:',
-				response,
-			);
+		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, data.room.id);
 
-			const { content } = response;
-			const contentParsed = JSON.parse(content || '{}');
+		const persitedData = await retrievePersistentTokens(read, assoc);
+		let { persisantAffinity, persistantKey } = persitedData;
+		const { persistantagentName } = persitedData;
 
-			const messageArray = contentParsed.messages;
-			const isEndChat = salesforceHelpers.checkForEvent(
-				messageArray,
-				'ChatEnded',
-			);
-			console.log('Chat ended by Agent: ', isEndChat);
+		greetingMessage = greetingMessage.replace('%s', persistantagentName);
+		sendLCMessage(modify, data.room, greetingMessage, data.agent);
 
-			if (isEndChat === true) {
-				console.log(
-				'Pulling Messages using Subscribe Function, Chat Ended By Live Agent.',
-				);
-				callback('Chat Ended By Live Agent');
-			} else {
-				await salesforceHelpers.messageFilter(
-				modify,
-				read,
-				data.room,
-				data.agent,
-				messageArray,
-				);
-				const persistantData = await retrievePersistentTokens(
-				read,
-				assoc,
-				);
-				persisantAffinity = persistantData.persisantAffinity;
-				persistantKey = persistantData.persistantKey;
+		const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
 
-				if (persisantAffinity && persistantKey) {
-				await subscribeToLiveAgent(callback);
-				} else {
-				console.log(
-					'Pulling Messages using Subscribe Function, Session Expired.',
-				);
-				return;
-				}
-			}
-			}
-		})
-		.catch(async (error) => {
-			console.log(
-			'Pulling Messages using Subscribe Function, error here:',
-			error,
-			);
-			const persistantData = await retrievePersistentTokens(read, assoc);
-			persisantAffinity = persistantData.persisantAffinity;
-			persistantKey = persistantData.persistantKey;
+		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
-			if (persisantAffinity && persistantKey) {
-			await subscribeToLiveAgent(callback);
-			} else {
-			console.log(
-				'Pulling Messages using Subscribe Function, Session Expired.',
-			);
+		const handleEndChatCallback = async (endChatdata) => {
+			await persistence.removeByAssociation(assoc);
+			await sendLCMessage(modify, data.room, endChatdata, data.agent);
 			return;
-			}
-		});
-	}
+			// PERFORM HANDOVER TO BOT
+		};
 
-	if (persisantAffinity && persistantKey) {
-		console.log('Executing Subscribe Function, MAIN ENTRY');
-		await subscribeToLiveAgent(handleEndChatCallback);
-	}
-  }
+		async function subscribeToLiveAgent(callback: any) {
+			await salesforceHelpers
+				.pullMessages(http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
+				.then(async (response) => {
+					if (response.statusCode === 403) {
+						console.log('Pulling Messages using Subscribe Function, Session Expired.');
+						callback('Chat Session Expired');
 
-  public async executePostMessageSent(
-	message: IMessage,
-	read: IRead,
-	http: IHttp,
-	persistence: IPersistence,
-	modify: IModify,
-  ): Promise<void> {
-	const dialogflowBotUsername: string = (
-		await read
-		.getEnvironmentReader()
-		.getSettings()
-		.getById('dialogflow_bot_username')
-	).value;
-	const salesforceBotUsername: string = (
-		await read
-		.getEnvironmentReader()
-		.getSettings()
-		.getById('salesforce_bot_username')
-	).value;
+						return;
+					} else if (response.statusCode === 204 || response.statusCode === 409) {
+						console.log('Pulling Messages using Subscribe Function, Empty Response.', response);
 
-	if (message.sender.username === dialogflowBotUsername) {
-		return;
-	} else if (message.room.type !== 'l') {
-		return;
-	}
+						const persistantData = await retrievePersistentTokens(read, assoc);
+						persisantAffinity = persistantData.persisantAffinity;
+						persistantKey = persistantData.persistantKey;
 
-	const lmessage: ILivechatMessage = message;
-	const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
-	const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : message.sender;
+						if (persisantAffinity && persistantKey) {
+							await subscribeToLiveAgent(callback);
+						} else {
+							console.log('Pulling Messages using Subscribe Function, Session Expired.');
+							return;
+						}
+					} else {
+						console.log('Pulling Messages using Subscribe Function, response here:', response);
 
-	if (message.text === 'initiate_salesforce_session') {
-		const initiateSalesforceSessionhandler = new InitiateSalesforceSession(
-		message,
-		read,
-		http,
-		persistence,
-		modify,
-		);
+						const { content } = response;
+						const contentParsed = JSON.parse(content || '{}');
 
-		try {
-		initiateSalesforceSessionhandler.exec();
-		} catch (error) {
-		console.log(error);
+						const messageArray = contentParsed.messages;
+						const isEndChat = salesforceHelpers.checkForEvent(messageArray, 'ChatEnded');
+						console.log('Chat ended by Agent: ', isEndChat);
+
+						if (isEndChat === true) {
+							console.log('Pulling Messages using Subscribe Function, Chat Ended By Live Agent.');
+							callback('Chat Ended By Live Agent');
+						} else {
+							await salesforceHelpers.messageFilter(modify, read, data.room, data.agent, messageArray);
+							const persistantData = await retrievePersistentTokens(read, assoc);
+							persisantAffinity = persistantData.persisantAffinity;
+							persistantKey = persistantData.persistantKey;
+
+							if (persisantAffinity && persistantKey) {
+								await subscribeToLiveAgent(callback);
+							} else {
+								console.log('Pulling Messages using Subscribe Function, Session Expired.');
+								return;
+							}
+						}
+					}
+				})
+				.catch(async (error) => {
+					console.log('Pulling Messages using Subscribe Function, error here:', error);
+					const persistantData = await retrievePersistentTokens(read, assoc);
+					persisantAffinity = persistantData.persisantAffinity;
+					persistantKey = persistantData.persistantKey;
+
+					if (persisantAffinity && persistantKey) {
+						await subscribeToLiveAgent(callback);
+					} else {
+						console.log('Pulling Messages using Subscribe Function, Session Expired.');
+						return;
+					}
+				});
+		}
+
+		if (persisantAffinity && persistantKey) {
+			console.log('Executing Subscribe Function, MAIN ENTRY');
+			await subscribeToLiveAgent(handleEndChatCallback);
 		}
 	}
 
-	if (LcAgent.username === salesforceBotUsername) {
-		const liveAgentSession = new LiveAgentSession(
-		message,
-		read,
-		http,
-		persistence,
-		modify,
-		);
+	public async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
+		const dialogflowBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('dialogflow_bot_username')).value;
+		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
 
-		try {
-		liveAgentSession.exec();
-		} catch (error) {
-		console.log(error);
+		if (message.sender.username === dialogflowBotUsername) {
+			return;
+		} else if (message.room.type !== 'l') {
+			return;
+		}
+
+		const lmessage: ILivechatMessage = message;
+		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
+		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : message.sender;
+
+		if (message.text === 'initiate_salesforce_session') {
+			const initiateSalesforceSessionhandler = new InitiateSalesforceSession(message, read, http, persistence, modify);
+
+			try {
+				initiateSalesforceSessionhandler.exec();
+			} catch (error) {
+				console.log(error);
+			}
+		}
+
+		if (LcAgent.username === salesforceBotUsername) {
+			const liveAgentSession = new LiveAgentSession(message, read, http, persistence, modify);
+
+			try {
+				liveAgentSession.exec();
+			} catch (error) {
+				console.log(error);
+			}
 		}
 	}
-  }
 
-  public async extendConfiguration(
-	configuration: IConfigurationExtend,
-  ): Promise<void> {
-	AppSettings.forEach((setting) =>
-		configuration.settings.provideSetting(setting),
-	);
-  }
+	public async extendConfiguration(configuration: IConfigurationExtend): Promise<void> {
+		AppSettings.forEach((setting) => configuration.settings.provideSetting(setting));
+	}
 }
