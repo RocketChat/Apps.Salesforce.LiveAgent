@@ -69,16 +69,3 @@ export async function retrievePersistentTokens(
   persistantagentName,
   };
 }
-
-// export function checkForEvent(messageArray, eventToCheck) {
-//   if (messageArray && messageArray.length > 0) {
-// 	// tslint:disable-next-line: prefer-for-of
-// 	for (let i = 0; i < messageArray.length; i++) {
-// 		if (messageArray[i].type === eventToCheck) {
-// 		return true;
-// 		}
-// 	}
-//   }
-
-//   return false;
-// }

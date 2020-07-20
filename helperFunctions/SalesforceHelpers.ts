@@ -2,10 +2,8 @@ import {
 	IHttp,
 	IHttpRequest,
 	IModify,
-	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
-import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { sendDebugLCMessage, sendLCMessage } from './GeneralHelpers';
@@ -195,8 +193,6 @@ export class SalesforceHelpers {
 	public async messageFilter(
 		modify: IModify,
 		read: IRead,
-		// persistence: IPersistence,
-		// assoc: RocketChatAssociationRecord,
 		messageRoom: IRoom,
 		LcAgent: IUser,
 		messageArray: any,
@@ -219,17 +215,6 @@ export class SalesforceHelpers {
 						LcAgent,
 					);
 					break;
-
-				// case 'ChatEnded':
-				// 	await sendDebugLCMessage(
-				// 		read,
-				// 		modify,
-				// 		messageRoom,
-				// 		'Chat Ended By Agent',
-				// 		LcAgent,
-				// 	);
-				// 	await persistence.removeByAssociation(assoc);
-				// 	break;
 
 				default:
 					console.log(

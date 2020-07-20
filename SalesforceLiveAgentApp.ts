@@ -80,12 +80,14 @@ export class SalesforcePluginApp extends App
 		data.room.id,
 	);
 
+	const persitedData = await retrievePersistentTokens(read, assoc);
+
 	let {
 		persisantAffinity,
 		persistantKey,
-		// tslint:disable-next-line: prefer-const
-		persistantagentName,
-	} = await retrievePersistentTokens(read, assoc);
+	} = persitedData;
+
+	const { persistantagentName } = persitedData;
 
 	greetingMessage = greetingMessage.replace('%s', persistantagentName);
 	sendLCMessage(modify, data.room, greetingMessage, data.agent);
@@ -100,16 +102,7 @@ export class SalesforcePluginApp extends App
 	).value;
 	salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
-	const handleEndChatCallback = async (endChatdata, error) => {
-		if (error) {
-		console.error(error);
-
-		if (error === 'out of retries') {
-			await sendLCMessage(modify, data.room, 'Connection lost', data.agent);
-		}
-		return;
-		}
-
+	const handleEndChatCallback = async (endChatdata) => {
 		await persistence.removeByAssociation(assoc);
 		await sendLCMessage(modify, data.room, endChatdata, data.agent);
 		return;
