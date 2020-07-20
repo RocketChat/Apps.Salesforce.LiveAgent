@@ -13,13 +13,11 @@ export class LiveAgentSession {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
 			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
-
 			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {
 				return;
 			}
 
 			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
-
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
 			const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();

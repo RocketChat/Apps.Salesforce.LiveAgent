@@ -11,7 +11,6 @@ export async function sendLCMessage(modify: IModify, room: IRoom, messageText: s
 
 export async function sendDebugLCMessage(read: IRead, modify: IModify, room: IRoom, messageText: string, sender: IUser) {
 	const debugMode: boolean = (await read.getEnvironmentReader().getSettings().getById('debug_button')).value;
-
 	if (debugMode !== true) {
 		return;
 	}
@@ -31,7 +30,6 @@ export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAss
 	let persistantagentName;
 
 	const awayDatas = await read.getPersistenceReader().readByAssociation(assoc);
-
 	const contentStringified = JSON.stringify(awayDatas[0]);
 	const contentParsed = JSON.parse(contentStringified);
 

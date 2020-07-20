@@ -90,9 +90,7 @@ export class InitiateSalesforceSession {
 									LcAgent,
 								);
 
-								let retries = 20;
-
-								const callback = async (data?, error?) => {
+								const checkAgentStatusCallback = async (data?, error?) => {
 									if (error) {
 										console.log('Check whether agent accepted request, Callback error:', error);
 										return;
@@ -102,15 +100,11 @@ export class InitiateSalesforceSession {
 
 									try {
 										const targetagent = await this.read.getUserReader().getByUsername(salesforceBotUsername);
-
 										console.log('Target Agent Status: ', targetagent.statusConnection);
 
 										if (targetagent.statusConnection === 'online') {
-											const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
-
 											const { content } = data;
 											const contentParsed = JSON.parse(content || '{}');
-
 											const agentName = contentParsed.messages[0].message.name;
 
 											const sessionTokens = {
@@ -120,6 +114,7 @@ export class InitiateSalesforceSession {
 												agentName,
 											};
 
+											const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
 											await this.persistence.createWithAssociation(sessionTokens, assoc);
 
 											const roomId = this.message.room.id;
@@ -169,16 +164,9 @@ export class InitiateSalesforceSession {
 														.then(async (statusResponse) => {
 															console.log('Setting Salesforce Bot Status, Response:', statusResponse);
 
-															const assoc = new RocketChatAssociationRecord(
-																RocketChatAssociationModel.ROOM,
-																this.message.room.id,
-															);
-
 															const { content } = data;
 															const contentParsed = JSON.parse(content || '{}');
-
 															const agentName = contentParsed.messages[0].message.name;
-
 															const sessionTokens = {
 																id,
 																affinityToken,
@@ -186,22 +174,18 @@ export class InitiateSalesforceSession {
 																agentName,
 															};
 
+															const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
 															await this.persistence.createWithAssociation(sessionTokens, assoc);
 
 															const roomId = this.message.room.id;
 															const room: ILivechatRoom = (await this.read.getRoomReader().getById(roomId)) as ILivechatRoom;
-
 															const targetDepartment: IDepartment = (await this.read
 																.getLivechatReader()
 																.getLivechatDepartmentByIdOrName(targetDeptName)) as IDepartment;
-
-															console.log('targetDepartment: ', targetDepartment);
-
 															const transferData: ILivechatTransferData = {
 																currentRoom: room,
 																targetDepartment: targetDepartment.id,
 															};
-
 															await this.modify.getUpdater().getLivechatUpdater().transferVisitor(LcVisitor, transferData);
 														})
 														.catch((statusErr) => {
@@ -218,7 +202,7 @@ export class InitiateSalesforceSession {
 									}
 								};
 
-								// tslint:disable-next-line: no-shadowed-variable
+								let retries = 20;
 								function checkCurrentChatStatus(http, callback) {
 									salesforceHelpers
 										.pullMessages(http, salesforceChatApiEndpoint, affinityToken, key)
@@ -227,7 +211,6 @@ export class InitiateSalesforceSession {
 
 											const checkCurrentChatStatusContent = response.content;
 											const checkParsedResponse = JSON.parse(checkCurrentChatStatusContent || '{}');
-
 											const checkMessageArray = checkParsedResponse.messages;
 
 											if (checkMessageArray[0] && checkMessageArray[0].type === 'ChatEstablished') {
@@ -254,7 +237,6 @@ export class InitiateSalesforceSession {
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
 									if (pullMessagesContentParsed.messages[0].message.reason === 'Unavailable') {
 										await sendDebugLCMessage(this.read, this.modify, this.message.room, 'No Agent available for chat.', LcAgent);
-
 										console.log('Check whether agent accepted request, Error: No Agent available for chat.');
 									} else if (pullMessagesContentParsed.messages[0].message.reason === 'InternalFailure') {
 										await sendDebugLCMessage(
@@ -264,17 +246,14 @@ export class InitiateSalesforceSession {
 											'Salesforce Internal Failure. Please Try Again after sometime',
 											LcAgent,
 										);
-
 										console.log('Check whether agent accepted request, Error: Salesforce Internal Failure.');
 									} else {
 										await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Unknown Error Occured', LcAgent);
-
 										console.log('Check whether agent accepted request, Error: Unknown Error Occured.');
 									}
 								} else {
 									console.log('Check whether agent accepted request, Executing Function:');
-
-									checkCurrentChatStatus(this.http, callback);
+									checkCurrentChatStatus(this.http, checkAgentStatusCallback);
 								}
 							})
 							.catch((error) => {
