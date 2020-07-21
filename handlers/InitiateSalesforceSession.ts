@@ -3,7 +3,7 @@ import { IDepartment, ILivechatMessage, ILivechatRoom, ILivechatTransferData, IV
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { getServerSettingValue, sendDebugLCMessage } from '../helperFunctions/GeneralHelpers';
+import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
 import { SalesforceHelpers } from '../helperFunctions/SalesforceHelpers';
 
 export class InitiateSalesforceSession {
@@ -236,11 +236,10 @@ export class InitiateSalesforceSession {
 
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
 									if (pullMessagesContentParsed.messages[0].message.reason === 'Unavailable') {
-										await sendDebugLCMessage(this.read, this.modify, this.message.room, 'No Agent available for chat.', LcAgent);
+										await sendLCMessage(this.modify, this.message.room, 'No Agent available for chat.', LcAgent);
 										console.log('Check whether agent accepted request, Error: No Agent available for chat.');
 									} else if (pullMessagesContentParsed.messages[0].message.reason === 'InternalFailure') {
-										await sendDebugLCMessage(
-											this.read,
+										await sendLCMessage(
 											this.modify,
 											this.message.room,
 											'Salesforce Internal Failure. Please Try Again after sometime',
@@ -248,7 +247,7 @@ export class InitiateSalesforceSession {
 										);
 										console.log('Check whether agent accepted request, Error: Salesforce Internal Failure.');
 									} else {
-										await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Unknown Error Occured', LcAgent);
+										await sendLCMessage(this.modify, this.message.room, 'Unknown Error Occured', LcAgent);
 										console.log('Check whether agent accepted request, Error: Unknown Error Occured.');
 									}
 								} else {
