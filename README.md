@@ -2,7 +2,7 @@
 
 <p align="center">
 
-<img  src="https://user-images.githubusercontent.com/41849970/84944024-d03e0d80-b102-11ea-94fd-b5500dca314d.png">
+<img  src="https://user-images.githubusercontent.com/41849970/88032175-392e0080-cb5b-11ea-9868-b8d2526c22e2.png">
 
 </p>
 
@@ -99,7 +99,7 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 6. **Debug Mode**
 
-   - Debug mode will send logs and debug messages to the Live Chat users. Dev only setting, keep it to default setting (false).
+   - Enabling this setting will send debug messages and log to the Live Chat user. Setting only intended for Developer testing.
 
 7. That's it for the configuration. Now let's look at the usage.
 
