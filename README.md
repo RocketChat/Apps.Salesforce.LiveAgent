@@ -80,7 +80,7 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 7. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
 
-   - Insert your department name with your Dialogflow bot in the function where requested.
+   - Insert your department name which consists the Dialogflow bot in the following function:
 
    ```
    RocketChat(function() {
