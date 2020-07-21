@@ -93,10 +93,13 @@ export class InitiateSalesforceSession {
 								const checkAgentStatusCallback = async (data?, error?) => {
 									if (error) {
 										console.log('Check whether agent accepted request, Callback error:', error);
+										sendLCMessage(this.modify, this.message.room, error, LcAgent);
 										return;
 									}
 
-									console.log('Check whether agent accepted request, Callback Response:', data);
+									const content0 = data.content;
+									const contentParsed0 = JSON.parse(content0 || '{}');
+									console.log('Check whether agent accepted request, Callback Response:', contentParsed0);
 
 									try {
 										const targetagent = await this.read.getUserReader().getByUsername(salesforceBotUsername);
@@ -174,7 +177,10 @@ export class InitiateSalesforceSession {
 																agentName,
 															};
 
-															const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
+															const assoc = new RocketChatAssociationRecord(
+																RocketChatAssociationModel.ROOM,
+																this.message.room.id,
+															);
 															await this.persistence.createWithAssociation(sessionTokens, assoc);
 
 															const roomId = this.message.room.id;
@@ -202,35 +208,52 @@ export class InitiateSalesforceSession {
 									}
 								};
 
-								let retries = 20;
-								function checkCurrentChatStatus(http, callback) {
+								const { http } = this;
+
+								async function checkCurrentChatStatus(callback) {
 									salesforceHelpers
 										.pullMessages(http, salesforceChatApiEndpoint, affinityToken, key)
-										.then((response) => {
-											console.log('Check whether agent accepted request, Response:', response);
-
-											const checkCurrentChatStatusContent = response.content;
-											const checkParsedResponse = JSON.parse(checkCurrentChatStatusContent || '{}');
-											const checkMessageArray = checkParsedResponse.messages;
-
-											if (checkMessageArray[0] && checkMessageArray[0].type === 'ChatEstablished') {
-												callback(response);
+										.then(async (response) => {
+											if (response.statusCode === 403) {
+												console.log('Check whether agent accepted request, Session Expired. ', response);
+												callback([], 'Chat session expired.');
+												return;
+											} else if (response.statusCode === 204 || response.statusCode === 409) {
+												console.log('Check whether agent accepted request, Empty Response.', response);
+												await checkCurrentChatStatus(callback);
 											} else {
-												if (retries > 0) {
-													--retries;
-													checkCurrentChatStatus(http, callback);
+												console.log('Check whether agent accepted request, response here:', response);
+
+												const { content } = response;
+												const contentParsed = JSON.parse(content || '{}');
+
+												const messageArray = contentParsed.messages;
+												const isChatAccepted = salesforceHelpers.checkForEvent(messageArray, 'ChatEstablished');
+
+												if (isChatAccepted === true) {
+													console.log('Chat Accepted by Agent: ', isChatAccepted);
+													console.log('Check whether agent accepted request, Chat Ended By Live Agent.');
+													callback(response);
+													return;
+												} else if (isChatAccepted === false) {
+													console.log('Chat Accepted by Agent: ', isChatAccepted);
+
+													const isChatRequestFail = salesforceHelpers.checkForEvent(messageArray, 'ChatRequestFail');
+													if (isChatRequestFail === true) {
+														console.log('Chat Request Fail: ', isChatRequestFail);
+														callback([], 'Sorry we are unable to complete your request right now.');
+														return;
+													} else {
+														await checkCurrentChatStatus(callback);
+													}
 												} else {
-													callback([], 'Check whether agent accepted request, Error: Retries Limit Exceeded.');
+													await checkCurrentChatStatus(callback);
 												}
 											}
 										})
-										.catch((error) => {
-											if (retries > 0) {
-												--retries;
-												checkCurrentChatStatus(http, callback);
-											} else {
-												callback([], error);
-											}
+										.catch(async (error) => {
+											console.log('Check whether agent accepted request, Error: ', error);
+											await checkCurrentChatStatus(callback);
 										});
 								}
 
@@ -252,7 +275,7 @@ export class InitiateSalesforceSession {
 									}
 								} else {
 									console.log('Check whether agent accepted request, Executing Function:');
-									checkCurrentChatStatus(this.http, checkAgentStatusCallback);
+									checkCurrentChatStatus(checkAgentStatusCallback);
 								}
 							})
 							.catch((error) => {

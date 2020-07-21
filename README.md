@@ -48,30 +48,7 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - Create a new user in Rocket Chat from **Administration** -> **Users**. This user should be created with `bot` and `livechat-agent` roles. Optionally, you can also connect this bot user to Dialogflow using this [app](https://github.com/RocketChat/Apps.Dialogflow/tree/develop-gsoc).
 
-   - Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment. After creating this department, add the following function with this department name, to your Live Chat installation script:
-
-   ```
-   RocketChat(function() {
-    this.setDepartment('YOUR DEPARMENT NAME');
-	});
-   ```
-   - For example, your script should look like this:
-
-   ```
-   <script type="text/javascript">
-	(function(w, d, s, u) {
-		w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
-		var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
-		j.async = true; j.src = 'http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000';
-		h.parentNode.insertBefore(j, h);
-	})(window, document, 'script', 'http://localhost:3000/livechat');
-
-	RocketChat(function() {
-    this.setDepartment('botDepartment');
-	});
-
-	</script>
-   ```
+   - Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment.
 
    - Then go to **Administration** -> **Livechat** -> **Routing**. There enable `Assign new conversations to bot agent` Setting. This setting will automatically assign a visitor to this bot.
 
@@ -99,9 +76,41 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 6. **Debug Mode**
 
-   - Enabling this setting will send debug messages and log to the Live Chat user. Setting only intended for Developer testing.
+   - Enabling this setting will send debug messages and log to the Live Chat user. Setting only intended for Developer testing not for production.
 
-7. That's it for the configuration. Now let's look at the usage.
+7. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
+
+   - Insert your department name with your Dialogflow bot in the function where requested.
+
+   ```
+   RocketChat(function() {
+		this.setDepartment('<INSERT YOUR BOT DEPARMENT NAME HERE>');
+		this.onChatEnded(function() {
+			window.location.reload();
+    	});
+	});
+   ```
+   - For example, your script should look like this after adding the API functions:
+
+   ```
+   <script type="text/javascript">
+	(function(w, d, s, u) {
+		w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
+		var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
+		j.async = true; j.src = 'http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000';
+		h.parentNode.insertBefore(j, h);
+	})(window, document, 'script', 'http://localhost:3000/livechat');
+
+	RocketChat(function() {
+		this.setDepartment('botDepartment');
+		this.onChatEnded(function() {
+			window.location.reload();
+    	});
+	});
+	</script>
+   ```
+
+8. That's it for the configuration. Now let's look at the usage.
 
 ## App Usage
 

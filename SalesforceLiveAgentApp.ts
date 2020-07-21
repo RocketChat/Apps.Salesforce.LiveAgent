@@ -33,15 +33,15 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		console.log('executeLivechatAssignAgentHandler', { data });
 
 		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+		let greetingMessage: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_greeting_message')).value;
+		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
 		if (data.agent.username !== salesforceBotUsername) {
 			return;
 		}
 
-		let greetingMessage: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_greeting_message')).value;
-
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, data.room.id);
-
 		const persitedData = await retrievePersistentTokens(read, assoc);
 		let { persisantAffinity, persistantKey } = persitedData;
 		const { persistantagentName } = persitedData;
@@ -51,14 +51,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 
 		const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
 
-		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-
 		const handleEndChatCallback = async (endChatdata) => {
 			await persistence.removeByAssociation(assoc);
 			await sendLCMessage(modify, data.room, endChatdata, data.agent);
 			return;
-			// PERFORM HANDOVER TO BOT
+			// ADD PERFORM HANDOVER TO BOT
 		};
 
 		async function subscribeToLiveAgent(callback: any) {
@@ -67,8 +64,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 				.then(async (response) => {
 					if (response.statusCode === 403) {
 						console.log('Pulling Messages using Subscribe Function, Session Expired.');
-						callback('Chat Session Expired');
-
+						callback('Chat session expired');
 						return;
 					} else if (response.statusCode === 204 || response.statusCode === 409) {
 						console.log('Pulling Messages using Subscribe Function, Empty Response.', response);
@@ -95,7 +91,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 
 						if (isEndChat === true) {
 							console.log('Pulling Messages using Subscribe Function, Chat Ended By Live Agent.');
-							callback('Chat Ended By Live Agent');
+							callback('Chat ended by agent.');
 						} else {
 							await salesforceHelpers.messageFilter(modify, read, data.room, data.agent, messageArray);
 							const persistantData = await retrievePersistentTokens(read, assoc);
