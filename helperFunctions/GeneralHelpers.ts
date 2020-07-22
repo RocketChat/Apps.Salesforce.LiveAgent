@@ -27,7 +27,6 @@ export const getServerSettingValue = async (read: IRead, id: string) => {
 export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAssociationRecord) {
 	let persisantAffinity;
 	let persistantKey;
-	let persistantagentName;
 
 	const awayDatas = await read.getPersistenceReader().readByAssociation(assoc);
 	const contentStringified = JSON.stringify(awayDatas[0]);
@@ -37,11 +36,9 @@ export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAss
 
 	persisantAffinity = contentParsed.affinityToken;
 	persistantKey = contentParsed.key;
-	persistantagentName = contentParsed.agentName;
 
 	return {
 		persisantAffinity,
 		persistantKey,
-		persistantagentName,
 	};
 }

@@ -33,7 +33,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		console.log('executeLivechatAssignAgentHandler', { data });
 
 		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
-		let greetingMessage: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_greeting_message')).value;
 		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
 		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
@@ -44,10 +43,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, data.room.id);
 		const persitedData = await retrievePersistentTokens(read, assoc);
 		let { persisantAffinity, persistantKey } = persitedData;
-		const { persistantagentName } = persitedData;
-
-		greetingMessage = greetingMessage.replace('%s', persistantagentName);
-		sendLCMessage(modify, data.room, greetingMessage, data.agent);
 
 		const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
 

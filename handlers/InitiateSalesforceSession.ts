@@ -106,15 +106,10 @@ export class InitiateSalesforceSession {
 										console.log('Target Agent Status: ', targetagent.statusConnection);
 
 										if (targetagent.statusConnection === 'online') {
-											const { content } = data;
-											const contentParsed = JSON.parse(content || '{}');
-											const agentName = contentParsed.messages[0].message.name;
-
 											const sessionTokens = {
 												id,
 												affinityToken,
 												key,
-												agentName,
 											};
 
 											const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
@@ -167,14 +162,10 @@ export class InitiateSalesforceSession {
 														.then(async (statusResponse) => {
 															console.log('Setting Salesforce Bot Status, Response:', statusResponse);
 
-															const { content } = data;
-															const contentParsed = JSON.parse(content || '{}');
-															const agentName = contentParsed.messages[0].message.name;
 															const sessionTokens = {
 																id,
 																affinityToken,
 																key,
-																agentName,
 															};
 
 															const assoc = new RocketChatAssociationRecord(
@@ -247,6 +238,7 @@ export class InitiateSalesforceSession {
 														await checkCurrentChatStatus(callback);
 													}
 												} else {
+													console.log('Check whether agent accepted request, Unresolved Response:', response);
 													await checkCurrentChatStatus(callback);
 												}
 											}

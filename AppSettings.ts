@@ -9,7 +9,6 @@ export enum AppSettingId {
 	SalesforceDeploymentId = 'salesforce_deployment_id',
 	SalesforceButtonId = 'salesforce_button_id',
 	HandoverDepartmentName = 'handover_department_name',
-	GreetingMessage = 'salesforce_greeting_message',
 	DebugButton = 'debug_button',
 }
 
@@ -88,15 +87,6 @@ export const AppSettings: Array<ISetting> = [
 		packageValue: '',
 		i18nLabel: 'Handover Target Department Name',
 		i18nDescription: 'Enter Omnichannel department name containing Salesforce agent user.',
-		required: true,
-	},
-	{
-		id: AppSettingId.GreetingMessage,
-		public: true,
-		type: SettingType.STRING,
-		packageValue: '%s will help you today.',
-		i18nLabel: 'Greeting Message',
-		i18nDescription: 'Enter greeting to show user after handoff. Use %s to place Agent Name.',
 		required: true,
 	},
 	{
