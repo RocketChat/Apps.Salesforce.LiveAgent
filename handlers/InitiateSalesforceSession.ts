@@ -81,6 +81,30 @@ export class InitiateSalesforceSession {
 
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
+								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
+
+								const isChatRequestSuccess = salesforceHelpers.checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
+								console.log('Check whether agent accepted request, isChatRequestSuccess: ', isChatRequestSuccess);
+
+								if (isChatRequestSuccess === true) {
+									const chatSuccessMessageArray = pullMessagesMessageArray[0].message;
+									const { queuePosition } = chatSuccessMessageArray;
+									switch (queuePosition) {
+										case 1:
+											console.log('Check whether agent accepted request, Queue Position = 1');
+											await sendLCMessage(this.modify, this.message.room, 'An agent will be with you soon.', LcAgent);
+											break;
+										default:
+											console.log('Check whether agent accepted request, Queue Position = ', queuePosition);
+											await sendLCMessage(
+												this.modify,
+												this.message.room,
+												`No agent is available right now. Please wait for a while. Your queue position is: ${queuePosition}`,
+												LcAgent,
+											);
+											break;
+									}
+								}
 
 								await sendDebugLCMessage(
 									this.read,
@@ -199,7 +223,7 @@ export class InitiateSalesforceSession {
 									}
 								};
 
-								const { http } = this;
+								const { http, modify, message } = this;
 
 								async function checkCurrentChatStatus(callback) {
 									salesforceHelpers
@@ -217,10 +241,24 @@ export class InitiateSalesforceSession {
 
 												const { content } = response;
 												const contentParsed = JSON.parse(content || '{}');
-
 												const messageArray = contentParsed.messages;
-												const isChatAccepted = salesforceHelpers.checkForEvent(messageArray, 'ChatEstablished');
 
+												const isQueueUpdate = salesforceHelpers.checkForEvent(messageArray, 'QueueUpdate');
+												if (isQueueUpdate === true) {
+													console.log('isQueueUpdate: ', isQueueUpdate);
+													const queueUpdateMessages = messageArray[0].message;
+													const queueUpdatePosition = queueUpdateMessages.position;
+													if (queueUpdatePosition > 0) {
+														await sendLCMessage(
+															modify,
+															message.room,
+															`An agent agent will be with you soon. Your queue position is: ${queueUpdatePosition}`,
+															LcAgent,
+														);
+													}
+												}
+
+												const isChatAccepted = salesforceHelpers.checkForEvent(messageArray, 'ChatEstablished');
 												if (isChatAccepted === true) {
 													console.log('Chat Accepted by Agent: ', isChatAccepted);
 													console.log('Check whether agent accepted request, Chat Ended By Live Agent.');
@@ -254,16 +292,21 @@ export class InitiateSalesforceSession {
 										await sendLCMessage(this.modify, this.message.room, 'No Agent available for chat.', LcAgent);
 										console.log('Check whether agent accepted request, Error: No Agent available for chat.');
 									} else if (pullMessagesContentParsed.messages[0].message.reason === 'InternalFailure') {
-										await sendLCMessage(
-											this.modify,
-											this.message.room,
-											'Salesforce Internal Failure. Please Try Again after sometime',
-											LcAgent,
-										);
-										console.log('Check whether agent accepted request, Error: Salesforce Internal Failure.');
-									} else {
-										await sendLCMessage(this.modify, this.message.room, 'Unknown Error Occured', LcAgent);
-										console.log('Check whether agent accepted request, Error: Unknown Error Occured.');
+										await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+
+										if (pullMessagesContentParsed.messages[0].message.reason === 'InternalFailure') {
+											await sendDebugLCMessage(
+												this.read,
+												this.modify,
+												this.message.room,
+												'Salesforce Internal Failure. Please check your Salesforce Org for potential issues.',
+												LcAgent,
+											);
+											console.log('Check whether agent accepted request, Error: Salesforce Internal Failure.');
+										} else {
+											await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Unknown Error Occured.', LcAgent);
+											console.log('Check whether agent accepted request, Error: Unknown Error Occured.');
+										}
 									}
 								} else {
 									console.log('Check whether agent accepted request, Executing Function:');
