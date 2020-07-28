@@ -33,9 +33,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		console.log('executeLivechatAssignAgentHandler', { data });
 
 		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
-		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-
 		if (data.agent.username !== salesforceBotUsername) {
 			return;
 		}
@@ -52,6 +49,9 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 			return;
 			// TODO: ADD PERFORM HANDOVER TO BOT
 		};
+
+		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 
 		async function subscribeToLiveAgent(callback: any) {
 			await salesforceHelpers
