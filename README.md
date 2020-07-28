@@ -22,6 +22,8 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 1. Rocket.Chat App Engine CLI.
    - Guide [here](https://docs.rocket.chat/apps-development/getting-started)
 
+2. Rocket Chat App Engine >= v1.16.0.
+
 ## App Installation
 
 1. Clone This Repo

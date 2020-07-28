@@ -77,25 +77,25 @@ export class InitiateSalesforceSession {
 						await salesforceHelpers
 							.pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
-								console.log('Check whether agent accepted request, Response:', pullMessagesres);
+								console.log('Chat request sent, checking for response , Response:', pullMessagesres);
 
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
 
 								const isChatRequestSuccess = salesforceHelpers.checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
-								console.log('Check whether agent accepted request, isChatRequestSuccess: ', isChatRequestSuccess);
+								console.log('Chat request sent, checking for response, isChatRequestSuccess: ', isChatRequestSuccess);
 
 								if (isChatRequestSuccess === true) {
 									const chatSuccessMessageArray = pullMessagesMessageArray[0].message;
 									const { queuePosition } = chatSuccessMessageArray;
 									switch (queuePosition) {
 										case 1:
-											console.log('Check whether agent accepted request, Queue Position = 1');
+											console.log('Chat request sent, checking for response, Queue Position = 1');
 											await sendLCMessage(this.modify, this.message.room, 'An agent will be with you soon.', LcAgent);
 											break;
 										default:
-											console.log('Check whether agent accepted request, Queue Position = ', queuePosition);
+											console.log('Chat request sent, checking for response, Queue Position = ', queuePosition);
 											await sendLCMessage(
 												this.modify,
 												this.message.room,
@@ -276,12 +276,12 @@ export class InitiateSalesforceSession {
 										}
 									}
 								} else {
-									console.log('Check whether agent accepted request, Executing Function:');
+									console.log('Chat request sent, checking for response, Executing Function:');
 									checkCurrentChatStatus(checkAgentStatusCallback);
 								}
 							})
 							.catch((error) => {
-								console.log('Check whether agent accepted request, Error:', error);
+								console.log('Chat request sent, checking for response, Error:', error);
 							});
 					})
 					.catch((error) => {

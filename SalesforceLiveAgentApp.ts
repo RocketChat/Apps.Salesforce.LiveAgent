@@ -50,7 +50,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 			await persistence.removeByAssociation(assoc);
 			await sendLCMessage(modify, data.room, endChatdata, data.agent);
 			return;
-			// ADD PERFORM HANDOVER TO BOT
+			// TODO: ADD PERFORM HANDOVER TO BOT
 		};
 
 		async function subscribeToLiveAgent(callback: any) {
