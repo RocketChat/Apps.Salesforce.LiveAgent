@@ -27,10 +27,20 @@ export class InitiateSalesforceSession {
 		const targetDeptName: string = (await this.read.getEnvironmentReader().getSettings().getById('handover_department_name')).value;
 
 		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+		if (salesforceChatApiEndpoint) {
+			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+		} else {
+			console.log('Salesforce Chat api endpoint not found.');
+			return;
+		}
 
 		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
-		rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
+		if (rocketChatServerUrl) {
+			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
+		} else {
+			console.log('Rocket.Chat server url not found.');
+			return;
+		}
 
 		const LcVisitor: IVisitor = lroom.visitor;
 		const LcVisitorName = LcVisitor.name;

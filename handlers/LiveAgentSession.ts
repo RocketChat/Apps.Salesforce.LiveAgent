@@ -10,7 +10,12 @@ export class LiveAgentSession {
 	public async exec() {
 		try {
 			let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+			if (salesforceChatApiEndpoint) {
+				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+			} else {
+				console.log('Salesforce Chat api endpoint not found.');
+				return;
+			}
 
 			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
 			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {

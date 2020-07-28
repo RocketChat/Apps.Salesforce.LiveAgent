@@ -51,7 +51,12 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		};
 
 		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+		if (salesforceChatApiEndpoint) {
+			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+		} else {
+			console.log('Salesforce Chat api endpoint not found.');
+			return;
+		}
 
 		async function subscribeToLiveAgent(callback: any) {
 			await salesforceHelpers
