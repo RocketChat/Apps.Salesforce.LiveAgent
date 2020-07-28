@@ -10,8 +10,16 @@ export class InitiateSalesforceSession {
 	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async exec() {
-		const dialogflowBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('dialogflow_bot_username')).value;
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+
+		const lmessage: ILivechatMessage = this.message;
+		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
+		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
+
+		if (salesforceBotUsername === LcAgent.username) {
+			return;
+		}
+
 		const salesforceBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_password')).value;
 		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_organisation_id')).value;
 		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_deployment_id')).value;
@@ -24,9 +32,6 @@ export class InitiateSalesforceSession {
 		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
 		rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
 
-		const lmessage: ILivechatMessage = this.message;
-		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
-		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
 		const LcVisitor: IVisitor = lroom.visitor;
 		const LcVisitorName = LcVisitor.name;
 		const LcVisitorEmailsArr = LcVisitor.visitorEmails;
@@ -35,10 +40,6 @@ export class InitiateSalesforceSession {
 		if (LcVisitorEmailsArr) {
 			const t = LcVisitorEmailsArr[0].address;
 			LcVisitorEmail = t;
-		}
-
-		if (dialogflowBotUsername !== LcAgent.username) {
-			return;
 		}
 
 		const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();

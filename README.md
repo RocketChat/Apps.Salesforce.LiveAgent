@@ -46,17 +46,7 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 ## App Configuration
 
-1. **Dialogflow Bot Username**
-
-   - Create a new user in Rocket Chat from **Administration** -> **Users**. This user should be created with `bot` and `livechat-agent` roles. Optionally, you can also connect this bot user to Dialogflow using this [app](https://github.com/RocketChat/Apps.Dialogflow/tree/develop-gsoc).
-
-   - Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment.
-
-   - Then go to **Administration** -> **Livechat** -> **Routing**. There enable `Assign new conversations to bot agent` Setting. This setting will automatically assign a visitor to this bot.
-
-   - Copy and paste this newly created Bot user's username in respective field of our app setting.
-
-2. **Salesforce Bot Username & Password** and **Handover Target Department Name**
+1. **Salesforce Bot Username & Password** and **Handover Target Department Name**
 
    - Again create a new user, from **Administration** -> **Users**, with `bot` and `livechat-agent` roles and paste this user's username and password in respective fields in our app setting.
 
@@ -64,23 +54,31 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - Make sure that Dialogflow Bot user and Salesforce Bot user are in different departments.
 
-3. **Salesforce Organization ID**
+1. **Salesforce Organization ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for company information -> Click on Company Information option -> Copy Salesforce.com Organization ID value.
 
-4. **Salesforce Deployment ID**
+1. **Salesforce Deployment ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of deploymentId from Chat Code Snippet.
 
-5. **Salesforce Button ID**
+1. **Salesforce Button ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of buttonId from Chat Code Snippet.
 
-6. **Debug Mode**
+1. **Debug Mode**
 
    - Enabling this setting will send debug messages and log to the Live Chat user. Setting only intended for Developer testing not for production.
 
-7. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
+## Bot Configuration
+
+1. This app requires a Bot user to initialize session with Salesforce Live Agent. You can use any existing bot user or create a new one.
+
+1. Go to Omnichannel -> Departments -> New Department and create a new department. Assign our bot user to that deparment.
+
+1. Then go to Administration -> Livechat -> Routing. There enable Assign new conversations to bot agent Setting. This setting will automatically assign a visitor to this bot.
+
+3. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
 
    - Insert your department name which consists the Dialogflow bot in the following function:
 
@@ -111,8 +109,6 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 	});
 	</script>
    ```
-
-8. That's it for the configuration. Now let's look at the usage.
 
 ## App Usage
 

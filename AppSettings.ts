@@ -1,7 +1,6 @@
 import { ISetting, SettingType } from '@rocket.chat/apps-engine/definition/settings';
 
 export enum AppSettingId {
-	DialogflowBotUsername = 'dialogflow_bot_username',
 	SalesforceBotUsername = 'salesforce_bot_username',
 	SalesforceBotPassword = 'salesforce_bot_password',
 	SalesforceChatApiEndpoint = 'salesforce_chat_api_endpoint',
@@ -13,15 +12,6 @@ export enum AppSettingId {
 }
 
 export const AppSettings: Array<ISetting> = [
-	{
-		id: AppSettingId.DialogflowBotUsername,
-		public: true,
-		type: SettingType.STRING,
-		packageValue: '',
-		i18nLabel: 'Dialogflow Bot Username',
-		i18nDescription: 'Enter Omnichannel agent username, hadling requests from Dialogflow Bot.',
-		required: true,
-	},
 	{
 		id: AppSettingId.SalesforceBotUsername,
 		public: true,

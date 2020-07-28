@@ -124,10 +124,9 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	}
 
 	public async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
-		const dialogflowBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('dialogflow_bot_username')).value;
 		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
 
-		if (message.sender.username === dialogflowBotUsername) {
+		if (message.sender.username === salesforceBotUsername) {
 			return;
 		} else if (message.room.type !== 'l') {
 			return;
