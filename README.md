@@ -74,13 +74,13 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 1. This app requires a Bot user to initialize session with Salesforce Live Agent. You can use any existing bot user or create a new one.
 
-1. Go to Omnichannel -> Departments -> New Department and create a new department. Assign our bot user to that deparment.
+1. Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment.
 
-1. Then go to Administration -> Livechat -> Routing. There enable Assign new conversations to bot agent Setting. This setting will automatically assign a visitor to this bot.
+1. Then go to **Administration** -> **Livechat** -> **Routing**. There enable Assign new conversations to bot agent Setting. This setting will automatically assign a visitor to this bot.
 
 3. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
 
-   - Insert your department name which consists the Dialogflow bot in the following function:
+   - Insert your **Department name** which consists the bot user in the following function:
 
    ```
    RocketChat(function() {
