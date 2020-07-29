@@ -49,21 +49,19 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - Then go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our new bot user to that deparment. Paste this department name in **Handover Target Department Name** setting field. **Note:** Make sure to never add any other user other than the one we just added in this department.
 
-   - Make sure that Dialogflow Bot user and Salesforce Bot user are in different departments.
-
-1. **Salesforce Organization ID**
+2. **Salesforce Organization ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for company information -> Click on Company Information option -> Copy Salesforce.com Organization ID value.
 
-1. **Salesforce Deployment ID**
+3. **Salesforce Deployment ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of deploymentId from Chat Code Snippet.
 
-1. **Salesforce Button ID**
+4. **Salesforce Button ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of buttonId from Chat Code Snippet.
 
-1. **Debug Mode**
+5. **Debug Mode**
 
    - Enabling this setting will send debug messages and log to the Live Chat user. Setting only intended for Developer testing not for production.
 
@@ -115,12 +113,10 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
    - On Bottom Bar, click on **Omni-channel** and change status from `Offline` to `Available - Chat`.
 
-1. From Live Chat widget, sending the following message will initiate a session with Live Agent:
+1. From Live Chat widget, send the following message to initiate a session with Live Agent:
 
    ```
    initiate_salesforce_session
    ```
 
 1. Once the Live Agent accepts your chat request, it will perform handoff to our Salesforce bot user and then you can send and recieve messages from Salesforce Live Agent.
-
-1. Due to Long Message Polling Loop, if Live Chat user is idle for `40` seconds. Session is automatically expired.
