@@ -4,7 +4,7 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
-import { SalesforceHelpers } from '../helperFunctions/SalesforceHelpers';
+import { checkForEvent, getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceHelpers';
 
 export class InitiateSalesforceSession {
 	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
@@ -52,29 +52,26 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = t;
 		}
 
-		const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
 		await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Initiating session with Salesforce', LcAgent);
 
-		await salesforceHelpers
-			.getSessionTokens(this.http, salesforceChatApiEndpoint)
+		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
 				console.log('Generating session id, Response:', res);
 				await sendDebugLCMessage(this.read, this.modify, this.message.room, `Session initiated with Saleforce:: ${JSON.stringify(res)}`, LcAgent);
 
 				const { id, affinityToken, key } = res;
-				await salesforceHelpers
-					.sendChatRequest(
-						this.http,
-						salesforceChatApiEndpoint,
-						affinityToken,
-						key,
-						id,
-						salesforceOrganisationId,
-						salesforceButtonId,
-						salesforceDeploymentId,
-						LcVisitorName,
-						LcVisitorEmail,
-					)
+				await sendChatRequest(
+					this.http,
+					salesforceChatApiEndpoint,
+					affinityToken,
+					key,
+					id,
+					salesforceOrganisationId,
+					salesforceButtonId,
+					salesforceDeploymentId,
+					LcVisitorName,
+					LcVisitorEmail,
+				)
 					.then(async (sendChatRequestres) => {
 						console.log('Sending a chat request to Salesforce, Response:', sendChatRequestres);
 						await sendDebugLCMessage(
@@ -85,8 +82,7 @@ export class InitiateSalesforceSession {
 							LcAgent,
 						);
 
-						await salesforceHelpers
-							.pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
+						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
 								console.log('Chat request sent, checking for response , Response:', pullMessagesres);
 
@@ -94,7 +90,7 @@ export class InitiateSalesforceSession {
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
 
-								const isChatRequestSuccess = salesforceHelpers.checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
+								const isChatRequestSuccess = checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
 								console.log('Chat request sent, checking for response, isChatRequestSuccess: ', isChatRequestSuccess);
 
 								if (isChatRequestSuccess === true) {
@@ -204,8 +200,7 @@ export class InitiateSalesforceSession {
 								const { http, modify, message } = this;
 
 								async function checkCurrentChatStatus(callback) {
-									salesforceHelpers
-										.pullMessages(http, salesforceChatApiEndpoint, affinityToken, key)
+									pullMessages(http, salesforceChatApiEndpoint, affinityToken, key)
 										.then(async (response) => {
 											if (response.statusCode === 403) {
 												console.log('Check whether agent accepted request, Session Expired. ', response);
@@ -221,7 +216,7 @@ export class InitiateSalesforceSession {
 												const contentParsed = JSON.parse(content || '{}');
 												const messageArray = contentParsed.messages;
 
-												const isQueueUpdate = salesforceHelpers.checkForEvent(messageArray, 'QueueUpdate');
+												const isQueueUpdate = checkForEvent(messageArray, 'QueueUpdate');
 												if (isQueueUpdate === true) {
 													console.log('isQueueUpdate: ', isQueueUpdate);
 													const queueUpdateMessages = messageArray[0].message;
@@ -236,7 +231,7 @@ export class InitiateSalesforceSession {
 													}
 												}
 
-												const isChatAccepted = salesforceHelpers.checkForEvent(messageArray, 'ChatEstablished');
+												const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 												if (isChatAccepted === true) {
 													console.log('Chat accepted by agent: ', isChatAccepted);
 													console.log('Check whether agent accepted request, Chat ended by Live Agent.');
@@ -245,7 +240,7 @@ export class InitiateSalesforceSession {
 												} else if (isChatAccepted === false) {
 													console.log('Chat accepted by agent: ', isChatAccepted);
 
-													const isChatRequestFail = salesforceHelpers.checkForEvent(messageArray, 'ChatRequestFail');
+													const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 													if (isChatRequestFail === true) {
 														console.log('Chat request fail: ', isChatRequestFail);
 														callback([], 'Sorry we are unable to complete your request right now.');

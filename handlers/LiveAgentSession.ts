@@ -2,7 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
-import { SalesforceHelpers } from '../helperFunctions/SalesforceHelpers';
+import { closeChat, sendMessages } from '../helperFunctions/SalesforceHelpers';
 
 export class LiveAgentSession {
 	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
@@ -25,11 +25,8 @@ export class LiveAgentSession {
 			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
-			const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
-
 			if (this.message.text === 'Closed by visitor' && persisantAffinity && persistantKey) {
-				await salesforceHelpers
-					.closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
+				await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
 					.then(async (res) => {
 						console.log('Closing Liveagent Chat, Response:', res);
 						await this.persistence.removeByAssociation(assoc);
@@ -44,8 +41,7 @@ export class LiveAgentSession {
 				if (this.message.text) {
 					messageText = this.message.text;
 				}
-				await salesforceHelpers
-					.sendMessages(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, messageText)
+				await sendMessages(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, messageText)
 					.then((res) => {
 						console.log('Sending Message To Liveagent, Response:', res);
 					})

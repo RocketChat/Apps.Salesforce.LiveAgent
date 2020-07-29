@@ -3,13 +3,21 @@ import {
 	IConfigurationExtend,
 	IEnvironmentRead,
 	IHttp,
+	IHttpRequest,
 	ILogger,
 	IModify,
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { App } from '@rocket.chat/apps-engine/definition/App';
-import { ILivechatEventContext, ILivechatMessage, ILivechatRoom, IPostLivechatAgentAssigned } from '@rocket.chat/apps-engine/definition/livechat';
+import {
+	IDepartment,
+	ILivechatEventContext,
+	ILivechatMessage,
+	ILivechatRoom,
+	ILivechatTransferData,
+	IPostLivechatAgentAssigned,
+} from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo, RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
@@ -17,7 +25,7 @@ import { AppSettings } from './AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
 import { retrievePersistentTokens, sendLCMessage } from './helperFunctions/GeneralHelpers';
-import { SalesforceHelpers } from './helperFunctions/SalesforceHelpers';
+import { checkForEvent, messageFilter, pullMessages } from './helperFunctions/SalesforceHelpers';
 
 export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
@@ -41,13 +49,58 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		const persitedData = await retrievePersistentTokens(read, assoc);
 		let { persisantAffinity, persistantKey } = persitedData;
 
-		const salesforceHelpers: SalesforceHelpers = new SalesforceHelpers();
-
 		const handleEndChatCallback = async (endChatdata) => {
 			await persistence.removeByAssociation(assoc);
 			await sendLCMessage(modify, data.room, endChatdata, data.agent);
 			return;
 			// TODO: ADD PERFORM HANDOVER TO BOT
+
+			// const authHttpRequest: IHttpRequest = {
+			// 	headers: {
+			// 		'Content-Type': 'application/json',
+			// 	},
+			// 	data: {
+			// 		user: 'dialogflow.bot',
+			// 		password: '123456',
+			// 	},
+			// };
+
+			// http.post(`http://localhost:3000/api/v1/login`, authHttpRequest)
+			// 	.then((loginResponse) => {
+			// 		const loginResponseJSON = JSON.parse(loginResponse.content || '{}');
+			// 		console.log('Performing Dialogflow bot login, Response:', loginResponse);
+
+			// 		const setStatusHttpRequest: IHttpRequest = {
+			// 			headers: {
+			// 				'X-Auth-Token': loginResponseJSON.data.authToken,
+			// 				'X-User-Id': loginResponseJSON.data.userId,
+			// 			},
+			// 			data: {
+			// 				message: 'online',
+			// 				status: 'online',
+			// 			},
+			// 		};
+
+			// 		http.post(`http://localhost:3000/api/v1/users.setStatus`, setStatusHttpRequest)
+			// 			.then(async (statusResponse) => {
+			// 				console.log('Setting Dialogflow bot status, Response:', statusResponse);
+
+			// 				const roomId = data.room.id;
+			// 				const room: ILivechatRoom = (await read.getRoomReader().getById(roomId)) as ILivechatRoom;
+			// 				const targetDepartment: IDepartment = (await read.getLivechatReader().getLivechatDepartmentByIdOrName('bot')) as IDepartment;
+			// 				const transferData: ILivechatTransferData = {
+			// 					currentRoom: room,
+			// 					targetDepartment: targetDepartment.id,
+			// 				};
+			// 				await modify.getUpdater().getLivechatUpdater().transferVisitor(data.room.visitor, transferData);
+			// 			})
+			// 			.catch((loginErr) => {
+			// 				console.log('Setting Dialogflow bot status , Error:', loginErr);
+			// 			});
+			// 	})
+			// 	.catch((loginErr) => {
+			// 		console.log('Performing Dialogflow bot login, Error:', loginErr);
+			// 	});
 		};
 
 		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
@@ -59,8 +112,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		}
 
 		async function subscribeToLiveAgent(callback: any) {
-			await salesforceHelpers
-				.pullMessages(http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
+			await pullMessages(http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
 				.then(async (response) => {
 					if (response.statusCode === 403) {
 						console.log('Pulling Messages using Subscribe Function, Session Expired.');
@@ -86,14 +138,14 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 						const contentParsed = JSON.parse(content || '{}');
 
 						const messageArray = contentParsed.messages;
-						const isEndChat = salesforceHelpers.checkForEvent(messageArray, 'ChatEnded');
+						const isEndChat = checkForEvent(messageArray, 'ChatEnded');
 						console.log('Chat ended by Agent: ', isEndChat);
 
 						if (isEndChat === true) {
 							console.log('Pulling Messages using Subscribe Function, Chat Ended By Live Agent.');
 							callback('Chat ended by agent.');
 						} else {
-							await salesforceHelpers.messageFilter(modify, read, data.room, data.agent, messageArray);
+							await messageFilter(modify, read, data.room, data.agent, messageArray);
 							const persistantData = await retrievePersistentTokens(read, assoc);
 							persisantAffinity = persistantData.persisantAffinity;
 							persistantKey = persistantData.persistantKey;
