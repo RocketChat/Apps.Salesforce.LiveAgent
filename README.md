@@ -12,16 +12,14 @@ A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
 
 1. Salesforce Org with Live Agent Setup.
 
-   - If you don't have this setup, follow steps [here.](https://github.com/PrajvalRaval/Salesforce-Rocket.Chat-Plugin/blob/master/instructions.md#salesforce-live-agent-setup)
-
-1. Rocket Chat Instance with Live Chat Setup.
+2. Rocket Chat Instance with Live Chat Setup.
 
    - Rocket Chat >= v3.5.0
    - Rocket Chat setup guide [here.](https://docs.rocket.chat/guides/developer/quick-start)
    - Live Chat [guide](https://docs.rocket.chat/guides/administrator-guides/livechat#:~:text=Enable%20Livechat%20feature,Settings%20%3E%20Livechat%20and%20enable%20it.&text=Now%20the%20admin%20will%20have,left%20corner%20drop%20down%20menu.) and [repo](https://github.com/RocketChat/Rocket.Chat.Livechat)
 
-1. Rocket.Chat App Engine CLI.
-   - Guide [here](https://docs.rocket.chat/apps-development/getting-started)
+3. Rocket.Chat App Engine CLI.
+   - Guide [here](https://docs.rocket.chat/apps-development/getting-started#rocket-chat-app-engine-cli)
 
 ## App Installation
 
