@@ -11,5 +11,5 @@
     "name": "Saleforce Live Agent Integration",
     "nameSlug": "salesforce-live-agent",
     "classFile": "SalesforceLiveAgentApp.ts",
-    "description": "Interface for Salesforce Live Agent"
+    "description": "Integration between Rocket.Chat and the Salesforce Live Agent (Chat)."
 }

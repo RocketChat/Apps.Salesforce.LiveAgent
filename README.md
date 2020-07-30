@@ -6,7 +6,7 @@
 
 </p>
 
-A Rocket.Chat marketplace app for Salesforce Live Agent (Chat) Integration.
+Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
 ## Prerequisites
 
