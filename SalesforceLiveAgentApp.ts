@@ -124,13 +124,14 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 			console.log('Salesforce Chat api endpoint not found.');
 			return;
 		}
+		const LAChatEndedMessage: string = (await read.getEnvironmentReader().getSettings().getById('la_chat_ended_message')).value;
 
 		async function subscribeToLiveAgent(callback: any) {
 			await pullMessages(http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
 				.then(async (response) => {
 					if (response.statusCode === 403) {
 						console.log('Pulling Messages using Subscribe Function, Session Expired.');
-						callback('Chat session expired');
+						callback(LAChatEndedMessage);
 						return;
 					} else if (response.statusCode === 204 || response.statusCode === 409) {
 						console.log('Pulling Messages using Subscribe Function, Empty Response.', response);

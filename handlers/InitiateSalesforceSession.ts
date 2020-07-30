@@ -46,6 +46,10 @@ export class InitiateSalesforceSession {
 			return;
 		}
 
+		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_queue_position_message')).value;
+		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_queue_message')).value;
+		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_queue_empty_message')).value;
+
 		const LcVisitor: IVisitor = lroom.visitor;
 		const LcVisitorName = LcVisitor.name;
 		const LcVisitorEmailsArr = LcVisitor.visitorEmails;
@@ -102,16 +106,12 @@ export class InitiateSalesforceSession {
 									switch (queuePosition) {
 										case 1:
 											console.log('Chat request sent, checking for response, Queue Position = 1');
-											await sendLCMessage(this.modify, this.message.room, 'An agent will be with you soon.', LcAgent);
+											await sendLCMessage(this.modify, this.message.room, LANoQueueMessage, LcAgent);
 											break;
 										default:
 											console.log('Chat request sent, checking for response, Queue Position = ', queuePosition);
-											await sendLCMessage(
-												this.modify,
-												this.message.room,
-												`No agent is available right now. Please wait for a while. Your queue position is: ${queuePosition}`,
-												LcAgent,
-											);
+											const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
+											await sendLCMessage(this.modify, this.message.room, queuePosMessage, LcAgent);
 											break;
 									}
 								}
@@ -224,13 +224,7 @@ export class InitiateSalesforceSession {
 									} catch (err) {
 										console.log('Perfoming handoff, Error:', err);
 										await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
-										await sendDebugLCMessage(
-											this.read,
-											this.modify,
-											this.message.room,
-											`Error in performing Handoff: ${err}`,
-											LcAgent,
-										);
+										await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in performing Handoff: ${err}`, LcAgent);
 									}
 								};
 
@@ -258,13 +252,13 @@ export class InitiateSalesforceSession {
 													console.log('isQueueUpdate: ', isQueueUpdate);
 													const queueUpdateMessages = messageArray[0].message;
 													const queueUpdatePosition = queueUpdateMessages.position;
-													if (queueUpdatePosition > 0) {
-														await sendLCMessage(
-															modify,
-															message.room,
-															`An agent agent will be with you soon. Your queue position is: ${queueUpdatePosition}`,
-															LcAgent,
-														);
+
+													if (queueUpdatePosition === 1) {
+														const queueEmptyMessage = LAQueueEmptyMessage.replace(/%s/g, queueUpdatePosition);
+														await sendLCMessage(modify, message.room, queueEmptyMessage, LcAgent);
+													} else if (queueUpdatePosition > 1) {
+														const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queueUpdatePosition);
+														await sendLCMessage(modify, message.room, queuePosMessage, LcAgent);
 													}
 												}
 
@@ -369,13 +363,7 @@ export class InitiateSalesforceSession {
 					.catch(async (error) => {
 						console.log('Sending a chat request to Salesforce, Error:', error);
 						await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
-						await sendDebugLCMessage(
-							this.read,
-							this.modify,
-							this.message.room,
-							`Error in sending a chat request to Salesforce: ${error}`,
-							LcAgent,
-						);
+						await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in sending a chat request to Salesforce: ${error}`, LcAgent);
 					});
 			})
 			.catch(async (error) => {
