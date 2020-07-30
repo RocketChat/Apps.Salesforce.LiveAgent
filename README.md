@@ -45,7 +45,7 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
 1. **Salesforce Bot Username & Password** and **Handover Target Department Name**
 
-   - Again create a new user, from **Administration** -> **Users**, with `bot` and `livechat-agent` roles and paste this user's username and password in respective fields in our app setting.
+   - Create a new user from **Administration** -> **Users**, after filling all the details add, `bot` and `livechat-agent` roles. Paste this user's username and password in respective fields in app setting.
 
    - Then go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our new bot user to that deparment. Paste this department name in **Handover Target Department Name** setting field. **Note:** Make sure to never add any other user other than the one we just added in this department.
 
@@ -65,15 +65,21 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
    - Enabling this setting will send debug messages and log to the Live Chat user. Setting only intended for Developer testing not for production.
 
-## Bot Configuration
+6. **Chat Bot Configurations**
+
+   - Please refer to the following section to configure this setting.
+
+## Chat Bot Configuration
 
 1. This app requires a Bot user to initialize session with Salesforce Live Agent. You can use any existing bot user or create a new one.
 
-1. Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment.
+2. To create a new Chat Bot user, go to **Administration** -> **Users**, after filling all the details add, `bot` and `livechat-agent` roles. Paste this user's username and password in Chat Bot fields in app setting.
 
-1. Then go to **Administration** -> **Livechat** -> **Routing**. There enable Assign new conversations to bot agent Setting. This setting will automatically assign a visitor to this bot.
+3. Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to that deparment. Paste this department name in `Chat Bot Department Name` field in app setting
 
-1. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
+4. Then go to **Administration** -> **Livechat** -> **Routing**. There enable Assign new conversations to bot agent Setting. This setting will automatically assign a visitor to this bot.
+
+5. Finally we will make changes to your Livechat Widget installation script. Go to your installation script and add the following code to it:
 
    - Insert your **Department name** which consists the bot user in the following function:
 

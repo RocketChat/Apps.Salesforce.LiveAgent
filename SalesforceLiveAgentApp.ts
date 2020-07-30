@@ -24,7 +24,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettings } from './AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
-import { retrievePersistentTokens, sendLCMessage } from './helperFunctions/GeneralHelpers';
+import { getServerSettingValue, retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from './helperFunctions/GeneralHelpers';
 import { checkForEvent, messageFilter, pullMessages } from './helperFunctions/SalesforceHelpers';
 
 export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
@@ -52,55 +52,69 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		const handleEndChatCallback = async (endChatdata) => {
 			await persistence.removeByAssociation(assoc);
 			await sendLCMessage(modify, data.room, endChatdata, data.agent);
-			return;
-			// TODO: ADD PERFORM HANDOVER TO BOT
 
-			// const authHttpRequest: IHttpRequest = {
-			// 	headers: {
-			// 		'Content-Type': 'application/json',
-			// 	},
-			// 	data: {
-			// 		user: 'dialogflow.bot',
-			// 		password: '123456',
-			// 	},
-			// };
+			let rocketChatServerUrl: string = await getServerSettingValue(read, 'Site_Url');
+			try {
+				rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
+			} catch (error) {
+				await sendLCMessage(modify, data.room, 'Sorry we are unable to complete your request right now.', data.agent);
+				await sendDebugLCMessage(read, modify, data.room, 'Rocket Chat server url not found.', data.agent);
+				console.log('Rocket Chat server url not found.');
+				return;
+			}
 
-			// http.post(`http://localhost:3000/api/v1/login`, authHttpRequest)
-			// 	.then((loginResponse) => {
-			// 		const loginResponseJSON = JSON.parse(loginResponse.content || '{}');
-			// 		console.log('Performing Dialogflow bot login, Response:', loginResponse);
+			const chatBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('chat_bot_username')).value;
+			const chatBotPassword: string = (await read.getEnvironmentReader().getSettings().getById('chat_bot_password')).value;
+			const CBHandoverDepartmentName: string = (await read.getEnvironmentReader().getSettings().getById('chat_handover_department_name')).value;
 
-			// 		const setStatusHttpRequest: IHttpRequest = {
-			// 			headers: {
-			// 				'X-Auth-Token': loginResponseJSON.data.authToken,
-			// 				'X-User-Id': loginResponseJSON.data.userId,
-			// 			},
-			// 			data: {
-			// 				message: 'online',
-			// 				status: 'online',
-			// 			},
-			// 		};
+			const authHttpRequest: IHttpRequest = {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				data: {
+					user: chatBotUsername,
+					password: chatBotPassword,
+				},
+			};
 
-			// 		http.post(`http://localhost:3000/api/v1/users.setStatus`, setStatusHttpRequest)
-			// 			.then(async (statusResponse) => {
-			// 				console.log('Setting Dialogflow bot status, Response:', statusResponse);
+			http.post(`${rocketChatServerUrl}api/v1/login`, authHttpRequest)
+				.then((loginResponse) => {
+					const loginResponseJSON = JSON.parse(loginResponse.content || '{}');
+					console.log('Performing Dialogflow bot login, Response:', loginResponse);
 
-			// 				const roomId = data.room.id;
-			// 				const room: ILivechatRoom = (await read.getRoomReader().getById(roomId)) as ILivechatRoom;
-			// 				const targetDepartment: IDepartment = (await read.getLivechatReader().getLivechatDepartmentByIdOrName('bot')) as IDepartment;
-			// 				const transferData: ILivechatTransferData = {
-			// 					currentRoom: room,
-			// 					targetDepartment: targetDepartment.id,
-			// 				};
-			// 				await modify.getUpdater().getLivechatUpdater().transferVisitor(data.room.visitor, transferData);
-			// 			})
-			// 			.catch((loginErr) => {
-			// 				console.log('Setting Dialogflow bot status , Error:', loginErr);
-			// 			});
-			// 	})
-			// 	.catch((loginErr) => {
-			// 		console.log('Performing Dialogflow bot login, Error:', loginErr);
-			// 	});
+					const setStatusHttpRequest: IHttpRequest = {
+						headers: {
+							'X-Auth-Token': loginResponseJSON.data.authToken,
+							'X-User-Id': loginResponseJSON.data.userId,
+						},
+						data: {
+							message: 'online',
+							status: 'online',
+						},
+					};
+
+					http.post(`${rocketChatServerUrl}api/v1/users.setStatus`, setStatusHttpRequest)
+						.then(async (statusResponse) => {
+							console.log('Setting Dialogflow bot status, Response:', statusResponse);
+
+							const roomId = data.room.id;
+							const room: ILivechatRoom = (await read.getRoomReader().getById(roomId)) as ILivechatRoom;
+							const targetDepartment: IDepartment = (await read
+								.getLivechatReader()
+								.getLivechatDepartmentByIdOrName(CBHandoverDepartmentName)) as IDepartment;
+							const transferData: ILivechatTransferData = {
+								currentRoom: room,
+								targetDepartment: targetDepartment.id,
+							};
+							await modify.getUpdater().getLivechatUpdater().transferVisitor(data.room.visitor, transferData);
+						})
+						.catch((loginErr) => {
+							console.log('Setting Dialogflow bot status , Error:', loginErr);
+						});
+				})
+				.catch((loginErr) => {
+					console.log('Performing Dialogflow bot login, Error:', loginErr);
+				});
 		};
 
 		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
