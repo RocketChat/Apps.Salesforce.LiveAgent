@@ -1,7 +1,7 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
+import { retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceHelpers';
 
 export class LiveAgentSession {
@@ -9,16 +9,16 @@ export class LiveAgentSession {
 
 	public async exec() {
 		try {
-			let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-			if (salesforceChatApiEndpoint) {
-				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-			} else {
-				console.log('Salesforce Chat api endpoint not found.');
+			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {
 				return;
 			}
 
-			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
-			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {
+			let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+			try {
+				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+			} catch (error) {
+				console.log('Salesforce Chat API endpoint not found.');
 				return;
 			}
 

@@ -25,14 +25,15 @@ export class InitiateSalesforceSession {
 		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_deployment_id')).value;
 		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_button_id')).value;
 		const targetDeptName: string = (await this.read.getEnvironmentReader().getSettings().getById('handover_department_name')).value;
+		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('technical_difficulty_message')).value;
 
 		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 			await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Salesforce Chat API endpoint not found.', LcAgent);
-			console.log('Rocket Chat server url not found.');
+			console.log('Salesforce Chat API endpoint not found.');
 			return;
 		}
 
@@ -40,7 +41,7 @@ export class InitiateSalesforceSession {
 		try {
 			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 			await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Rocket Chat server url not found.', LcAgent);
 			console.log('Rocket Chat server url not found.');
 			return;
@@ -103,16 +104,13 @@ export class InitiateSalesforceSession {
 								if (isChatRequestSuccess === true) {
 									const chatSuccessMessageArray = pullMessagesMessageArray[0].message;
 									const { queuePosition } = chatSuccessMessageArray;
-									switch (queuePosition) {
-										case 1:
-											console.log('Chat request sent, checking for response, Queue Position = 1');
-											await sendLCMessage(this.modify, this.message.room, LANoQueueMessage, LcAgent);
-											break;
-										default:
-											console.log('Chat request sent, checking for response, Queue Position = ', queuePosition);
-											const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
-											await sendLCMessage(this.modify, this.message.room, queuePosMessage, LcAgent);
-											break;
+									if (queuePosition === 1) {
+										console.log('Chat request sent, checking for response, Queue Position = 1');
+										await sendLCMessage(this.modify, this.message.room, LANoQueueMessage, LcAgent);
+									} else if (queuePosition > 1) {
+										console.log('Chat request sent, checking for response, Queue Position = ', queuePosition);
+										const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
+										await sendLCMessage(this.modify, this.message.room, queuePosMessage, LcAgent);
 									}
 								}
 
@@ -190,12 +188,7 @@ export class InitiateSalesforceSession {
 													})
 													.catch(async (statusErr) => {
 														console.log('Setting Salesforce bot status, Error:', statusErr);
-														await sendLCMessage(
-															this.modify,
-															this.message.room,
-															'Sorry we are unable to complete your request right now.',
-															LcAgent,
-														);
+														await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 														await sendDebugLCMessage(
 															this.read,
 															this.modify,
@@ -207,12 +200,7 @@ export class InitiateSalesforceSession {
 											})
 											.catch(async (loginErr) => {
 												console.log('Performing Salesforce bot login, Error:', loginErr);
-												await sendLCMessage(
-													this.modify,
-													this.message.room,
-													'Sorry we are unable to complete your request right now.',
-													LcAgent,
-												);
+												await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 												await sendDebugLCMessage(
 													this.read,
 													this.modify,
@@ -223,7 +211,7 @@ export class InitiateSalesforceSession {
 											});
 									} catch (err) {
 										console.log('Perfoming handoff, Error:', err);
-										await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+										await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 										await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in performing Handoff: ${err}`, LcAgent);
 									}
 								};
@@ -274,7 +262,7 @@ export class InitiateSalesforceSession {
 													const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 													if (isChatRequestFail === true) {
 														console.log('Chat request fail: ', isChatRequestFail);
-														callback([], 'Sorry we are unable to complete your request right now.');
+														callback([], technicalDifficultyMessage);
 														return;
 													} else {
 														await checkCurrentChatStatus(callback);
@@ -300,12 +288,7 @@ export class InitiateSalesforceSession {
 
 										case 'NoPost':
 											console.log('Check whether agent accepted request, Error: Invalid App configuration.');
-											await sendLCMessage(
-												this.modify,
-												this.message.room,
-												'Sorry we are unable to complete your request right now.',
-												LcAgent,
-											);
+											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
@@ -317,12 +300,7 @@ export class InitiateSalesforceSession {
 
 										case 'InternalFailure':
 											console.log('Check whether agent accepted request, Error: Salesforce internal failure.');
-											await sendLCMessage(
-												this.modify,
-												this.message.room,
-												'Sorry we are unable to complete your request right now.',
-												LcAgent,
-											);
+											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
@@ -334,12 +312,7 @@ export class InitiateSalesforceSession {
 
 										default:
 											console.log('Check whether agent accepted request, Error: Unknown error occured.');
-											await sendLCMessage(
-												this.modify,
-												this.message.room,
-												'Sorry we are unable to complete your request right now.',
-												LcAgent,
-											);
+											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 											await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Unknown error occured.', LcAgent);
 											break;
 									}
@@ -350,7 +323,7 @@ export class InitiateSalesforceSession {
 							})
 							.catch(async (error) => {
 								console.log('Chat request sent, checking for response, Error:', error);
-								await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+								await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 								await sendDebugLCMessage(
 									this.read,
 									this.modify,
@@ -362,13 +335,13 @@ export class InitiateSalesforceSession {
 					})
 					.catch(async (error) => {
 						console.log('Sending a chat request to Salesforce, Error:', error);
-						await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+						await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 						await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in sending a chat request to Salesforce: ${error}`, LcAgent);
 					});
 			})
 			.catch(async (error) => {
 				console.log('Generating session id, Error:', error);
-				await sendLCMessage(this.modify, this.message.room, 'Sorry we are unable to complete your request right now.', LcAgent);
+				await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 				await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in Generating Session Id: ${error}`, LcAgent);
 			});
 	}

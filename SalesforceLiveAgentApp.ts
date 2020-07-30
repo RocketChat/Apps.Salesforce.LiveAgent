@@ -48,20 +48,21 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, data.room.id);
 		const persitedData = await retrievePersistentTokens(read, assoc);
 		let { persisantAffinity, persistantKey } = persitedData;
+		const technicalDifficultyMessage: string = (await read.getEnvironmentReader().getSettings().getById('technical_difficulty_message')).value;
+
+		let rocketChatServerUrl: string = await getServerSettingValue(read, 'Site_Url');
+		try {
+			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
+		} catch (error) {
+			await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
+			await sendDebugLCMessage(read, modify, data.room, 'Rocket Chat server url not found.', data.agent);
+			console.log('Rocket Chat server url not found.');
+			return;
+		}
 
 		const handleEndChatCallback = async (endChatdata) => {
 			await persistence.removeByAssociation(assoc);
 			await sendLCMessage(modify, data.room, endChatdata, data.agent);
-
-			let rocketChatServerUrl: string = await getServerSettingValue(read, 'Site_Url');
-			try {
-				rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
-			} catch (error) {
-				await sendLCMessage(modify, data.room, 'Sorry we are unable to complete your request right now.', data.agent);
-				await sendDebugLCMessage(read, modify, data.room, 'Rocket Chat server url not found.', data.agent);
-				console.log('Rocket Chat server url not found.');
-				return;
-			}
 
 			const chatBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('chat_bot_username')).value;
 			const chatBotPassword: string = (await read.getEnvironmentReader().getSettings().getById('chat_bot_password')).value;
@@ -108,20 +109,26 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 							};
 							await modify.getUpdater().getLivechatUpdater().transferVisitor(data.room.visitor, transferData);
 						})
-						.catch((loginErr) => {
-							console.log('Setting Dialogflow bot status , Error:', loginErr);
+						.catch(async (loginErr) => {
+							console.log('Setting Chat bot status , Error:', loginErr);
+							await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
+							await sendDebugLCMessage(read, modify, data.room, `Error Setting Chat bot status, ${loginErr}`, data.agent);
 						});
 				})
-				.catch((loginErr) => {
-					console.log('Performing Dialogflow bot login, Error:', loginErr);
+				.catch(async (loginErr) => {
+					console.log('Performing Chat bot login, Error:', loginErr);
+					await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
+					await sendDebugLCMessage(read, modify, data.room, `Error Performing Chat bot login, ${loginErr}`, data.agent);
 				});
 		};
 
 		let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
-		if (salesforceChatApiEndpoint) {
+		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-		} else {
-			console.log('Salesforce Chat api endpoint not found.');
+		} catch (error) {
+			await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
+			await sendDebugLCMessage(read, modify, data.room, 'Salesforce Chat API endpoint not found.', data.agent);
+			console.log('Salesforce Chat API endpoint not found.');
 			return;
 		}
 		const LAChatEndedMessage: string = (await read.getEnvironmentReader().getSettings().getById('la_chat_ended_message')).value;

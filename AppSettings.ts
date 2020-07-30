@@ -15,6 +15,7 @@ export enum AppSettingId {
 	LAQueuePositionMessage = 'la_queue_position_message',
 	LAQueueEmptyMessage = 'la_queue_empty_message',
 	LANoQueueMessage = 'la_no_queue_message',
+	technicalDifficultyMessage = 'technical_difficulty_message',
 	DebugButton = 'debug_button',
 }
 
@@ -147,6 +148,15 @@ export const AppSettings: Array<ISetting> = [
 		packageValue: 'An agent will be with you soon.',
 		i18nLabel: 'Live Agent No Queue Message',
 		i18nDescription: 'Enter message to show when there is no queue and user is next up.',
+		required: true,
+	},
+	{
+		id: AppSettingId.technicalDifficultyMessage,
+		public: true,
+		type: SettingType.STRING,
+		packageValue: 'Sorry we are unable to complete your request right now.',
+		i18nLabel: 'Technical Difficulty Message',
+		i18nDescription: 'Enter message to show to user when there is some tehnical error.',
 		required: true,
 	},
 	{
