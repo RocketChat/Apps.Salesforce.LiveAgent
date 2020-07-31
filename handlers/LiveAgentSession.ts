@@ -1,7 +1,7 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
+import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceHelpers';
 
 export class LiveAgentSession {

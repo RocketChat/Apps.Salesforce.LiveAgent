@@ -165,7 +165,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 
 						if (isEndChat === true) {
 							console.log('Pulling Messages using Subscribe Function, Chat Ended By Live Agent.');
-							callback('Chat ended by agent.');
+							callback(LAChatEndedMessage);
 						} else {
 							await messageFilter(modify, read, data.room, data.agent, messageArray);
 							const persistantData = await retrievePersistentTokens(read, assoc);

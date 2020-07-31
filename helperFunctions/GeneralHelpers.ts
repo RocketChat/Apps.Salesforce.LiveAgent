@@ -31,12 +31,10 @@ export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAss
 	const awayDatas = await read.getPersistenceReader().readByAssociation(assoc);
 	const contentStringified = JSON.stringify(awayDatas[0]);
 	const contentParsed = JSON.parse(contentStringified);
-
 	console.log('Find Session Variables from Persistent Storage, Response: ', contentParsed);
 
 	persisantAffinity = contentParsed.affinityToken;
 	persistantKey = contentParsed.key;
-
 	return {
 		persisantAffinity,
 		persistantKey,

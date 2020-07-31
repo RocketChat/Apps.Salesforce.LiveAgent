@@ -118,7 +118,7 @@ export const AppSettings: Array<ISetting> = [
 		id: AppSettingId.LAChatEndedMessage,
 		public: true,
 		type: SettingType.STRING,
-		packageValue: 'Chat ended by agent.',
+		packageValue: 'This session has been closed. Have a nice day.',
 		i18nLabel: 'Live Agent Chat Ended Message',
 		i18nDescription: 'Enter message to show to the user when Live Agent ends chat session.',
 		required: true,
