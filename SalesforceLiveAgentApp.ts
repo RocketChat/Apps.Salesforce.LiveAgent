@@ -21,7 +21,7 @@ import {
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo, RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { AppSettings } from './AppSettings';
+import { AppSettings } from './config/AppSettings';
 import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
 import { LiveAgentSession } from './handlers/LiveAgentSession';
 import { getServerSettingValue, retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from './helperFunctions/GeneralHelpers';
@@ -204,7 +204,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 
 	public async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
 		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
-
 		if (message.sender.username === salesforceBotUsername) {
 			return;
 		} else if (message.room.type !== 'l') {
@@ -217,22 +216,12 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 
 		if (message.text === 'initiate_salesforce_session') {
 			const initiateSalesforceSessionhandler = new InitiateSalesforceSession(message, read, http, persistence, modify);
-
-			try {
-				initiateSalesforceSessionhandler.exec();
-			} catch (error) {
-				console.log(error);
-			}
+			await initiateSalesforceSessionhandler.exec();
 		}
 
 		if (LcAgent.username === salesforceBotUsername) {
 			const liveAgentSession = new LiveAgentSession(message, read, http, persistence, modify);
-
-			try {
-				liveAgentSession.exec();
-			} catch (error) {
-				console.log(error);
-			}
+			await liveAgentSession.exec();
 		}
 	}
 

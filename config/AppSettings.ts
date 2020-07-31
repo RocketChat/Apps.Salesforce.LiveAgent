@@ -136,7 +136,7 @@ export const AppSettings: Array<ISetting> = [
 		id: AppSettingId.LAQueueEmptyMessage,
 		public: true,
 		type: SettingType.STRING,
-		packageValue: 'An agent agent will be with you soon. Your queue position is: %s',
+		packageValue: 'An agent will be with you soon. Your queue position is: %s',
 		i18nLabel: 'Live Agent Queue Empty Message',
 		i18nDescription: 'Enter message to show when user is next up in the queue. %s wil be replaced by the user\'s queue position',
 		required: true,
