@@ -22,10 +22,11 @@ import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/
 import { IAppInfo, RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettings } from './config/AppSettings';
-import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSession';
-import { LiveAgentSession } from './handlers/LiveAgentSession';
+import { InitiateSalesforceSession } from './handlers/InitiateSalesforceSessionHandler';
+import { LiveAgentSession } from './handlers/LiveAgentSessionHandler';
 import { getServerSettingValue, retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from './helperFunctions/GeneralHelpers';
-import { checkForEvent, messageFilter, pullMessages } from './helperFunctions/SalesforceHelpers';
+import { pullMessages } from './helperFunctions/SalesforceAPIHelpers';
+import { checkForEvent, messageFilter } from './helperFunctions/SalesforceMessageHelpers';
 
 export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {

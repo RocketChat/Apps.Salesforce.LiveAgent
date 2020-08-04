@@ -2,7 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
-import { closeChat, sendMessages } from '../helperFunctions/SalesforceHelpers';
+import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class LiveAgentSession {
 	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}

@@ -4,7 +4,8 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
-import { checkForEvent, getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceHelpers';
+import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
+import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 
 export class InitiateSalesforceSession {
 	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
