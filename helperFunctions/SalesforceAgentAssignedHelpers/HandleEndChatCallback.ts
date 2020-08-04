@@ -2,6 +2,7 @@ import { IHttp, IHttpRequest, IModify, IPersistence, IRead } from '@rocket.chat/
 import { IDepartment, ILivechatEventContext, ILivechatRoom, ILivechatTransferData } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { sendDebugLCMessage, sendLCMessage } from '../GeneralHelpers';
+import { getAuthTokens, setBotStatus } from '../RocketChatAPIHelpers';
 
 export const handleEndChatCallback = async (
 	modify: IModify,
@@ -21,38 +22,11 @@ export const handleEndChatCallback = async (
 	const chatBotPassword: string = (await read.getEnvironmentReader().getSettings().getById('chat_bot_password')).value;
 	const CBHandoverDepartmentName: string = (await read.getEnvironmentReader().getSettings().getById('chat_handover_department_name')).value;
 
-	const authHttpRequest: IHttpRequest = {
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		data: {
-			user: chatBotUsername,
-			password: chatBotPassword,
-		},
-	};
-
-	http
-		.post(`${rocketChatServerUrl}api/v1/login`, authHttpRequest)
-		.then((loginResponse) => {
-			const loginResponseJSON = JSON.parse(loginResponse.content || '{}');
-			console.log('Performing Dialogflow bot login, Response:', loginResponse);
-
-			const setStatusHttpRequest: IHttpRequest = {
-				headers: {
-					'X-Auth-Token': loginResponseJSON.data.authToken,
-					'X-User-Id': loginResponseJSON.data.userId,
-				},
-				data: {
-					message: 'online',
-					status: 'online',
-				},
-			};
-
-			http
-				.post(`${rocketChatServerUrl}api/v1/users.setStatus`, setStatusHttpRequest)
-				.then(async (statusResponse) => {
-					console.log('Setting Dialogflow bot status, Response:', statusResponse);
-
+	await getAuthTokens(http, rocketChatServerUrl, chatBotUsername, chatBotPassword)
+		.then(async (loginRes) => {
+			const { authToken, userId } = loginRes;
+			await setBotStatus(http, rocketChatServerUrl, authToken, userId)
+				.then(async () => {
 					const roomId = data.room.id;
 					const room: ILivechatRoom = (await read.getRoomReader().getById(roomId)) as ILivechatRoom;
 					const targetDepartment: IDepartment = (await read
@@ -64,10 +38,10 @@ export const handleEndChatCallback = async (
 					};
 					await modify.getUpdater().getLivechatUpdater().transferVisitor(data.room.visitor, transferData);
 				})
-				.catch(async (loginErr) => {
-					console.log('Setting Chat bot status , Error:', loginErr);
+				.catch(async (botStatusErr) => {
+					console.log('Setting Chat bot status , Error:', botStatusErr);
 					await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
-					await sendDebugLCMessage(read, modify, data.room, `Error Setting Chat bot status, ${loginErr}`, data.agent);
+					await sendDebugLCMessage(read, modify, data.room, `Error Setting Chat bot status, ${botStatusErr}`, data.agent);
 				});
 		})
 		.catch(async (loginErr) => {

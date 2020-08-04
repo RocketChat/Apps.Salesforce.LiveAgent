@@ -4,8 +4,9 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
+import { getAuthTokens, setBotStatus } from '../helperFunctions/RocketChatAPIHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
-import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
+import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 
 export class InitiateSalesforceSession {
 	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
@@ -134,91 +135,52 @@ export class InitiateSalesforceSession {
 									const contentParsed = JSON.parse(contentData || '{}');
 									console.log('Check whether agent accepted request, Callback Response:', contentParsed);
 
-									try {
-										const authHttpRequest: IHttpRequest = {
-											headers: {
-												'Content-Type': 'application/json',
-											},
-											data: {
-												user: salesforceBotUsername,
-												password: salesforceBotPassword,
-											},
-										};
+									await getAuthTokens(http, rocketChatServerUrl, salesforceBotUsername, salesforceBotPassword)
+										.then(async (loginRes) => {
+											const { authToken, userId } = loginRes;
+											await setBotStatus(http, rocketChatServerUrl, authToken, userId)
+												.then(async () => {
+													const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
+													const sessionTokens = { id, affinityToken, key };
+													await this.persistence.createWithAssociation(sessionTokens, assoc);
 
-										this.http
-											.post(`${rocketChatServerUrl}api/v1/login`, authHttpRequest)
-											.then((loginResponse) => {
-												const loginResponseJSON = JSON.parse(loginResponse.content || '{}');
-												console.log('Performing Salesforce bot login, Response:', loginResponse);
-
-												const setStatusHttpRequest: IHttpRequest = {
-													headers: {
-														'X-Auth-Token': loginResponseJSON.data.authToken,
-														'X-User-Id': loginResponseJSON.data.userId,
-													},
-													data: {
-														message: 'online',
-														status: 'online',
-													},
-												};
-
-												this.http
-													.post(`${rocketChatServerUrl}api/v1/users.setStatus`, setStatusHttpRequest)
-													.then(async (statusResponse) => {
-														console.log('Setting Salesforce bot status, Response:', statusResponse);
-
-														const sessionTokens = {
-															id,
-															affinityToken,
-															key,
-														};
-
-														const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
-														await this.persistence.createWithAssociation(sessionTokens, assoc);
-
-														const roomId = this.message.room.id;
-														const room: ILivechatRoom = (await this.read.getRoomReader().getById(roomId)) as ILivechatRoom;
-														const targetDepartment: IDepartment = (await this.read
-															.getLivechatReader()
-															.getLivechatDepartmentByIdOrName(targetDeptName)) as IDepartment;
-														const transferData: ILivechatTransferData = {
-															currentRoom: room,
-															targetDepartment: targetDepartment.id,
-														};
-														await this.modify.getUpdater().getLivechatUpdater().transferVisitor(LcVisitor, transferData);
-													})
-													.catch(async (statusErr) => {
-														console.log('Setting Salesforce bot status, Error:', statusErr);
-														await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-														await sendDebugLCMessage(
-															this.read,
-															this.modify,
-															this.message.room,
-															`Error in setting SF bot stauts: ${statusErr}`,
-															LcAgent,
-														);
-													});
-											})
-											.catch(async (loginErr) => {
-												console.log('Performing Salesforce bot login, Error:', loginErr);
-												await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-												await sendDebugLCMessage(
-													this.read,
-													this.modify,
-													this.message.room,
-													`Error in performing SF bot login: ${loginErr}`,
-													LcAgent,
-												);
-											});
-									} catch (err) {
-										console.log('Perfoming handoff, Error:', err);
-										await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-										await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in performing Handoff: ${err}`, LcAgent);
-									}
+													const roomId = this.message.room.id;
+													const room: ILivechatRoom = (await this.read.getRoomReader().getById(roomId)) as ILivechatRoom;
+													const targetDepartment: IDepartment = (await this.read
+														.getLivechatReader()
+														.getLivechatDepartmentByIdOrName(targetDeptName)) as IDepartment;
+													const transferData: ILivechatTransferData = {
+														currentRoom: room,
+														targetDepartment: targetDepartment.id,
+													};
+													await this.modify.getUpdater().getLivechatUpdater().transferVisitor(LcVisitor, transferData);
+												})
+												.catch(async (statusErr) => {
+													console.log('Setting Salesforce bot status, Error:', statusErr);
+													await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
+													await sendDebugLCMessage(
+														this.read,
+														this.modify,
+														this.message.room,
+														`Error in setting SF bot stauts: ${statusErr}`,
+														LcAgent,
+													);
+												});
+										})
+										.catch(async (loginErr) => {
+											console.log('Performing Salesforce bot login, Error:', loginErr);
+											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
+											await sendDebugLCMessage(
+												this.read,
+												this.modify,
+												this.message.room,
+												`Error in performing SF bot login: ${loginErr}`,
+												LcAgent,
+											);
+										});
 								};
 
 								const { http, modify, message } = this;
-
 								async function checkCurrentChatStatus(callback) {
 									pullMessages(http, salesforceChatApiEndpoint, affinityToken, key)
 										.then(async (response) => {
@@ -281,42 +243,14 @@ export class InitiateSalesforceSession {
 								}
 
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
-									switch (pullMessagesContentParsed.messages[0].message.reason) {
-										case 'Unavailable':
-											await sendLCMessage(this.modify, this.message.room, 'No agent available for chat.', LcAgent);
-											console.log('Check whether agent accepted request, Error: No agent available for chat.');
-											break;
-
-										case 'NoPost':
-											console.log('Check whether agent accepted request, Error: Invalid App configuration.');
-											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-											await sendDebugLCMessage(
-												this.read,
-												this.modify,
-												this.message.room,
-												`App configuration error. Please double check your provided Salesforce Id's`,
-												LcAgent,
-											);
-											break;
-
-										case 'InternalFailure':
-											console.log('Check whether agent accepted request, Error: Salesforce internal failure.');
-											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-											await sendDebugLCMessage(
-												this.read,
-												this.modify,
-												this.message.room,
-												'Salesforce internal failure. Please check your Salesforce Org for potential issues.',
-												LcAgent,
-											);
-											break;
-
-										default:
-											console.log('Check whether agent accepted request, Error: Unknown error occured.');
-											await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-											await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Unknown error occured.', LcAgent);
-											break;
-									}
+									await checkForErrorEvents(
+										this.read,
+										this.modify,
+										this.message,
+										pullMessagesContentParsed,
+										technicalDifficultyMessage,
+										LcAgent,
+									);
 								} else {
 									console.log('Chat request sent, checking for response, Executing Function:');
 									checkCurrentChatStatus(checkAgentStatusCallback);
