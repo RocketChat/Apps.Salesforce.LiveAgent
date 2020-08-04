@@ -49,6 +49,7 @@ export async function subscribeToLiveAgent(
 					);
 				} else {
 					console.log('Pulling Messages using Subscribe Function, Session Expired.');
+					handleEndChatCallback(modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
 					return;
 				}
 			} else {
@@ -84,6 +85,17 @@ export async function subscribeToLiveAgent(
 						);
 					} else {
 						console.log('Pulling Messages using Subscribe Function, Session Expired.');
+						handleEndChatCallback(
+							modify,
+							data,
+							read,
+							persistence,
+							http,
+							LAChatEndedMessage,
+							assoc,
+							rocketChatServerUrl,
+							technicalDifficultyMessage,
+						);
 						return;
 					}
 				}
@@ -109,6 +121,7 @@ export async function subscribeToLiveAgent(
 				);
 			} else {
 				console.log('Pulling Messages using Subscribe Function, Session Expired.');
+				handleEndChatCallback(modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
 				return;
 			}
 		});
