@@ -30,10 +30,8 @@ export async function subscribeToLiveAgent(
 				return;
 			} else if (response.statusCode === 204 || response.statusCode === 409) {
 				console.log('Pulling Messages using Subscribe Function, Empty Response.', response);
-
 				persisantAffinity = persistantData.persisantAffinity;
 				persistantKey = persistantData.persistantKey;
-
 				if (persisantAffinity && persistantKey) {
 					await subscribeToLiveAgent(
 						read,
@@ -57,7 +55,6 @@ export async function subscribeToLiveAgent(
 
 				const { content } = response;
 				const contentParsed = JSON.parse(content || '{}');
-
 				const messageArray = contentParsed.messages;
 				const isEndChat = checkForEvent(messageArray, 'ChatEnded');
 				console.log('Chat ended by Agent: ', isEndChat);

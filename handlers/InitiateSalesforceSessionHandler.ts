@@ -56,8 +56,7 @@ export class InitiateSalesforceSession {
 		const LcVisitorEmailsArr = LcVisitor.visitorEmails;
 		let LcVisitorEmail: string = 'No email provided';
 		if (LcVisitorEmailsArr) {
-			const t = LcVisitorEmailsArr[0].address;
-			LcVisitorEmail = t;
+			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
 		await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Initiating session with Salesforce', LcAgent);

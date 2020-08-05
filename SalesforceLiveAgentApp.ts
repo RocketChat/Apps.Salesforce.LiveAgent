@@ -27,7 +27,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	}
 
 	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
-		console.log('executeLivechatAssignAgentHandler', { data });
 		const salesforceAgentAssigned = new SalesforceAgentAssigned(data, read, http, persistence, modify);
 		await salesforceAgentAssigned.exec();
 	}
