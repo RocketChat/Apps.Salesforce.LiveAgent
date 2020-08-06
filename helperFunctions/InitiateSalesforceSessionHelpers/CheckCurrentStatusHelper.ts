@@ -105,7 +105,8 @@ export async function checkCurrentChatStatus(
 					return;
 				} else if (isChatAccepted === false) {
 					const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
-					if (isChatRequestFail === true) {
+					const isChatEnded = checkForEvent(messageArray, 'ChatEnded');
+					if (isChatRequestFail === true || isChatEnded === true) {
 						checkAgentStatusCallbackError(technicalDifficultyMessage, modify, message, LcAgent);
 						return;
 					} else {
@@ -159,26 +160,7 @@ export async function checkCurrentChatStatus(
 		})
 		.catch(async (error) => {
 			console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
-			await checkCurrentChatStatus(
-				app,
-				http,
-				modify,
-				persistence,
-				message,
-				read,
-				salesforceChatApiEndpoint,
-				rocketChatServerUrl,
-				salesforceBotUsername,
-				salesforceBotPassword,
-				id,
-				affinityToken,
-				key,
-				targetDeptName,
-				LcAgent,
-				LAQueueEmptyMessage,
-				LAQueuePositionMessage,
-				technicalDifficultyMessage,
-				LcVisitor,
-			);
+			checkAgentStatusCallbackError(technicalDifficultyMessage, modify, message, LcAgent);
+			return;
 		});
 }

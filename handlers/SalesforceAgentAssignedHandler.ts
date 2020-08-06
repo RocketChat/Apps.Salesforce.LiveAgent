@@ -62,6 +62,8 @@ export class SalesforceAgentAssigned {
 				rocketChatServerUrl,
 				LAChatEndedMessage,
 				technicalDifficultyMessage,
+				persisantAffinity,
+				persistantKey,
 			);
 		}
 	}
