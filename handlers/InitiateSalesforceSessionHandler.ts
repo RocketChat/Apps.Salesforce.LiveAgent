@@ -5,7 +5,7 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../enum/Logs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
-import { checkCurrentChatStatus } from '../helperFunctions/InitiateSalesforceSessionHelpers/CheckCurrentStatusHelper';
+import { CheckChatStatus } from '../helperFunctions/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 
@@ -126,7 +126,7 @@ export class InitiateSalesforceSession {
 									);
 								} else {
 									// No error in initiating liveagent session. Executing Function to check for agent response.
-									await checkCurrentChatStatus(
+									const checkChatStatus = new CheckChatStatus(
 										this.app,
 										this.http,
 										this.modify,
@@ -147,6 +147,8 @@ export class InitiateSalesforceSession {
 										technicalDifficultyMessage,
 										LcVisitor,
 									);
+
+									await checkChatStatus.checkCurrentChatStatus();
 								}
 							})
 							.catch(async (error) => {
