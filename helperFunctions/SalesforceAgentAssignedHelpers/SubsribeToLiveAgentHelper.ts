@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../../enum/Logs';
+import { retrievePersistentTokens } from '../GeneralHelpers';
 import { pullMessages } from '../SalesforceAPIHelpers';
 import { checkForEvent, messageFilter } from '../SalesforceMessageHelpers';
 import { handleEndChatCallback } from './HandleEndChatCallback';
@@ -26,24 +27,55 @@ export async function subscribeToLiveAgent(
 		.then(async (response) => {
 			if (response.statusCode === 403) {
 				console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
-				await handleEndChatCallback(app, modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
+				await handleEndChatCallback(
+					app,
+					modify,
+					data,
+					read,
+					persistence,
+					http,
+					LAChatEndedMessage,
+					assoc,
+					rocketChatServerUrl,
+					technicalDifficultyMessage,
+				);
 				return;
 			} else if (response.statusCode === 204 || response.statusCode === 409) {
-				await subscribeToLiveAgent(
-					app,
-					read,
-					http,
-					modify,
-					persistence,
-					data,
-					assoc,
-					salesforceChatApiEndpoint,
-					rocketChatServerUrl,
-					LAChatEndedMessage,
-					technicalDifficultyMessage,
-					persisantAffinity,
-					persistantKey,
-				);
+				const persistantData = await retrievePersistentTokens(read, assoc);
+				persisantAffinity = persistantData.persisantAffinity;
+				persistantKey = persistantData.persistantKey;
+				if (persisantAffinity && persistantKey) {
+					await subscribeToLiveAgent(
+						app,
+						read,
+						http,
+						modify,
+						persistence,
+						data,
+						assoc,
+						salesforceChatApiEndpoint,
+						rocketChatServerUrl,
+						LAChatEndedMessage,
+						technicalDifficultyMessage,
+						persisantAffinity,
+						persistantKey,
+					);
+				} else {
+					console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+					handleEndChatCallback(
+						app,
+						modify,
+						data,
+						read,
+						persistence,
+						http,
+						LAChatEndedMessage,
+						assoc,
+						rocketChatServerUrl,
+						technicalDifficultyMessage,
+					);
+					return;
+				}
 			} else {
 				console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 				const { content } = response;
@@ -67,21 +99,41 @@ export async function subscribeToLiveAgent(
 					);
 				} else {
 					await messageFilter(app, modify, read, data.room, data.agent, messageArray);
-					await subscribeToLiveAgent(
-						app,
-						read,
-						http,
-						modify,
-						persistence,
-						data,
-						assoc,
-						salesforceChatApiEndpoint,
-						rocketChatServerUrl,
-						LAChatEndedMessage,
-						technicalDifficultyMessage,
-						persisantAffinity,
-						persistantKey,
-					);
+					const persistantData = await retrievePersistentTokens(read, assoc);
+					persisantAffinity = persistantData.persisantAffinity;
+					persistantKey = persistantData.persistantKey;
+					if (persisantAffinity && persistantKey) {
+						await subscribeToLiveAgent(
+							app,
+							read,
+							http,
+							modify,
+							persistence,
+							data,
+							assoc,
+							salesforceChatApiEndpoint,
+							rocketChatServerUrl,
+							LAChatEndedMessage,
+							technicalDifficultyMessage,
+							persisantAffinity,
+							persistantKey,
+						);
+					} else {
+						console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+						handleEndChatCallback(
+							app,
+							modify,
+							data,
+							read,
+							persistence,
+							http,
+							LAChatEndedMessage,
+							assoc,
+							rocketChatServerUrl,
+							technicalDifficultyMessage,
+						);
+						return;
+					}
 				}
 			}
 		})

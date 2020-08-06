@@ -49,7 +49,7 @@ export class SalesforceAgentAssigned {
 		const LAChatEndedMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_chat_ended_message')).value;
 
 		if (persisantAffinity && persistantKey) {
-			// Executing subscribe fucntion to listend to Liveagent messages.
+			// Executing subscribe function to listen to Liveagent messages.
 			await subscribeToLiveAgent(
 				this.app,
 				this.read,
