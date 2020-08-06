@@ -1,27 +1,9 @@
 import { ISetting, SettingType } from '@rocket.chat/apps-engine/definition/settings';
-
-export enum AppSettingId {
-	SalesforceBotUsername = 'salesforce_bot_username',
-	SalesforceBotPassword = 'salesforce_bot_password',
-	SFHandoverDepartmentName = 'handover_department_name',
-	ChatBotUsername = 'chat_bot_username',
-	ChatBotPassword = 'chat_bot_password',
-	CBHandoverDepartmentName = 'chat_handover_department_name',
-	SalesforceChatApiEndpoint = 'salesforce_chat_api_endpoint',
-	SalesforceOrganisationId = 'salesforce_organisation_id',
-	SalesforceDeploymentId = 'salesforce_deployment_id',
-	SalesforceButtonId = 'salesforce_button_id',
-	LAChatEndedMessage = 'la_chat_ended_message',
-	LAQueuePositionMessage = 'la_queue_position_message',
-	LAQueueEmptyMessage = 'la_queue_empty_message',
-	LANoQueueMessage = 'la_no_queue_message',
-	technicalDifficultyMessage = 'technical_difficulty_message',
-	DebugButton = 'debug_button',
-}
+import { AppSettingId } from '../enum/AppSettingId';
 
 export const AppSettings: Array<ISetting> = [
 	{
-		id: AppSettingId.SalesforceBotUsername,
+		id: AppSettingId.SALESFORCE_BOT_USERNAME,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -30,7 +12,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SalesforceBotPassword,
+		id: AppSettingId.SALESFORCE_BOT_PASSWORD,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -39,7 +21,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SFHandoverDepartmentName,
+		id: AppSettingId.SF_HANDOVER_DEPARTMENT_NAME,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -48,7 +30,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SalesforceChatApiEndpoint,
+		id: AppSettingId.SALESFORCE_CHAT_API_ENDPOINT,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -58,7 +40,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SalesforceOrganisationId,
+		id: AppSettingId.SALESFORCE_ORGANISATION_ID,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -68,7 +50,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SalesforceDeploymentId,
+		id: AppSettingId.SALESFORCE_DEPLOYMENT_ID,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -78,7 +60,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SalesforceButtonId,
+		id: AppSettingId.SALESFORCE_BUTTON_ID,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -88,7 +70,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.ChatBotUsername,
+		id: AppSettingId.CHAT_BOT_USERNAME,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -97,7 +79,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.ChatBotPassword,
+		id: AppSettingId.CHAT_BOT_PASSWORD,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -106,7 +88,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.CBHandoverDepartmentName,
+		id: AppSettingId.CB_HANDOVER_DEPARTMENT_NAME,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: '',
@@ -115,7 +97,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.LAChatEndedMessage,
+		id: AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: 'This session has been closed. Have a nice day.',
@@ -124,7 +106,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.LAQueuePositionMessage,
+		id: AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: 'No agent is available right now. Please wait for a while. Your queue position is: %s',
@@ -133,7 +115,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.LAQueueEmptyMessage,
+		id: AppSettingId.LIVEAGENT_QUEUE_EMPTY_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: 'An agent will be with you soon. Your queue position is: %s',
@@ -142,7 +124,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.LANoQueueMessage,
+		id: AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: 'An agent will be with you soon.',
@@ -151,7 +133,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.technicalDifficultyMessage,
+		id: AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: 'Sorry we are unable to complete your request right now.',
@@ -160,7 +142,7 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.DebugButton,
+		id: AppSettingId.DEBUG_BUTTON,
 		public: true,
 		type: SettingType.BOOLEAN,
 		packageValue: false,

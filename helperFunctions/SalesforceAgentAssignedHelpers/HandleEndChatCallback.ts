@@ -1,10 +1,13 @@
-import { IHttp, IHttpRequest, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IDepartment, ILivechatEventContext, ILivechatRoom, ILivechatTransferData } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { Logs } from '../../enum/Logs';
 import { sendDebugLCMessage, sendLCMessage } from '../GeneralHelpers';
 import { getAuthTokens, setBotStatus } from '../RocketChatAPIHelpers';
 
 export const handleEndChatCallback = async (
+	app: IApp,
 	modify: IModify,
 	data: ILivechatEventContext,
 	read: IRead,
@@ -39,14 +42,14 @@ export const handleEndChatCallback = async (
 					await modify.getUpdater().getLivechatUpdater().transferVisitor(data.room.visitor, transferData);
 				})
 				.catch(async (botStatusErr) => {
-					console.log('Setting Chat bot status , Error:', botStatusErr);
+					console.log(Logs.ERROR_SETTING_CHATBOT_STATUS, botStatusErr);
 					await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
-					await sendDebugLCMessage(read, modify, data.room, `Error Setting Chat bot status, ${botStatusErr}`, data.agent);
+					await sendDebugLCMessage(read, modify, data.room, `${Logs.ERROR_SETTING_CHATBOT_STATUS}: ${botStatusErr}`, data.agent);
 				});
 		})
-		.catch(async (loginErr) => {
-			console.log('Performing Chat bot login, Error:', loginErr);
+		.catch(async (botLoginErr) => {
+			console.log(Logs.ERROR_LOGIN_CHATBOT, botLoginErr);
 			await sendLCMessage(modify, data.room, technicalDifficultyMessage, data.agent);
-			await sendDebugLCMessage(read, modify, data.room, `Error Performing Chat bot login, ${loginErr}`, data.agent);
+			await sendDebugLCMessage(read, modify, data.room, `${Logs.ERROR_LOGIN_CHATBOT}: ${botLoginErr}`, data.agent);
 		});
 };

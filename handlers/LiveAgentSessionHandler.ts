@@ -1,11 +1,13 @@
-import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { Logs } from '../enum/Logs';
 import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class LiveAgentSession {
-	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(private app: IApp, private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence) {}
 
 	public async exec() {
 		try {
@@ -18,7 +20,7 @@ export class LiveAgentSession {
 			try {
 				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 			} catch (error) {
-				console.log('Salesforce Chat API endpoint not found.');
+				console.log(Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND);
 				return;
 			}
 
@@ -27,12 +29,12 @@ export class LiveAgentSession {
 
 			if (this.message.text === 'Closed by visitor' && persisantAffinity && persistantKey) {
 				await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
-					.then(async (res) => {
-						console.log('Closing Liveagent Chat, Response:', res);
+					.then(async () => {
+						console.log(Logs.LIVEAGENT_SESSION_CLOSED);
 						await this.persistence.removeByAssociation(assoc);
 					})
 					.catch((error) => {
-						console.log('Closing Liveagent Chat, Error:', error);
+						console.log(Logs.ERROR_CLOSING_LIVEAGENT_SESSION, error);
 					});
 			}
 
@@ -42,15 +44,15 @@ export class LiveAgentSession {
 					messageText = this.message.text;
 				}
 				await sendMessages(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, messageText)
-					.then((res) => {
-						console.log('Sending Message To Liveagent, Response:', res);
+					.then(() => {
+						console.log(Logs.MESSAGE_SENT_TO_LIVEAGENT);
 					})
 					.catch((error) => {
-						console.log('Sending Message To Liveagent, Error:', error);
+						console.log(Logs.ERROR_SENDING_MESSAGE_TO_LIVEAGENT, error);
 					});
 			}
 		} catch (error) {
-			console.log('Handling Live Agent Session, Error: ', error);
+			console.log(Logs.ERROR_IN_LIVEAGENT_SESSION_CLASS, error);
 		}
 	}
 }

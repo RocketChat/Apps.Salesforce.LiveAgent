@@ -27,12 +27,12 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	}
 
 	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
-		const salesforceAgentAssigned = new SalesforceAgentAssigned(data, read, http, persistence, modify);
+		const salesforceAgentAssigned = new SalesforceAgentAssigned(this, data, read, http, persistence, modify);
 		await salesforceAgentAssigned.exec();
 	}
 
 	public async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
-		const postMessageClassInitiate = new PostMessageClassInitiate(message, read, http, persistence, modify);
+		const postMessageClassInitiate = new PostMessageClassInitiate(this, message, read, http, persistence, modify);
 		await postMessageClassInitiate.exec();
 	}
 

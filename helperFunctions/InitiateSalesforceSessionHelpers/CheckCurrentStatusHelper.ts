@@ -1,13 +1,16 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { Logs } from '../../enum/Logs';
 import { sendLCMessage } from '../GeneralHelpers';
 import { pullMessages } from '../SalesforceAPIHelpers';
 import { checkForEvent } from '../SalesforceMessageHelpers';
 import { checkAgentStatusCallbackData, checkAgentStatusCallbackError } from './CheckAgentStatusCallback';
 
 export async function checkCurrentChatStatus(
+	app: IApp,
 	http: IHttp,
 	modify: IModify,
 	persistence: IPersistence,
@@ -30,12 +33,13 @@ export async function checkCurrentChatStatus(
 	pullMessages(http, salesforceChatApiEndpoint, affinityToken, key)
 		.then(async (response) => {
 			if (response.statusCode === 403) {
-				console.log('Check whether agent accepted request, Session Expired. ', response);
+				console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
 				checkAgentStatusCallbackError('Chat session expired.', modify, message, LcAgent);
 				return;
 			} else if (response.statusCode === 204 || response.statusCode === 409) {
-				console.log('Check whether agent accepted request, Empty Response.', response);
+				// Empty Response from Liveagent
 				await checkCurrentChatStatus(
+					app,
 					http,
 					modify,
 					persistence,
@@ -56,7 +60,7 @@ export async function checkCurrentChatStatus(
 					LcVisitor,
 				);
 			} else {
-				console.log('Check whether agent accepted request, response here:', response);
+				console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 
 				const { content } = response;
 				const contentParsed = JSON.parse(content || '{}');
@@ -64,7 +68,6 @@ export async function checkCurrentChatStatus(
 
 				const isQueueUpdate = checkForEvent(messageArray, 'QueueUpdate');
 				if (isQueueUpdate === true) {
-					console.log('isQueueUpdate: ', isQueueUpdate);
 					const queueUpdateMessages = messageArray[0].message;
 					const queueUpdatePosition = queueUpdateMessages.position;
 
@@ -79,9 +82,9 @@ export async function checkCurrentChatStatus(
 
 				const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 				if (isChatAccepted === true) {
-					console.log('Chat accepted by agent: ', isChatAccepted);
-					console.log('Check whether agent accepted request, Chat ended by Live Agent.');
+					console.log(Logs.LIVEAGENT_SESSION_CLOSED);
 					checkAgentStatusCallbackData(
+						app,
 						modify,
 						message,
 						LcAgent,
@@ -101,15 +104,13 @@ export async function checkCurrentChatStatus(
 					);
 					return;
 				} else if (isChatAccepted === false) {
-					console.log('Chat accepted by agent: ', isChatAccepted);
-
 					const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 					if (isChatRequestFail === true) {
-						console.log('Chat request fail: ', isChatRequestFail);
 						checkAgentStatusCallbackError(technicalDifficultyMessage, modify, message, LcAgent);
 						return;
 					} else {
 						await checkCurrentChatStatus(
+							app,
 							http,
 							modify,
 							persistence,
@@ -131,8 +132,9 @@ export async function checkCurrentChatStatus(
 						);
 					}
 				} else {
-					console.log('Check whether agent accepted request, Unresolved Response:', response);
+					console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, response);
 					await checkCurrentChatStatus(
+						app,
 						http,
 						modify,
 						persistence,
@@ -156,8 +158,9 @@ export async function checkCurrentChatStatus(
 			}
 		})
 		.catch(async (error) => {
-			console.log('Check whether agent accepted request, Error: ', error);
+			console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
 			await checkCurrentChatStatus(
+				app,
 				http,
 				modify,
 				persistence,

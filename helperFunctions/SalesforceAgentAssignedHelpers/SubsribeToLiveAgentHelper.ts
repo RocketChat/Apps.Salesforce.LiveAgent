@@ -1,12 +1,15 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { Logs } from '../../enum/Logs';
 import { retrievePersistentTokens } from '../GeneralHelpers';
 import { pullMessages } from '../SalesforceAPIHelpers';
 import { checkForEvent, messageFilter } from '../SalesforceMessageHelpers';
 import { handleEndChatCallback } from './HandleEndChatCallback';
 
 export async function subscribeToLiveAgent(
+	app: IApp,
 	read: IRead,
 	http: IHttp,
 	modify: IModify,
@@ -25,15 +28,15 @@ export async function subscribeToLiveAgent(
 	await pullMessages(http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
 		.then(async (response) => {
 			if (response.statusCode === 403) {
-				console.log('Pulling Messages using Subscribe Function, Session Expired.');
-				handleEndChatCallback(modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
+				console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+				handleEndChatCallback(app, modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
 				return;
 			} else if (response.statusCode === 204 || response.statusCode === 409) {
-				console.log('Pulling Messages using Subscribe Function, Empty Response.', response);
 				persisantAffinity = persistantData.persisantAffinity;
 				persistantKey = persistantData.persistantKey;
 				if (persisantAffinity && persistantKey) {
 					await subscribeToLiveAgent(
+						app,
 						read,
 						http,
 						modify,
@@ -46,29 +49,51 @@ export async function subscribeToLiveAgent(
 						technicalDifficultyMessage,
 					);
 				} else {
-					console.log('Pulling Messages using Subscribe Function, Session Expired.');
-					handleEndChatCallback(modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
+					console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+					handleEndChatCallback(
+						app,
+						modify,
+						data,
+						read,
+						persistence,
+						http,
+						LAChatEndedMessage,
+						assoc,
+						rocketChatServerUrl,
+						technicalDifficultyMessage,
+					);
 					return;
 				}
 			} else {
-				console.log('Pulling Messages using Subscribe Function, response here:', response);
+				console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 
 				const { content } = response;
 				const contentParsed = JSON.parse(content || '{}');
 				const messageArray = contentParsed.messages;
 				const isEndChat = checkForEvent(messageArray, 'ChatEnded');
-				console.log('Chat ended by Agent: ', isEndChat);
 
 				if (isEndChat === true) {
-					console.log('Pulling Messages using Subscribe Function, Chat Ended By Live Agent.');
-					handleEndChatCallback(modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
+					console.log(Logs.LIVEAGENT_SESSION_CLOSED);
+					handleEndChatCallback(
+						app,
+						modify,
+						data,
+						read,
+						persistence,
+						http,
+						LAChatEndedMessage,
+						assoc,
+						rocketChatServerUrl,
+						technicalDifficultyMessage,
+					);
 				} else {
-					await messageFilter(modify, read, data.room, data.agent, messageArray);
+					await messageFilter(app, modify, read, data.room, data.agent, messageArray);
 					persisantAffinity = persistantData.persisantAffinity;
 					persistantKey = persistantData.persistantKey;
 
 					if (persisantAffinity && persistantKey) {
 						await subscribeToLiveAgent(
+							app,
 							read,
 							http,
 							modify,
@@ -81,8 +106,9 @@ export async function subscribeToLiveAgent(
 							technicalDifficultyMessage,
 						);
 					} else {
-						console.log('Pulling Messages using Subscribe Function, Session Expired.');
+						console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
 						handleEndChatCallback(
+							app,
 							modify,
 							data,
 							read,
@@ -99,12 +125,13 @@ export async function subscribeToLiveAgent(
 			}
 		})
 		.catch(async (error) => {
-			console.log('Pulling Messages using Subscribe Function, error here:', error);
+			console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
 			persisantAffinity = persistantData.persisantAffinity;
 			persistantKey = persistantData.persistantKey;
 
 			if (persisantAffinity && persistantKey) {
 				await subscribeToLiveAgent(
+					app,
 					read,
 					http,
 					modify,
@@ -117,8 +144,8 @@ export async function subscribeToLiveAgent(
 					technicalDifficultyMessage,
 				);
 			} else {
-				console.log('Pulling Messages using Subscribe Function, Session Expired.');
-				handleEndChatCallback(modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
+				console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+				handleEndChatCallback(app, modify, data, read, persistence, http, LAChatEndedMessage, assoc, rocketChatServerUrl, technicalDifficultyMessage);
 				return;
 			}
 		});

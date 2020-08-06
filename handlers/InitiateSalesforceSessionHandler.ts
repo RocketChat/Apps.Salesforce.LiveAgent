@@ -1,14 +1,23 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { Logs } from '../enum/Logs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
 import { checkCurrentChatStatus } from '../helperFunctions/InitiateSalesforceSessionHelpers/CheckCurrentStatusHelper';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 
 export class InitiateSalesforceSession {
-	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private message: IMessage,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
@@ -32,8 +41,8 @@ export class InitiateSalesforceSession {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-			await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Salesforce Chat API endpoint not found.', LcAgent);
-			console.log('Salesforce Chat API endpoint not found.');
+			await sendDebugLCMessage(this.read, this.modify, this.message.room, Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND, LcAgent);
+			console.log(Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND);
 			return;
 		}
 
@@ -42,8 +51,8 @@ export class InitiateSalesforceSession {
 			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-			await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Rocket Chat server url not found.', LcAgent);
-			console.log('Rocket Chat server url not found.');
+			await sendDebugLCMessage(this.read, this.modify, this.message.room, Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND, LcAgent);
+			console.log(Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND);
 			return;
 		}
 
@@ -59,11 +68,11 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		await sendDebugLCMessage(this.read, this.modify, this.message.room, 'Initiating session with Salesforce', LcAgent);
+		await sendDebugLCMessage(this.read, this.modify, this.message.room, Logs.INITIATING_LIVEAGENT_SESSION, LcAgent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
-				console.log('Generating session id, Response:', res);
-				await sendDebugLCMessage(this.read, this.modify, this.message.room, `Session initiated with Saleforce:: ${JSON.stringify(res)}`, LcAgent);
+				console.log(Logs.LIVEAGENT_SESSION_ID_GENERATED);
+				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${Logs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, LcAgent);
 				const { id, affinityToken, key } = res;
 				await sendChatRequest(
 					this.http,
@@ -78,17 +87,17 @@ export class InitiateSalesforceSession {
 					LcVisitorEmail,
 				)
 					.then(async (sendChatRequestres) => {
-						console.log('Sending a chat request to Salesforce, Response:', sendChatRequestres);
+						console.log(Logs.LIVEAGENT_CHAT_REQUEST_SENT);
 						await sendDebugLCMessage(
 							this.read,
 							this.modify,
 							this.message.room,
-							`Chat request to Salesforce: ${JSON.stringify(sendChatRequestres)}`,
+							`${Logs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`,
 							LcAgent,
 						);
 						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
-								console.log('Chat request sent, checking for response , Response:', pullMessagesres);
+								console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
@@ -97,23 +106,17 @@ export class InitiateSalesforceSession {
 									const chatSuccessMessageArray = pullMessagesMessageArray[0].message;
 									const { queuePosition } = chatSuccessMessageArray;
 									if (queuePosition === 1) {
-										console.log('Chat request sent, checking for response, Queue Position = 1');
+										// User Queue Position = 1
 										await sendLCMessage(this.modify, this.message.room, LANoQueueMessage, LcAgent);
 									} else if (queuePosition > 1) {
-										console.log('Chat request sent, checking for response, Queue Position = ', queuePosition);
+										// User Queue Position > 1
 										const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
 										await sendLCMessage(this.modify, this.message.room, queuePosMessage, LcAgent);
 									}
 								}
-								await sendDebugLCMessage(
-									this.read,
-									this.modify,
-									this.message.room,
-									`Current request status: ${pullMessagesContentParsed.messages[0].type}`,
-									LcAgent,
-								);
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
 									await checkForErrorEvents(
+										this.app,
 										this.read,
 										this.modify,
 										this.message,
@@ -122,8 +125,9 @@ export class InitiateSalesforceSession {
 										LcAgent,
 									);
 								} else {
-									console.log('Chat request sent, checking for response, Executing Function:');
+									// No error in initiating liveagent session. Executing Function to check for agent response.
 									await checkCurrentChatStatus(
+										this.app,
 										this.http,
 										this.modify,
 										this.persistence,
@@ -146,27 +150,27 @@ export class InitiateSalesforceSession {
 								}
 							})
 							.catch(async (error) => {
-								console.log('Chat request sent, checking for response, Error:', error);
+								console.log(Logs.ERROR_GETTING_LIVEAGENT_RESPONSE, error);
 								await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 								await sendDebugLCMessage(
 									this.read,
 									this.modify,
 									this.message.room,
-									`Error in getting response from Salesforce: ${error}`,
+									`${Logs.ERROR_GETTING_LIVEAGENT_RESPONSE}: ${error}`,
 									LcAgent,
 								);
 							});
 					})
 					.catch(async (error) => {
-						console.log('Sending a chat request to Salesforce, Error:', error);
+						console.log(Logs.ERROR_SENDING_LIVEAGENT_CHAT_REQUEST, error);
 						await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-						await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in sending a chat request to Salesforce: ${error}`, LcAgent);
+						await sendDebugLCMessage(this.read, this.modify, this.message.room, `${Logs.ERROR_SENDING_LIVEAGENT_CHAT_REQUEST}: ${error}`, LcAgent);
 					});
 			})
 			.catch(async (error) => {
-				console.log('Generating session id, Error:', error);
+				console.log(Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID, error);
 				await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(this.read, this.modify, this.message.room, `Error in Generating Session Id: ${error}`, LcAgent);
+				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID}: ${error}`, LcAgent);
 			});
 	}
 }

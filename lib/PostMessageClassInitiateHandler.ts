@@ -1,4 +1,5 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
@@ -6,7 +7,14 @@ import { InitiateSalesforceSession } from '../handlers/InitiateSalesforceSession
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
 
 export class PostMessageClassInitiate {
-	constructor(private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private message: IMessage,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
@@ -21,12 +29,12 @@ export class PostMessageClassInitiate {
 		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
 
 		if (this.message.text === 'initiate_salesforce_session') {
-			const initiateSalesforceSession = new InitiateSalesforceSession(this.message, this.read, this.http, this.persistence, this.modify);
+			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.message, this.read, this.http, this.persistence, this.modify);
 			await initiateSalesforceSession.exec();
 		}
 
 		if (LcAgent.username === salesforceBotUsername) {
-			const liveAgentSession = new LiveAgentSession(this.message, this.read, this.http, this.persistence, this.modify);
+			const liveAgentSession = new LiveAgentSession(this.app, this.message, this.read, this.http, this.persistence);
 			await liveAgentSession.exec();
 		}
 	}

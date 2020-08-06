@@ -1,10 +1,12 @@
 import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { Logs } from '../enum/Logs';
 import { sendDebugLCMessage, sendLCMessage } from './GeneralHelpers';
 
-export async function messageFilter(modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any) {
+export async function messageFilter(app: IApp, modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any) {
 	try {
 		messageArray.forEach(async (i) => {
 			const type = i.type;
@@ -15,11 +17,11 @@ export async function messageFilter(modify: IModify, read: IRead, messageRoom: I
 					break;
 
 				case 'AgentTyping':
-					await sendDebugLCMessage(read, modify, messageRoom, 'Agent Typing', LcAgent);
+					await sendDebugLCMessage(read, modify, messageRoom, Logs.LIVAGENT_CURRENTLY_TYPING, LcAgent);
 					break;
 
 				default:
-					console.log('Pulling Messages from Liveagent, Default messageType:', type);
+					console.log(Logs.ERROR_UNCALCULATED_AGENT_EVENT_TYPE, type);
 					break;
 			}
 		});
@@ -40,6 +42,7 @@ export function checkForEvent(messageArray: any, eventToCheck: string) {
 }
 
 export async function checkForErrorEvents(
+	app: IApp,
 	read: IRead,
 	modify: IModify,
 	message: IMessage,
@@ -50,32 +53,26 @@ export async function checkForErrorEvents(
 	try {
 		switch (messageArray.messages[0].message.reason) {
 			case 'Unavailable':
+				console.log(Logs.ERROR_ALL_LIVEAGENTS_UNAVAILABLE);
 				await sendLCMessage(modify, message.room, 'No agent available for chat.', LcAgent);
-				console.log('Check whether agent accepted request, Error: No agent available for chat.');
 				break;
 
 			case 'NoPost':
-				console.log('Check whether agent accepted request, Error: Invalid App configuration.');
+				console.log(Logs.ERROR_APP_CONFIGURATION_INVALID);
 				await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(read, modify, message.room, `App configuration error. Please double check your provided Salesforce Id's`, LcAgent);
+				await sendDebugLCMessage(read, modify, message.room, Logs.ERROR_APP_CONFIGURATION_INVALID, LcAgent);
 				break;
 
 			case 'InternalFailure':
-				console.log('Check whether agent accepted request, Error: Salesforce internal failure.');
+				console.log(Logs.ERROR_SALESFORCE_INTERNAL_FAILURE);
 				await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(
-					read,
-					modify,
-					message.room,
-					'Salesforce internal failure. Please check your Salesforce Org for potential issues.',
-					LcAgent,
-				);
+				await sendDebugLCMessage(read, modify, message.room, Logs.ERROR_SALESFORCE_INTERNAL_FAILURE, LcAgent);
 				break;
 
 			default:
-				console.log('Check whether agent accepted request, Error: Unknown error occured.');
+				console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE);
 				await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(read, modify, message.room, 'Unknown error occured.', LcAgent);
+				await sendDebugLCMessage(read, modify, message.room, Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, LcAgent);
 				break;
 		}
 	} catch (error) {
