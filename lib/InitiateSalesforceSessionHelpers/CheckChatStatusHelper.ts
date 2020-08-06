@@ -4,9 +4,9 @@ import { IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../../enum/Logs';
-import { sendLCMessage } from '../GeneralHelpers';
-import { pullMessages } from '../SalesforceAPIHelpers';
-import { checkForEvent } from '../SalesforceMessageHelpers';
+import { sendLCMessage } from '../../helperFunctions/GeneralHelpers';
+import { pullMessages } from '../../helperFunctions/SalesforceAPIHelpers';
+import { checkForEvent } from '../../helperFunctions/SalesforceMessageHelpers';
 import { checkAgentStatusCallbackData, checkAgentStatusCallbackError } from './CheckAgentStatusCallback';
 
 export class CheckChatStatus {
@@ -37,7 +37,7 @@ export class CheckChatStatus {
 			.then(async (response) => {
 				if (response.statusCode === 403) {
 					console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
-					checkAgentStatusCallbackError('Chat session expired.', this.modify, this.message, this.LcAgent);
+					await checkAgentStatusCallbackError('Chat session expired.', this.modify, this.message, this.LcAgent);
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
@@ -64,7 +64,7 @@ export class CheckChatStatus {
 					const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 					if (isChatAccepted === true) {
 						console.log(Logs.LIVEAGENT_SESSION_CLOSED);
-						checkAgentStatusCallbackData(
+						await checkAgentStatusCallbackData(
 							this.app,
 							this.modify,
 							this.message,
@@ -88,7 +88,7 @@ export class CheckChatStatus {
 						const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 						const isChatEnded = checkForEvent(messageArray, 'ChatEnded');
 						if (isChatRequestFail === true || isChatEnded === true) {
-							checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
+							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
 							return;
 						} else {
 							await this.checkCurrentChatStatus();
@@ -101,7 +101,7 @@ export class CheckChatStatus {
 			})
 			.catch(async (error) => {
 				console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
-				checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
+				await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
 				return;
 			});
 	}

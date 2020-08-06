@@ -5,9 +5,9 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../enum/Logs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
-import { CheckChatStatus } from '../helperFunctions/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
+import { CheckChatStatus } from '../lib/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 
 export class InitiateSalesforceSession {
 	constructor(

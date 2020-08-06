@@ -4,7 +4,7 @@ import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livec
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../enum/Logs';
 import { getServerSettingValue, retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
-import { subscribeToLiveAgent } from '../helperFunctions/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
+import { SubscribeToLiveAgent } from '../lib/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
 
 export class SalesforceAgentAssigned {
 	constructor(
@@ -50,7 +50,7 @@ export class SalesforceAgentAssigned {
 
 		if (persisantAffinity && persistantKey) {
 			// Executing subscribe function to listen to Liveagent messages.
-			await subscribeToLiveAgent(
+			const subscribeLiveAgentClass = new SubscribeToLiveAgent(
 				this.app,
 				this.read,
 				this.http,
@@ -65,6 +65,7 @@ export class SalesforceAgentAssigned {
 				persisantAffinity,
 				persistantKey,
 			);
+			await subscribeLiveAgentClass.subscribeToLiveAgent();
 		}
 	}
 }
