@@ -27,7 +27,7 @@ export class LiveAgentSession {
 			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
-			if (this.message.text === 'Closed by visitor' && persisantAffinity && persistantKey) {
+			if (this.message.text === 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
 				await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
 					.then(async () => {
 						console.log(Logs.LIVEAGENT_SESSION_CLOSED);
@@ -38,7 +38,7 @@ export class LiveAgentSession {
 					});
 			}
 
-			if (this.message.text !== 'Closed by visitor' && persisantAffinity && persistantKey) {
+			if (this.message.text !== 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
 				let messageText = '';
 				if (this.message.text) {
 					messageText = this.message.text;

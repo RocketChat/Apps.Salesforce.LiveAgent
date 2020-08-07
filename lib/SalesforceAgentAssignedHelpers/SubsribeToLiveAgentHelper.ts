@@ -45,10 +45,8 @@ export class SubscribeToLiveAgent {
 					await handleEndChatCallback.handleEndChat();
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
-					const persistantData = await retrievePersistentTokens(this.read, this.assoc);
-					this.persisantAffinity = persistantData.persisantAffinity;
-					this.persistantKey = persistantData.persistantKey;
-					if (this.persisantAffinity && this.persistantKey) {
+					const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+					if (persisantAffinity !== null && persistantKey !== null) {
 						await this.subscribeToLiveAgent();
 					} else {
 						console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
@@ -67,10 +65,8 @@ export class SubscribeToLiveAgent {
 						await handleEndChatCallback.handleEndChat();
 					} else {
 						await messageFilter(this.app, this.modify, this.read, this.data.room, this.data.agent, messageArray);
-						const persistantData = await retrievePersistentTokens(this.read, this.assoc);
-						this.persisantAffinity = persistantData.persisantAffinity;
-						this.persistantKey = persistantData.persistantKey;
-						if (this.persisantAffinity && this.persistantKey) {
+						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+						if (persisantAffinity !== null && persistantKey !== null) {
 							await this.subscribeToLiveAgent();
 						} else {
 							console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
