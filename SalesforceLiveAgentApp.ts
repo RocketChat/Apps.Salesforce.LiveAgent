@@ -14,6 +14,7 @@ import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettings } from './config/AppSettings';
 import { SalesforceAgentAssigned } from './handlers/SalesforceAgentAssignedHandler';
+import { AgentAssignedClassInitiate } from './lib/AgentAssignedClassInitiateHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 
 export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
@@ -27,7 +28,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	}
 
 	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
-		const salesforceAgentAssigned = new SalesforceAgentAssigned(this, data, read, http, persistence, modify);
+		const salesforceAgentAssigned = new AgentAssignedClassInitiate(this, data, read, http, persistence, modify);
 		await salesforceAgentAssigned.exec();
 	}
 
