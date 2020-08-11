@@ -202,8 +202,8 @@ export class InitiateSalesforceSessionDirect {
 			})
 			.catch(async (error) => {
 				console.log(Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID, error);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID}: ${error}`, this.data.agent);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
+				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID}: ${error}`, this.data.agent);
 			});
 	}
 }
