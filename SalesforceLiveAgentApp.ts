@@ -13,7 +13,6 @@ import { ILivechatEventContext, IPostLivechatAgentAssigned } from '@rocket.chat/
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettings } from './config/AppSettings';
-import { SalesforceAgentAssigned } from './handlers/SalesforceAgentAssignedHandler';
 import { AgentAssignedClassInitiate } from './lib/AgentAssignedClassInitiateHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 
