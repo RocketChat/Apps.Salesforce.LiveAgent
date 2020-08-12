@@ -158,7 +158,7 @@ export class InitiateSalesforceSessionDirect {
 									}
 								} else {
 									// No error in initiating liveagent session. Executing Function to check for agent response.
-									const checkChatStatus = new CheckChatStatusDirect(
+									const checkChatStatusDirect = new CheckChatStatusDirect(
 										this.app,
 										this.http,
 										this.modify,
@@ -173,7 +173,7 @@ export class InitiateSalesforceSessionDirect {
 										LAQueuePositionMessage,
 										technicalDifficultyMessage,
 									);
-									await checkChatStatus.checkCurrentChatStatus();
+									await checkChatStatusDirect.checkCurrentChatStatus();
 								}
 							})
 							.catch(async (error) => {
