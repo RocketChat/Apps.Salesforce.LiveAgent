@@ -3,10 +3,10 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { Logs } from '../../enum/Logs';
-import { sendLCMessage } from '../../helperFunctions/GeneralHelpers';
-import { pullMessages } from '../../helperFunctions/SalesforceAPIHelpers';
-import { checkForEvent } from '../../helperFunctions/SalesforceMessageHelpers';
+import { Logs } from '../../../enum/Logs';
+import { sendLCMessage } from '../../GeneralHelpers';
+import { pullMessages } from '../../SalesforceAPIHelpers';
+import { checkForEvent } from '../../SalesforceMessageHelpers';
 import { checkAgentStatusCallbackData, checkAgentStatusCallbackError } from './CheckAgentStatusCallback';
 
 export class CheckChatStatus {

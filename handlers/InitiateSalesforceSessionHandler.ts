@@ -7,7 +7,7 @@ import { Logs } from '../enum/Logs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
-import { CheckChatStatus } from '../lib/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
+import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 
 export class InitiateSalesforceSession {
 	constructor(

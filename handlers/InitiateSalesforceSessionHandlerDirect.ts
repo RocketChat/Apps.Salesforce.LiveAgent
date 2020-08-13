@@ -5,8 +5,8 @@ import { Logs } from '../enum/Logs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
-import { CheckAgentStatusDirectCallback } from '../lib/InitiateSalesforceSessionHelpersDirect/CheckAgentStatusDirectCallback';
-import { CheckChatStatusDirect } from '../lib/InitiateSalesforceSessionHelpersDirect/CheckChatStatusDirectHelper';
+import { CheckAgentStatusDirectCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpersDirect/CheckAgentStatusDirectCallback';
+import { CheckChatStatusDirect } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpersDirect/CheckChatStatusDirectHelper';
 
 export class InitiateSalesforceSessionDirect {
 	constructor(

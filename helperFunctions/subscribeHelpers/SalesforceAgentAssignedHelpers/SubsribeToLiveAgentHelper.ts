@@ -2,10 +2,10 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { Logs } from '../../enum/Logs';
-import { retrievePersistentTokens } from '../../helperFunctions/GeneralHelpers';
-import { pullMessages } from '../../helperFunctions/SalesforceAPIHelpers';
-import { checkForEvent, messageFilter } from '../../helperFunctions/SalesforceMessageHelpers';
+import { Logs } from '../../../enum/Logs';
+import { retrievePersistentTokens } from '../../GeneralHelpers';
+import { pullMessages } from '../../SalesforceAPIHelpers';
+import { checkForEvent, messageFilter } from '../../SalesforceMessageHelpers';
 import { HandleEndChatCallback } from './HandleEndChatCallback';
 
 export class SubscribeToLiveAgent {

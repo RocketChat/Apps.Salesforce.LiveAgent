@@ -1,6 +1,6 @@
 export enum Logs {
-	INITIATING_LIVEAGENT_SESSION = 'Initiating Liveagent Session',
-	LIVEAGENT_SESSION_INITIATED = 'Liveagent Session Initiated',
+	INITIATING_LIVEAGENT_SESSION = 'Initiating Liveagent Session.',
+	LIVEAGENT_SESSION_INITIATED = 'Liveagent Session Initiated.',
 	LIVEAGENT_SESSION_ID_GENERATED = 'Liveagent Session ID generated.',
 	SENDING_LIVEAGENT_CHAT_REQUEST = 'Sending Liveagent chat request.',
 	LIVEAGENT_CHAT_REQUEST_SENT = 'Liveagent chat request sent.',

@@ -4,9 +4,9 @@ import { IDepartment, ILivechatRoom, ILivechatTransferData, IVisitor } from '@ro
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { Logs } from '../../enum/Logs';
-import { sendDebugLCMessage, sendLCMessage } from '../../helperFunctions/GeneralHelpers';
-import { getAuthTokens, setBotStatus } from '../../helperFunctions/RocketChatAPIHelpers';
+import { Logs } from '../../../enum/Logs';
+import { sendDebugLCMessage, sendLCMessage } from '../../GeneralHelpers';
+import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
 
 export const checkAgentStatusCallbackError = async (error: string, modify: IModify, message: IMessage, LcAgent: IUser) => {
 	sendLCMessage(modify, message.room, error, LcAgent);

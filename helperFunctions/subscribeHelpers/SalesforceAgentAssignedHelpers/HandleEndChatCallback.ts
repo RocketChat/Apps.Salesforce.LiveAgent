@@ -2,9 +2,9 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IDepartment, ILivechatEventContext, ILivechatRoom, ILivechatTransferData } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { Logs } from '../../enum/Logs';
-import { sendDebugLCMessage, sendLCMessage } from '../../helperFunctions/GeneralHelpers';
-import { getAuthTokens, setBotStatus } from '../../helperFunctions/RocketChatAPIHelpers';
+import { Logs } from '../../../enum/Logs';
+import { sendDebugLCMessage, sendLCMessage } from '../../GeneralHelpers';
+import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
 
 export class HandleEndChatCallback {
 	constructor(
