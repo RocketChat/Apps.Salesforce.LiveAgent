@@ -1,8 +1,9 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { IDepartment, ILivechatEventContext, ILivechatRoom, ILivechatTransferData } from '@rocket.chat/apps-engine/definition/livechat';
+import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../../../enum/Logs';
+import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
 
@@ -33,16 +34,7 @@ export class HandleEndChatCallback {
 				const { authToken, userId } = loginRes;
 				await setBotStatus(this.http, this.rocketChatServerUrl, authToken, userId)
 					.then(async () => {
-						const roomId = this.data.room.id;
-						const room: ILivechatRoom = (await this.read.getRoomReader().getById(roomId)) as ILivechatRoom;
-						const targetDepartment: IDepartment = (await this.read
-							.getLivechatReader()
-							.getLivechatDepartmentByIdOrName(CBHandoverDepartmentName)) as IDepartment;
-						const transferData: ILivechatTransferData = {
-							currentRoom: room,
-							targetDepartment: targetDepartment.id,
-						};
-						await this.modify.getUpdater().getLivechatUpdater().transferVisitor(this.data.room.visitor, transferData);
+						await performHandover(this.modify, this.read, this.data.room.id, CBHandoverDepartmentName);
 					})
 					.catch(async (botStatusErr) => {
 						console.log(Logs.ERROR_SETTING_CHATBOT_STATUS, botStatusErr);

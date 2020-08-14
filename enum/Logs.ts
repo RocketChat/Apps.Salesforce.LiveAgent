@@ -28,4 +28,8 @@ export enum Logs {
 	ERROR_LIVEAGENT_SESSION_EXPIRED = 'Liveagent session expired.',
 	ERROR_SETTING_CHATBOT_STATUS = 'Error setting Chatbot status.',
 	ERROR_LOGIN_CHATBOT = 'Error login Chatbot.',
+	ERROR_INVALID_ROOM_ID = 'Room Id not valid.',
+	ERROR_INVALID_VISITOR_TOKEN = 'Visitor token not found.',
+	ERROR_INVALID_DEPARTMENT_NAME = 'Invalid target department name.',
+	ERROR_HANDOVER_REQUEST_FAILED = 'Handover request failed.',
 }

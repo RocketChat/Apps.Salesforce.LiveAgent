@@ -80,7 +80,6 @@ export class CheckChatStatus {
 							this.affinityToken,
 							this.key,
 							this.targetDeptName,
-							this.LcVisitor,
 							this.technicalDifficultyMessage,
 						);
 						return;

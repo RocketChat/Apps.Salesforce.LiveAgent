@@ -1,10 +1,10 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { IDepartment, ILivechatRoom, ILivechatTransferData, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../../../enum/Logs';
+import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
 
@@ -29,7 +29,6 @@ export const checkAgentStatusCallbackData = async (
 	affinityToken: string,
 	key: string,
 	targetDeptName: string,
-	LcVisitor: IVisitor,
 	technicalDifficultyMessage: string,
 ) => {
 	const contentData = data.content;
@@ -45,14 +44,7 @@ export const checkAgentStatusCallbackData = async (
 					const sessionTokens = { id, affinityToken, key };
 					await persistence.createWithAssociation(sessionTokens, assoc);
 
-					const roomId = message.room.id;
-					const room: ILivechatRoom = (await read.getRoomReader().getById(roomId)) as ILivechatRoom;
-					const targetDepartment: IDepartment = (await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDeptName)) as IDepartment;
-					const transferData: ILivechatTransferData = {
-						currentRoom: room,
-						targetDepartment: targetDepartment.id,
-					};
-					await modify.getUpdater().getLivechatUpdater().transferVisitor(LcVisitor, transferData);
+					await performHandover(modify, read, message.room.id, targetDeptName);
 				})
 				.catch(async (statusErr) => {
 					console.log(Logs.ERROR_SETTING_SALESFORCE_BOT_STATUS, statusErr);
