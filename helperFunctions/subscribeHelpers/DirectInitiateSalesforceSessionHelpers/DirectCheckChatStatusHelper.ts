@@ -4,10 +4,10 @@ import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livec
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
 import { Logs } from '../../../enum/Logs';
 import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssignedHandler';
-import { sendLCMessage } from '../../GeneralHelpers';
+import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
-import { CheckAgentStatusDirectCallback } from './CheckAgentStatusDirectCallback';
+import { CheckAgentStatusDirectCallback } from './DirectCheckAgentStatusCallback';
 
 export class CheckChatStatusDirect {
 	constructor(

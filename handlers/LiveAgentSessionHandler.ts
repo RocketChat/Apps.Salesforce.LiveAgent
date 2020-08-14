@@ -3,7 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../enum/Logs';
-import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
+import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class LiveAgentSession {

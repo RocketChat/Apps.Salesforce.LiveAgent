@@ -4,7 +4,7 @@ import { ILivechatMessage, ILivechatRoom, IVisitor } from '@rocket.chat/apps-eng
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../enum/Logs';
-import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
+import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';

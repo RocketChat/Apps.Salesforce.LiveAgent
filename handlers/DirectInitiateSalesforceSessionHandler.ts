@@ -2,11 +2,11 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { Logs } from '../enum/Logs';
-import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
+import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
-import { CheckAgentStatusDirectCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpersDirect/CheckAgentStatusDirectCallback';
-import { CheckChatStatusDirect } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpersDirect/CheckChatStatusDirectHelper';
+import { CheckAgentStatusDirectCallback } from '../helperFunctions/subscribeHelpers/DirectInitiateSalesforceSessionHelpers/DirectCheckAgentStatusCallback';
+import { CheckChatStatusDirect } from '../helperFunctions/subscribeHelpers/DirectInitiateSalesforceSessionHelpers/DirectCheckChatStatusHelper';
 
 export class InitiateSalesforceSessionDirect {
 	constructor(

@@ -5,7 +5,7 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../../../enum/Logs';
-import { sendDebugLCMessage, sendLCMessage } from '../../GeneralHelpers';
+import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
 
 export const checkAgentStatusCallbackError = async (error: string, modify: IModify, message: IMessage, LcAgent: IUser) => {

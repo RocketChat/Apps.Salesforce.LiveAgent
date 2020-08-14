@@ -3,7 +3,8 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../enum/Logs';
-import { getServerSettingValue, retrievePersistentTokens, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/GeneralHelpers';
+import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
 
 export class SalesforceAgentAssigned {

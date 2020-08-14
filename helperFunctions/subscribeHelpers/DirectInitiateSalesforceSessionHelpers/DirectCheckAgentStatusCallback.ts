@@ -3,7 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../../../enum/Logs';
-import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../../GeneralHelpers';
+import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { HandleEndChatCallback } from '../SalesforceAgentAssignedHelpers/HandleEndChatCallback';
 
 export class CheckAgentStatusDirectCallback {

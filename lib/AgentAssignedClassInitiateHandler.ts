@@ -2,9 +2,9 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
-import { InitiateSalesforceSessionDirect } from '../handlers/InitiateSalesforceSessionHandlerDirect';
+import { InitiateSalesforceSessionDirect } from '../handlers/DirectInitiateSalesforceSessionHandler';
 import { SalesforceAgentAssigned } from '../handlers/SalesforceAgentAssignedHandler';
-import { retrievePersistentTokens } from '../helperFunctions/GeneralHelpers';
+import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 
 export class AgentAssignedClassInitiate {
 	constructor(

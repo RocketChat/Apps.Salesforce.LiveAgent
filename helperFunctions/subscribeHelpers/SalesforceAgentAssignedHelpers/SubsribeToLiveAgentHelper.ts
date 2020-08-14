@@ -3,7 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { Logs } from '../../../enum/Logs';
-import { retrievePersistentTokens } from '../../GeneralHelpers';
+import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent, messageFilter } from '../../SalesforceMessageHelpers';
 import { HandleEndChatCallback } from './HandleEndChatCallback';

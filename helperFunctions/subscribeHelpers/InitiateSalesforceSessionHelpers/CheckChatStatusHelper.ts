@@ -4,7 +4,7 @@ import { IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../../../enum/Logs';
-import { sendLCMessage } from '../../GeneralHelpers';
+import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
 import { checkAgentStatusCallbackData, checkAgentStatusCallbackError } from './CheckAgentStatusCallback';

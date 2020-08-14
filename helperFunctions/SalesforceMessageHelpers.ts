@@ -4,7 +4,7 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../enum/Logs';
-import { sendDebugLCMessage, sendLCMessage } from './GeneralHelpers';
+import { sendDebugLCMessage, sendLCMessage } from './LivechatMessageHelpers';
 
 export async function messageFilter(app: IApp, modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any) {
 	try {
