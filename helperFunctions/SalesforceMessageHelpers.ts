@@ -31,14 +31,18 @@ export async function messageFilter(app: IApp, modify: IModify, read: IRead, mes
 }
 
 export function checkForEvent(messageArray: any, eventToCheck: string) {
-	if (messageArray && messageArray.length > 0) {
-		for (let i = 0; i < messageArray.length; i++) {
-			if (messageArray[i].type === eventToCheck) {
-				return true;
+	try {
+		if (messageArray && messageArray.length > 0) {
+			for (let i = 0; i < messageArray.length; i++) {
+				if (messageArray[i].type === eventToCheck) {
+					return true;
+				}
 			}
 		}
+		return false;
+	} catch (error) {
+		throw new Error(error);
 	}
-	return false;
 }
 
 export async function checkForErrorEvents(

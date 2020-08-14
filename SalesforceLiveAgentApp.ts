@@ -8,11 +8,13 @@ import {
 	IPersistence,
 	IRead,
 } from '@rocket.chat/apps-engine/definition/accessors';
+import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
 import { App } from '@rocket.chat/apps-engine/definition/App';
 import { ILivechatEventContext, IPostLivechatAgentAssigned } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettings } from './config/AppSettings';
+import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
 import { AgentAssignedClassInitiate } from './lib/AgentAssignedClassInitiateHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 
@@ -37,6 +39,12 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	}
 
 	public async extendConfiguration(configuration: IConfigurationExtend): Promise<void> {
+		configuration.api.provideApi({
+			visibility: ApiVisibility.PUBLIC,
+			security: ApiSecurity.UNSECURE,
+			endpoints: [new HandoverEndpoint(this)],
+		});
+
 		AppSettings.forEach((setting) => configuration.settings.provideSetting(setting));
 	}
 }
