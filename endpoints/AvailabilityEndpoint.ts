@@ -1,6 +1,7 @@
 import { HttpStatusCode, IHttp, IHttpRequest, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
-import { Logs } from '../enum/Logs';
+import { ErrorLogs } from '../enum/ErrorLogs';
+import { InfoLogs } from '../enum/InfoLogs';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
 
 export class AvailabilityEndpoint extends ApiEndpoint {
@@ -15,7 +16,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 		persist: IPersistence,
 	): Promise<IApiResponse> {
 		try {
-			console.log(Logs.AVAILABILITY_ENDPOINT_REQUEST_RECEIVED);
+			console.log(InfoLogs.AVAILABILITY_ENDPOINT_REQUEST_RECEIVED);
 			const { button_ids } = request.query;
 
 			if (!button_ids) {
@@ -27,11 +28,11 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 				return createHttpResponse(response.statusCode, { 'Content-Type': 'application/json' }, { result: response.results });
 			}
 		} catch (error) {
-			console.log(Logs.ERROR_IN_AVAILABILITY_ENDPOINT_REQUEST, error);
+			console.log(ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR, error);
 			return createHttpResponse(
 				HttpStatusCode.INTERNAL_SERVER_ERROR,
 				{ 'Content-Type': 'application/json' },
-				{ error: `${Logs.ERROR_IN_AVAILABILITY_ENDPOINT_REQUEST} ${error}` },
+				{ error: `${ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR} ${error}` },
 			);
 		}
 	}
@@ -67,7 +68,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 				results: response.content,
 			};
 		} catch (error) {
-			console.log(Logs.ERROR_IN_CHECKING_AVAILABILITY, error);
+			console.log(ErrorLogs.CHECKING_AVAILABILITY_ERROR, error);
 			throw new Error(error);
 		}
 	}

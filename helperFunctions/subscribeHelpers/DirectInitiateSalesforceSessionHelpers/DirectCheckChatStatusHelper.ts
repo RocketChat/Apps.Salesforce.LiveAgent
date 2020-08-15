@@ -2,7 +2,8 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
-import { Logs } from '../../../enum/Logs';
+import { ErrorLogs } from '../../../enum/ErrorLogs';
+import { InfoLogs } from '../../../enum/InfoLogs';
 import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssignedHandler';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
@@ -39,14 +40,14 @@ export class CheckChatStatusDirect {
 		pullMessages(this.http, this.salesforceChatApiEndpoint, this.affinityToken, this.key)
 			.then(async (response) => {
 				if (response.statusCode === 403) {
-					console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await checkAgentStatusDirectCallback.checkAgentStatusCallbackError('Chat session expired.');
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
 					await this.checkCurrentChatStatus();
 				} else {
-					console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
+					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
 					const contentParsed = JSON.parse(content || '{}');
 					const messageArray = contentParsed.messages;
@@ -66,7 +67,7 @@ export class CheckChatStatusDirect {
 
 					const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 					if (isChatAccepted === true) {
-						console.log(Logs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
+						console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
 
 						const sessionTokens = { id: this.id, affinityToken: this.affinityToken, key: this.key };
 						const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
@@ -95,13 +96,13 @@ export class CheckChatStatusDirect {
 							await this.checkCurrentChatStatus();
 						}
 					} else {
-						console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, response);
+						console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
 						await this.checkCurrentChatStatus();
 					}
 				}
 			})
 			.catch(async (error) => {
-				console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
+				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 				return;
 			});

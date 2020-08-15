@@ -2,7 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { Logs } from '../../../enum/Logs';
+import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
@@ -37,21 +37,21 @@ export class HandleEndChatCallback {
 						await performHandover(this.modify, this.read, this.data.room.id, CBHandoverDepartmentName);
 					})
 					.catch(async (botStatusErr) => {
-						console.log(Logs.ERROR_SETTING_CHATBOT_STATUS, botStatusErr);
+						console.log(ErrorLogs.SETTING_CHATBOT_STATUS_ERROR, botStatusErr);
 						await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
 						await sendDebugLCMessage(
 							this.read,
 							this.modify,
 							this.data.room,
-							`${Logs.ERROR_SETTING_CHATBOT_STATUS}: ${botStatusErr}`,
+							`${ErrorLogs.SETTING_CHATBOT_STATUS_ERROR}: ${botStatusErr}`,
 							this.data.agent,
 						);
 					});
 			})
 			.catch(async (botLoginErr) => {
-				console.log(Logs.ERROR_LOGIN_CHATBOT, botLoginErr);
+				console.log(ErrorLogs.LOGIN_CHATBOT_ERROR, botLoginErr);
 				await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${Logs.ERROR_LOGIN_CHATBOT}: ${botLoginErr}`, this.data.agent);
+				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.LOGIN_CHATBOT_ERROR}: ${botLoginErr}`, this.data.agent);
 			});
 	}
 }

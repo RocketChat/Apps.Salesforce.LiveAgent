@@ -2,7 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { Logs } from '../enum/Logs';
+import { ErrorLogs } from '../enum/ErrorLogs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
@@ -33,8 +33,8 @@ export class SalesforceAgentAssigned {
 			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND, this.data.agent);
-			console.log(Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND, error);
+			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, this.data.agent);
+			console.log(ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, error);
 			return;
 		}
 
@@ -43,8 +43,8 @@ export class SalesforceAgentAssigned {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
-			console.log(Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND, error);
+			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
+			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
 		}
 		const LAChatEndedMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_chat_ended_message')).value;

@@ -2,7 +2,8 @@ import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { Logs } from '../enum/Logs';
+import { ErrorLogs } from '../enum/ErrorLogs';
+import { InfoLogs } from '../enum/InfoLogs';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
@@ -20,7 +21,7 @@ export class LiveAgentSession {
 			try {
 				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 			} catch (error) {
-				console.log(Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND);
+				console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 				return;
 			}
 
@@ -30,11 +31,11 @@ export class LiveAgentSession {
 			if (this.message.text === 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
 				await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
 					.then(async () => {
-						console.log(Logs.LIVEAGENT_SESSION_CLOSED);
+						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
 						await this.persistence.removeByAssociation(assoc);
 					})
 					.catch((error) => {
-						console.log(Logs.ERROR_CLOSING_LIVEAGENT_SESSION, error);
+						console.log(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
 					});
 			}
 
@@ -45,14 +46,14 @@ export class LiveAgentSession {
 				}
 				await sendMessages(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, messageText)
 					.then(() => {
-						console.log(Logs.MESSAGE_SENT_TO_LIVEAGENT);
+						console.log(InfoLogs.MESSAGE_SENT_TO_LIVEAGENT);
 					})
 					.catch((error) => {
-						console.log(Logs.ERROR_SENDING_MESSAGE_TO_LIVEAGENT, error);
+						console.log(ErrorLogs.SENDING_MESSAGE_TO_LIVEAGENT_ERROR, error);
 					});
 			}
 		} catch (error) {
-			console.log(Logs.ERROR_IN_LIVEAGENT_SESSION_CLASS, error);
+			console.log(ErrorLogs.LIVEAGENT_SESSION_CLASS_FAILED, error);
 		}
 	}
 }

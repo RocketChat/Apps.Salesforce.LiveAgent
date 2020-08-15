@@ -3,7 +3,8 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { Logs } from '../enum/Logs';
+import { ErrorLogs } from '../enum/ErrorLogs';
+import { InfoLogs } from '../enum/InfoLogs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
@@ -41,8 +42,8 @@ export class InitiateSalesforceSession {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-			await sendDebugLCMessage(this.read, this.modify, this.message.room, Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND, LcAgent);
-			console.log(Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND);
+			await sendDebugLCMessage(this.read, this.modify, this.message.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, LcAgent);
+			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 			return;
 		}
 
@@ -51,8 +52,8 @@ export class InitiateSalesforceSession {
 			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-			await sendDebugLCMessage(this.read, this.modify, this.message.room, Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND, LcAgent);
-			console.log(Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND);
+			await sendDebugLCMessage(this.read, this.modify, this.message.room, ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, LcAgent);
+			console.log(ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND);
 			return;
 		}
 
@@ -68,11 +69,11 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		await sendDebugLCMessage(this.read, this.modify, this.message.room, Logs.INITIATING_LIVEAGENT_SESSION, LcAgent);
+		await sendDebugLCMessage(this.read, this.modify, this.message.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, LcAgent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
-				console.log(Logs.LIVEAGENT_SESSION_ID_GENERATED);
-				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${Logs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, LcAgent);
+				console.log(InfoLogs.LIVEAGENT_SESSION_ID_GENERATED);
+				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, LcAgent);
 				const { id, affinityToken, key } = res;
 				await sendChatRequest(
 					this.http,
@@ -87,17 +88,17 @@ export class InitiateSalesforceSession {
 					LcVisitorEmail,
 				)
 					.then(async (sendChatRequestres) => {
-						console.log(Logs.LIVEAGENT_CHAT_REQUEST_SENT);
+						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);
 						await sendDebugLCMessage(
 							this.read,
 							this.modify,
 							this.message.room,
-							`${Logs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`,
+							`${InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`,
 							LcAgent,
 						);
 						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
-								console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
+								console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
@@ -151,27 +152,27 @@ export class InitiateSalesforceSession {
 								}
 							})
 							.catch(async (error) => {
-								console.log(Logs.ERROR_GETTING_LIVEAGENT_RESPONSE, error);
+								console.log(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
 								await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 								await sendDebugLCMessage(
 									this.read,
 									this.modify,
 									this.message.room,
-									`${Logs.ERROR_GETTING_LIVEAGENT_RESPONSE}: ${error}`,
+									`${ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR}: ${error}`,
 									LcAgent,
 								);
 							});
 					})
 					.catch(async (error) => {
-						console.log(Logs.ERROR_SENDING_LIVEAGENT_CHAT_REQUEST, error);
+						console.log(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
 						await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-						await sendDebugLCMessage(this.read, this.modify, this.message.room, `${Logs.ERROR_SENDING_LIVEAGENT_CHAT_REQUEST}: ${error}`, LcAgent);
+						await sendDebugLCMessage(this.read, this.modify, this.message.room, `${ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR}: ${error}`, LcAgent);
 					});
 			})
 			.catch(async (error) => {
-				console.log(Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID, error);
+				console.log(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
 				await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID}: ${error}`, LcAgent);
+				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`, LcAgent);
 			});
 	}
 }

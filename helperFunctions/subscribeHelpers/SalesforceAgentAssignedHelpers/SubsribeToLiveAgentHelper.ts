@@ -2,7 +2,8 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { Logs } from '../../../enum/Logs';
+import { ErrorLogs } from '../../../enum/ErrorLogs';
+import { InfoLogs } from '../../../enum/InfoLogs';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent, messageFilter } from '../../SalesforceMessageHelpers';
@@ -41,7 +42,7 @@ export class SubscribeToLiveAgent {
 		await pullMessages(this.http, this.salesforceChatApiEndpoint, this.persisantAffinity, this.persistantKey)
 			.then(async (response) => {
 				if (response.statusCode === 403) {
-					console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await handleEndChatCallback.handleEndChat();
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
@@ -49,19 +50,19 @@ export class SubscribeToLiveAgent {
 					if (persisantAffinity !== null && persistantKey !== null) {
 						await this.subscribeToLiveAgent();
 					} else {
-						console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+						console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 						await handleEndChatCallback.handleEndChat();
 						return;
 					}
 				} else {
-					console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
+					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
 					const contentParsed = JSON.parse(content || '{}');
 					const messageArray = contentParsed.messages;
 					const isEndChat = checkForEvent(messageArray, 'ChatEnded');
 
 					if (isEndChat === true) {
-						console.log(Logs.LIVEAGENT_SESSION_CLOSED);
+						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
 						await handleEndChatCallback.handleEndChat();
 					} else {
 						await messageFilter(this.app, this.modify, this.read, this.data.room, this.data.agent, messageArray);
@@ -69,7 +70,7 @@ export class SubscribeToLiveAgent {
 						if (persisantAffinity !== null && persistantKey !== null) {
 							await this.subscribeToLiveAgent();
 						} else {
-							console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+							console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 							await handleEndChatCallback.handleEndChat();
 							return;
 						}
@@ -77,7 +78,7 @@ export class SubscribeToLiveAgent {
 				}
 			})
 			.catch(async (error) => {
-				console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
+				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await handleEndChatCallback.handleEndChat();
 				return;
 			});

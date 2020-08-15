@@ -1,7 +1,8 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
-import { Logs } from '../enum/Logs';
+import { ErrorLogs } from '../enum/ErrorLogs';
+import { InfoLogs } from '../enum/InfoLogs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
@@ -38,8 +39,8 @@ export class InitiateSalesforceSessionDirect {
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
-			console.log(Logs.ERROR_SALESFORCE_CHAT_API_NOT_FOUND);
+			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
+			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			return;
 		}
@@ -48,8 +49,8 @@ export class InitiateSalesforceSessionDirect {
 		try {
 			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND, this.data.agent);
-			console.log(Logs.ERROR_ROCKETCHAT_SERVER_URL_NOT_FOUND);
+			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, this.data.agent);
+			console.log(ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND);
 			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			return;
 		}
@@ -66,11 +67,11 @@ export class InitiateSalesforceSessionDirect {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		await sendDebugLCMessage(this.read, this.modify, this.data.room, Logs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
+		await sendDebugLCMessage(this.read, this.modify, this.data.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
-				console.log(Logs.LIVEAGENT_SESSION_ID_GENERATED);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${Logs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, this.data.agent);
+				console.log(InfoLogs.LIVEAGENT_SESSION_ID_GENERATED);
+				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, this.data.agent);
 				const { id, affinityToken, key } = res;
 				await sendChatRequest(
 					this.http,
@@ -85,17 +86,17 @@ export class InitiateSalesforceSessionDirect {
 					LcVisitorEmail,
 				)
 					.then(async (sendChatRequestres) => {
-						console.log(Logs.LIVEAGENT_CHAT_REQUEST_SENT);
+						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);
 						await sendDebugLCMessage(
 							this.read,
 							this.modify,
 							this.data.room,
-							`${Logs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`,
+							`${InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`,
 							this.data.agent,
 						);
 						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
-								console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
+								console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
@@ -116,42 +117,42 @@ export class InitiateSalesforceSessionDirect {
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
 									switch (pullMessagesContentParsed.messages[0].message.reason) {
 										case 'Unavailable':
-											console.log(Logs.ERROR_ALL_LIVEAGENTS_UNAVAILABLE);
+											console.log(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
 											const NoLiveagentAvailableMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')).value;
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 											break;
 
 										case 'NoPost':
-											console.log(Logs.ERROR_APP_CONFIGURATION_INVALID);
+											console.log(ErrorLogs.APP_CONFIGURATION_INVALID);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
 												this.data.room,
-												Logs.ERROR_APP_CONFIGURATION_INVALID,
+												ErrorLogs.APP_CONFIGURATION_INVALID,
 												this.data.agent,
 											);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 											break;
 
 										case 'InternalFailure':
-											console.log(Logs.ERROR_SALESFORCE_INTERNAL_FAILURE);
+											console.log(ErrorLogs.SALESFORCE_INTERNAL_FAILURE);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
 												this.data.room,
-												Logs.ERROR_SALESFORCE_INTERNAL_FAILURE,
+												ErrorLogs.SALESFORCE_INTERNAL_FAILURE,
 												this.data.agent,
 											);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 											break;
 
 										default:
-											console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE);
+											console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
 												this.data.room,
-												Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE,
+												ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE,
 												this.data.agent,
 											);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
@@ -178,32 +179,32 @@ export class InitiateSalesforceSessionDirect {
 								}
 							})
 							.catch(async (error) => {
-								console.log(Logs.ERROR_GETTING_LIVEAGENT_RESPONSE, error);
+								console.log(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
 								await sendDebugLCMessage(
 									this.read,
 									this.modify,
 									this.data.room,
-									`${Logs.ERROR_GETTING_LIVEAGENT_RESPONSE}: ${error}`,
+									`${ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR}: ${error}`,
 									this.data.agent,
 								);
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 							});
 					})
 					.catch(async (error) => {
-						console.log(Logs.ERROR_SENDING_LIVEAGENT_CHAT_REQUEST, error);
+						console.log(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
 						await sendDebugLCMessage(
 							this.read,
 							this.modify,
 							this.data.room,
-							`${Logs.ERROR_SENDING_LIVEAGENT_CHAT_REQUEST}: ${error}`,
+							`${ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR}: ${error}`,
 							this.data.agent,
 						);
 						await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 					});
 			})
 			.catch(async (error) => {
-				console.log(Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID, error);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${Logs.ERROR_GENERATING_LIVEAGENT_SESSION_ID}: ${error}`, this.data.agent);
+				console.log(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
+				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`, this.data.agent);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			});
 	}

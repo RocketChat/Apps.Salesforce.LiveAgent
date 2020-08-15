@@ -2,7 +2,8 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { Logs } from '../../../enum/Logs';
+import { ErrorLogs } from '../../../enum/ErrorLogs';
+import { InfoLogs } from '../../../enum/InfoLogs';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
@@ -34,14 +35,14 @@ export class CheckChatStatus {
 		pullMessages(this.http, this.salesforceChatApiEndpoint, this.affinityToken, this.key)
 			.then(async (response) => {
 				if (response.statusCode === 403) {
-					console.log(Logs.ERROR_LIVEAGENT_SESSION_EXPIRED);
+					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await checkAgentStatusCallbackError('Chat session expired.', this.modify, this.message, this.LcAgent);
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
 					await this.checkCurrentChatStatus();
 				} else {
-					console.log(Logs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
+					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
 					const contentParsed = JSON.parse(content || '{}');
 					const messageArray = contentParsed.messages;
@@ -61,7 +62,7 @@ export class CheckChatStatus {
 
 					const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 					if (isChatAccepted === true) {
-						console.log(Logs.LIVEAGENT_SESSION_CLOSED);
+						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
 						await checkAgentStatusCallbackData(
 							this.app,
 							this.modify,
@@ -101,13 +102,13 @@ export class CheckChatStatus {
 							await this.checkCurrentChatStatus();
 						}
 					} else {
-						console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, response);
+						console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
 						await this.checkCurrentChatStatus();
 					}
 				}
 			})
 			.catch(async (error) => {
-				console.log(Logs.ERROR_UNKNOWN_IN_CHECKING_AGENT_RESPONSE, error);
+				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
 				return;
 			});

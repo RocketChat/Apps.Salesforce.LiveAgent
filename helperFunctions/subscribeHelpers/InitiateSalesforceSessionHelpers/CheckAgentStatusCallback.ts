@@ -3,7 +3,8 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { Logs } from '../../../enum/Logs';
+import { ErrorLogs } from '../../../enum/ErrorLogs';
+import { InfoLogs } from '../../../enum/InfoLogs';
 import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
@@ -33,7 +34,7 @@ export const checkAgentStatusCallbackData = async (
 ) => {
 	const contentData = data.content;
 	const contentParsed = JSON.parse(contentData || '{}');
-	console.log(Logs.LIVEAGENT_ACCEPTED_CHAT_REQUEST, contentParsed);
+	console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST, contentParsed);
 
 	await getAuthTokens(http, rocketChatServerUrl, salesforceBotUsername, salesforceBotPassword)
 		.then(async (loginRes) => {
@@ -47,14 +48,14 @@ export const checkAgentStatusCallbackData = async (
 					await performHandover(modify, read, message.room.id, targetDeptName);
 				})
 				.catch(async (statusErr) => {
-					console.log(Logs.ERROR_SETTING_SALESFORCE_BOT_STATUS, statusErr);
+					console.log(ErrorLogs.SETTING_SALESFORCE_BOT_STATUS_ERROR, statusErr);
 					await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-					await sendDebugLCMessage(read, modify, message.room, `${Logs.ERROR_SETTING_SALESFORCE_BOT_STATUS} ${statusErr}`, LcAgent);
+					await sendDebugLCMessage(read, modify, message.room, `${ErrorLogs.SETTING_SALESFORCE_BOT_STATUS_ERROR} ${statusErr}`, LcAgent);
 				});
 		})
 		.catch(async (loginErr) => {
-			console.log(Logs.ERROR_LOGIN_SALESFORCE_BOT, loginErr);
+			console.log(ErrorLogs.LOGIN_SALESFORCE_BOT_ERROR, loginErr);
 			await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-			await sendDebugLCMessage(read, modify, message.room, `${Logs.ERROR_LOGIN_SALESFORCE_BOT}: ${loginErr}`, LcAgent);
+			await sendDebugLCMessage(read, modify, message.room, `${ErrorLogs.LOGIN_SALESFORCE_BOT_ERROR}: ${loginErr}`, LcAgent);
 		});
 };
