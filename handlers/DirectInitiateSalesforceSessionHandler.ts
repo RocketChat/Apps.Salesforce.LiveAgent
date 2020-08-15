@@ -117,7 +117,8 @@ export class InitiateSalesforceSessionDirect {
 									switch (pullMessagesContentParsed.messages[0].message.reason) {
 										case 'Unavailable':
 											console.log(Logs.ERROR_ALL_LIVEAGENTS_UNAVAILABLE);
-											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError('No agent available for chat.');
+											const NoLiveagentAvailableMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')).value;
+											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 											break;
 
 										case 'NoPost':

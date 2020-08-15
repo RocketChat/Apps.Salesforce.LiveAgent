@@ -133,6 +133,15 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
+		id: AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
+		public: true,
+		type: SettingType.STRING,
+		packageValue: 'No agent available for chat right now.',
+		i18nLabel: 'No Live Agent Available Message',
+		i18nDescription: 'Enter message to show when there is no liveagent available to accept user request.',
+		required: true,
+	},
+	{
 		id: AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE,
 		public: true,
 		type: SettingType.STRING,

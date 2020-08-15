@@ -145,7 +145,6 @@ export class InitiateSalesforceSession {
 										LAQueueEmptyMessage,
 										LAQueuePositionMessage,
 										technicalDifficultyMessage,
-										LcVisitor,
 									);
 
 									await checkChatStatus.checkCurrentChatStatus();

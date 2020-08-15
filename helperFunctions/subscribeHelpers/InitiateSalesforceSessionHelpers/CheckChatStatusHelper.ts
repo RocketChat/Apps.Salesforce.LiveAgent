@@ -1,6 +1,5 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { Logs } from '../../../enum/Logs';
@@ -29,7 +28,6 @@ export class CheckChatStatus {
 		private LAQueueEmptyMessage: string,
 		private LAQueuePositionMessage: string,
 		private technicalDifficultyMessage: string,
-		private LcVisitor: IVisitor,
 	) {}
 
 	public async checkCurrentChatStatus() {
