@@ -21,14 +21,18 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 			if (!button_ids) {
 				const salesforceButtonId: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_button_id')).value;
 				const response = await this.checkAvailability(http, read, salesforceButtonId);
-				return createHttpResponse(HttpStatusCode.OK, { 'Content-Type': 'application/json' }, { result: response });
+				return createHttpResponse(response.statusCode, { 'Content-Type': 'application/json' }, { result: response.results });
 			} else {
 				const response = await this.checkAvailability(http, read, button_ids);
-				return createHttpResponse(HttpStatusCode.OK, { 'Content-Type': 'application/json' }, { result: response });
+				return createHttpResponse(response.statusCode, { 'Content-Type': 'application/json' }, { result: response.results });
 			}
 		} catch (error) {
 			console.log(Logs.ERROR_IN_AVAILABILITY_ENDPOINT_REQUEST, error);
-			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: error.message });
+			return createHttpResponse(
+				HttpStatusCode.INTERNAL_SERVER_ERROR,
+				{ 'Content-Type': 'application/json' },
+				{ error: `${Logs.ERROR_IN_AVAILABILITY_ENDPOINT_REQUEST} ${error}` },
+			);
 		}
 	}
 
@@ -48,9 +52,20 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 			const checkAvailabilityUrl = `${salesforceChatApiEndpoint}Visitor/Availability?org_id=${salesforceOrganisationId}&deployment_id=${salesforceDeploymentId}&Availability.ids=${buttonId}&Availability.needEstimatedWaitTime=1`;
 
 			const response = await http.get(checkAvailabilityUrl, checkAvailabilityHttpRequest);
-			const responseJSON = JSON.parse(response.content || '{}');
-			const { results } = responseJSON.messages[0].message;
-			return results;
+
+			if (response.statusCode === 200) {
+				const responseJSON = JSON.parse(response.content || '{}');
+				const { results } = responseJSON.messages[0].message;
+				return {
+					statusCode: response.statusCode,
+					results,
+				};
+			}
+
+			return {
+				statusCode: response.statusCode,
+				results: response.content,
+			};
 		} catch (error) {
 			console.log(Logs.ERROR_IN_CHECKING_AVAILABILITY, error);
 			throw new Error(error);
