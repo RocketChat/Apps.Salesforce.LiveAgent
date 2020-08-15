@@ -84,7 +84,17 @@ export class CheckChatStatus {
 					} else if (isChatAccepted === false) {
 						const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 						const isChatEnded = checkForEvent(messageArray, 'ChatEnded');
-						if (isChatRequestFail === true || isChatEnded === true) {
+						if (isChatRequestFail === true) {
+							if (messageArray[0].message.reason === 'Unavailable') {
+								const NoLiveagentAvailableMessage: string = (
+									await this.read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')
+								).value;
+								await checkAgentStatusCallbackError(NoLiveagentAvailableMessage, this.modify, this.message, this.LcAgent);
+								return;
+							}
+							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
+							return;
+						} else if (isChatEnded === true) {
 							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
 							return;
 						} else {
