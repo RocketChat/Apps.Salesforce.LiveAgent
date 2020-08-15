@@ -58,7 +58,7 @@ export async function checkForErrorEvents(
 		switch (messageArray.messages[0].message.reason) {
 			case 'Unavailable':
 				console.log(Logs.ERROR_ALL_LIVEAGENTS_UNAVAILABLE);
-				const NoLiveagentAvailableMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')).value;
+				const NoLiveagentAvailableMessage: string = (await read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')).value;
 				await sendLCMessage(modify, message.room, NoLiveagentAvailableMessage, LcAgent);
 				break;
 
