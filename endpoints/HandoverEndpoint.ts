@@ -14,7 +14,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 		read: IRead,
 		modify: IModify,
 		http: IHttp,
-		persis: IPersistence,
+		persist: IPersistence,
 	): Promise<IApiResponse> {
 		console.log(Logs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {

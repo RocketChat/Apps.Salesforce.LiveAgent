@@ -14,6 +14,7 @@ import { ILivechatEventContext, IPostLivechatAgentAssigned } from '@rocket.chat/
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettings } from './config/AppSettings';
+import { AvailabilityEndpoint } from './endpoints/AvailabilityEndpoint';
 import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
 import { AgentAssignedClassInitiate } from './lib/AgentAssignedClassInitiateHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
@@ -42,7 +43,7 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 		configuration.api.provideApi({
 			visibility: ApiVisibility.PUBLIC,
 			security: ApiSecurity.UNSECURE,
-			endpoints: [new HandoverEndpoint(this)],
+			endpoints: [new HandoverEndpoint(this), new AvailabilityEndpoint(this)],
 		});
 
 		AppSettings.forEach((setting) => configuration.settings.provideSetting(setting));
