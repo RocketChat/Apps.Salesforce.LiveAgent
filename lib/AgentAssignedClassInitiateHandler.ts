@@ -2,6 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
+import { AppSettingId } from '../enum/AppSettingId';
 import { InitiateSalesforceSessionDirect } from '../handlers/DirectInitiateSalesforceSessionHandler';
 import { SalesforceAgentAssigned } from '../handlers/SalesforceAgentAssignedHandler';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
@@ -18,7 +19,7 @@ export class AgentAssignedClassInitiate {
 
 	public async exec() {
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
 		if (persisantAffinity === null && persistantKey === null && this.data.agent.username === salesforceBotUsername) {

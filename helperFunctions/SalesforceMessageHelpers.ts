@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from './LivechatMessageHelpers';
@@ -59,7 +60,9 @@ export async function checkForErrorEvents(
 		switch (messageArray.messages[0].message.reason) {
 			case 'Unavailable':
 				console.log(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
-				const NoLiveagentAvailableMessage: string = (await read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')).value;
+				const NoLiveagentAvailableMessage: string = (
+					await read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
+				).value;
 				await sendLCMessage(modify, message.room, NoLiveagentAvailableMessage, LcAgent);
 				break;
 

@@ -2,6 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
@@ -88,7 +89,7 @@ export class CheckChatStatus {
 						if (isChatRequestFail === true) {
 							if (messageArray[0].message.reason === 'Unavailable') {
 								const NoLiveagentAvailableMessage: string = (
-									await this.read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')
+									await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
 								).value;
 								await checkAgentStatusCallbackError(NoLiveagentAvailableMessage, this.modify, this.message, this.LcAgent);
 								return;

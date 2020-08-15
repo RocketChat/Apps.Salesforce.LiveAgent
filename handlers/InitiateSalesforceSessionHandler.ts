@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
@@ -21,7 +22,7 @@ export class InitiateSalesforceSession {
 	) {}
 
 	public async exec() {
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 		const lmessage: ILivechatMessage = this.message;
 		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
 		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
@@ -30,14 +31,15 @@ export class InitiateSalesforceSession {
 			return;
 		}
 
-		const salesforceBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_password')).value;
-		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_organisation_id')).value;
-		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_deployment_id')).value;
-		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_button_id')).value;
-		const targetDeptName: string = (await this.read.getEnvironmentReader().getSettings().getById('handover_department_name')).value;
-		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('technical_difficulty_message')).value;
+		const salesforceBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_PASSWORD)).value;
+		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_ORGANISATION_ID)).value;
+		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_DEPLOYMENT_ID)).value;
+		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BUTTON_ID)).value;
+		const targetDeptName: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SF_HANDOVER_DEPARTMENT_NAME)).value;
+		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
+			.value;
 
-		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -57,9 +59,10 @@ export class InitiateSalesforceSession {
 			return;
 		}
 
-		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_queue_position_message')).value;
-		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_queue_message')).value;
-		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_queue_empty_message')).value;
+		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE))
+			.value;
+		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE)).value;
+		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_EMPTY_MESSAGE)).value;
 
 		const LcVisitor: IVisitor = lroom.visitor;
 		const LcVisitorName = LcVisitor.name;
@@ -166,7 +169,13 @@ export class InitiateSalesforceSession {
 					.catch(async (error) => {
 						console.log(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
 						await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-						await sendDebugLCMessage(this.read, this.modify, this.message.room, `${ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR}: ${error}`, LcAgent);
+						await sendDebugLCMessage(
+							this.read,
+							this.modify,
+							this.message.room,
+							`${ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR}: ${error}`,
+							LcAgent,
+						);
 					});
 			})
 			.catch(async (error) => {

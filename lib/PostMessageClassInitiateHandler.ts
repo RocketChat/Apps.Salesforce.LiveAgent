@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { AppSettingId } from '../enum/AppSettingId';
 import { InitiateSalesforceSession } from '../handlers/InitiateSalesforceSessionHandler';
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
 
@@ -17,7 +18,7 @@ export class PostMessageClassInitiate {
 	) {}
 
 	public async exec() {
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 		if (this.message.sender.username === salesforceBotUsername) {
 			return;
 		} else if (this.message.room.type !== 'l') {

@@ -1,5 +1,6 @@
 import { HttpStatusCode, IHttp, IHttpRequest, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
@@ -20,7 +21,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 			const { button_ids } = request.query;
 
 			if (!button_ids) {
-				const salesforceButtonId: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_button_id')).value;
+				const salesforceButtonId: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BUTTON_ID)).value;
 				const response = await this.checkAvailability(http, read, salesforceButtonId);
 				return createHttpResponse(response.statusCode, { 'Content-Type': 'application/json' }, { result: response.results });
 			} else {
@@ -39,10 +40,10 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 
 	private async checkAvailability(http: IHttp, read: IRead, buttonId: string) {
 		try {
-			let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+			let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-			const salesforceOrganisationId: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_organisation_id')).value;
-			const salesforceDeploymentId: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_deployment_id')).value;
+			const salesforceOrganisationId: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_ORGANISATION_ID)).value;
+			const salesforceDeploymentId: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_DEPLOYMENT_ID)).value;
 
 			const checkAvailabilityHttpRequest: IHttpRequest = {
 				headers: {

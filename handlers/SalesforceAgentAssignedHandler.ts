@@ -2,6 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
@@ -18,7 +19,7 @@ export class SalesforceAgentAssigned {
 	) {}
 
 	public async exec() {
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 		if (this.data.agent.username !== salesforceBotUsername) {
 			return;
 		}
@@ -26,7 +27,8 @@ export class SalesforceAgentAssigned {
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
 		const persitedData = await retrievePersistentTokens(this.read, assoc);
 		const { persisantAffinity, persistantKey } = persitedData;
-		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('technical_difficulty_message')).value;
+		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
+			.value;
 
 		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
 		try {
@@ -38,7 +40,7 @@ export class SalesforceAgentAssigned {
 			return;
 		}
 
-		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -47,7 +49,7 @@ export class SalesforceAgentAssigned {
 			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
 		}
-		const LAChatEndedMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_chat_ended_message')).value;
+		const LAChatEndedMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE)).value;
 
 		if (persisantAffinity !== null && persistantKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.

@@ -2,6 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
@@ -25,9 +26,9 @@ export class HandleEndChatCallback {
 		await this.persistence.removeByAssociation(this.assoc);
 		await sendLCMessage(this.modify, this.data.room, this.endChatReason, this.data.agent);
 
-		const chatBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('chat_bot_username')).value;
-		const chatBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById('chat_bot_password')).value;
-		const CBHandoverDepartmentName: string = (await this.read.getEnvironmentReader().getSettings().getById('chat_handover_department_name')).value;
+		const chatBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHAT_BOT_USERNAME)).value;
+		const chatBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHAT_BOT_PASSWORD)).value;
+		const CBHandoverDepartmentName: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CB_HANDOVER_DEPARTMENT_NAME)).value;
 
 		await getAuthTokens(this.http, this.rocketChatServerUrl, chatBotUsername, chatBotPassword)
 			.then(async (loginRes) => {

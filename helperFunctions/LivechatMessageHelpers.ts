@@ -1,6 +1,7 @@
 import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { AppSettingId } from '../enum/AppSettingId';
 
 export async function sendLCMessage(modify: IModify, room: IRoom, messageText: string, sender: IUser) {
 	try {
@@ -14,7 +15,7 @@ export async function sendLCMessage(modify: IModify, room: IRoom, messageText: s
 
 export async function sendDebugLCMessage(read: IRead, modify: IModify, room: IRoom, messageText: string, sender: IUser) {
 	try {
-		const debugMode: boolean = (await read.getEnvironmentReader().getSettings().getById('debug_button')).value;
+		const debugMode: boolean = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.DEBUG_BUTTON)).value;
 		if (debugMode !== true) {
 			return;
 		}

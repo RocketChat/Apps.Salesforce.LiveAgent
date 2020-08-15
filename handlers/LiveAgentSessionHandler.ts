@@ -2,6 +2,7 @@ import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
@@ -12,12 +13,13 @@ export class LiveAgentSession {
 
 	public async exec() {
 		try {
-			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {
 				return;
 			}
 
-			let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+			let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT))
+				.value;
 			try {
 				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 			} catch (error) {

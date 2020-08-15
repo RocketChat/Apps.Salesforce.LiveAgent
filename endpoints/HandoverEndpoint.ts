@@ -1,6 +1,7 @@
 import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { performHandover } from '../helperFunctions/HandoverHelpers';
@@ -20,7 +21,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 		console.log(InfoLogs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {
 			const room: ILivechatRoom = (await read.getRoomReader().getById(request.content.roomId)) as ILivechatRoom;
-			const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById('salesforce_bot_username')).value;
+			const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 
 			if (room.servedBy && room.servedBy.username === salesforceBotUsername) {
 				console.log(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED);

@@ -1,6 +1,7 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
+import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
@@ -20,10 +21,11 @@ export class InitiateSalesforceSessionDirect {
 	) {}
 
 	public async exec() {
-		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_organisation_id')).value;
-		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_deployment_id')).value;
-		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_button_id')).value;
-		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('technical_difficulty_message')).value;
+		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_ORGANISATION_ID)).value;
+		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_DEPLOYMENT_ID)).value;
+		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BUTTON_ID)).value;
+		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
+			.value;
 
 		const checkAgentStatusDirectCallback = new CheckAgentStatusDirectCallback(
 			this.app,
@@ -35,7 +37,7 @@ export class InitiateSalesforceSessionDirect {
 			technicalDifficultyMessage,
 		);
 
-		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById('salesforce_chat_api_endpoint')).value;
+		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -55,9 +57,10 @@ export class InitiateSalesforceSessionDirect {
 			return;
 		}
 
-		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_queue_position_message')).value;
-		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_queue_message')).value;
-		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_queue_empty_message')).value;
+		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE))
+			.value;
+		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE)).value;
+		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_EMPTY_MESSAGE)).value;
 
 		const LcVisitor: IVisitor = this.data.room.visitor;
 		const LcVisitorName = LcVisitor.name;
@@ -71,7 +74,13 @@ export class InitiateSalesforceSessionDirect {
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
 				console.log(InfoLogs.LIVEAGENT_SESSION_ID_GENERATED);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, this.data.agent);
+				await sendDebugLCMessage(
+					this.read,
+					this.modify,
+					this.data.room,
+					`${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`,
+					this.data.agent,
+				);
 				const { id, affinityToken, key } = res;
 				await sendChatRequest(
 					this.http,
@@ -118,7 +127,9 @@ export class InitiateSalesforceSessionDirect {
 									switch (pullMessagesContentParsed.messages[0].message.reason) {
 										case 'Unavailable':
 											console.log(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
-											const NoLiveagentAvailableMessage: string = (await this.read.getEnvironmentReader().getSettings().getById('la_no_liveagent_available')).value;
+											const NoLiveagentAvailableMessage: string = (
+												await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
+											).value;
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 											break;
 
@@ -204,7 +215,13 @@ export class InitiateSalesforceSessionDirect {
 			})
 			.catch(async (error) => {
 				console.log(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`, this.data.agent);
+				await sendDebugLCMessage(
+					this.read,
+					this.modify,
+					this.data.room,
+					`${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`,
+					this.data.agent,
+				);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			});
 	}
