@@ -171,8 +171,7 @@ Debug mode is a setting that is intended for the use of Developers to keep track
 	- For example, your script should look like the following, after adding the API function:
 
       ```
-   <!-- Start of Rocket.Chat Livechat Script -->
-	<script type="text/javascript">
+      <script type="text/javascript">
 		(function (w, d, s, u) {
 			w.RocketChat = function (c) {
 				w.RocketChat._.push(c);
@@ -193,9 +192,8 @@ Debug mode is a setting that is intended for the use of Developers to keep track
 				window.location.reload();
 			});
 		});
-	</script>
-	<!-- End of Rocket.Chat Livechat Script -->
-   ```
+	   </script>
+      ```
 
 2. Doing this should change your default Omnichannel department.
 
