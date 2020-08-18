@@ -20,7 +20,7 @@
   * **Code:** 200 <br />
     **Content:** `{ result: "Handover request completed successfully" }`
 
-* **Active Live Agent Session Error Response:**
+* **Error Response (Active Live Agent Session):**
 
   * **Code:** 406 NOT ACCEPTABLE <br />
     **Content:** <br/>
