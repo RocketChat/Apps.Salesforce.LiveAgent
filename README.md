@@ -8,6 +8,24 @@
 
 Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
+---
+
+## Index
+- [Salesforce Live Agent Integration App](#salesforce-live-agent-integration-app)
+  - [Index](#index)
+  - [Prerequisites](#prerequisites)
+  - [App Installation](#app-installation)
+  - [App Configuration](#app-configuration)
+  - [Chat Bot Configuration](#chat-bot-configuration)
+  - [App Usage](#app-usage)
+  - [REST API Endpoints](#rest-api-endpoints)
+- [Some Optional App Configurations](#some-optional-app-configurations)
+  - [Customising app responses](#customising-app-responses)
+  - [Debug Mode](#debug-mode)
+  - [Setting a default Omnichannel department](#setting-a-default-omnichannel-department)
+
+---
+
 ## Prerequisites
 
 1. Salesforce Org with Live Agent Setup.
@@ -139,36 +157,36 @@ Debug mode is a setting that is intended for the use of Developers to keep track
 
 1. If you have the pre-chat form disabled in your Live Chat or you just want to set a default department to route all new visitor to your preferred Omnichannel department, follow these instructions:
 
-	- Insert your preferred **Department name** to the following function, and this function to your Live Chat installation script:
+	- Insert your preferred **Department name** to the following function, and this function to your `Live Chat installation script`:
 
 		```
 	   	RocketChat(function() {
-			this.setDepartment('<INSERT YOUR BOT DEPARMENT NAME HERE>');
-			this.onChatEnded(function() {
-				window.location.reload();
-			});
-		});
+            this.setDepartment('<INSERT YOUR BOT DEPARMENT NAME HERE>');
+            this.onChatEnded(function() {
+               window.location.reload();
+            });
+		   });
 	   ```
 	- For example, your script should look like the following, after adding the API function:
 
-		```
-   		<script type="text/javascript">
-		(function(w, d, s, u) {
-			w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
-			var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
-			j.async = true; j.src = 'http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000';
-			h.parentNode.insertBefore(j, h);
-		})(window, document, 'script', 'http://localhost:3000/livechat');
+      ```
+         <script type="text/javascript">
+         (function(w, d, s, u) {
+            w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
+            var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
+            j.async = true; j.src = 'http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000';
+            h.parentNode.insertBefore(j, h);
+         })(window, document, 'script', 'http://localhost:3000/livechat');
 
-		RocketChat(function() {
-			this.setDepartment('botDepartment');
-			this.onChatEnded(function() {
-				window.location.reload();
-    			});
-		});
-		</script>
-   	```
+         RocketChat(function() {
+            this.setDepartment('botDepartment');
+            this.onChatEnded(function() {
+               window.location.reload();
+               });
+         });
+		   </script>
+      ```
 
-1. Doing this should change your default Omnichannel department.
+2. Doing this should change your default Omnichannel department.
 
 ---
