@@ -169,4 +169,6 @@ Debug mode is a setting that is intended for the use of Developers to keep track
 		</script>
    	```
 
+1. Doing this should change your default Omnichannel department.
+
 ---
