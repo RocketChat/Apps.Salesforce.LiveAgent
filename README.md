@@ -20,6 +20,7 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
   - [App Usage](#app-usage)
   - [REST API Endpoints](#rest-api-endpoints)
 - [Some Optional App Configurations](#some-optional-app-configurations)
+  - [Setting a default welcome message (Auto Greeting)](#setting-a-default-welcome-message-auto-greeting)
   - [Customising app responses](#customising-app-responses)
   - [Debug Mode](#debug-mode)
   - [Setting a default Omnichannel department](#setting-a-default-omnichannel-department)
@@ -136,18 +137,24 @@ REST API Endpoints can be used to trigger specific actions in the app. You can g
 
 # Some Optional App Configurations
 
+## Setting a default welcome message (Auto Greeting)
+
+1. Welcome message is automatically sent to the Live Chat visitor on the successfull initiation of his/her chat session.
+
+2. To enable this message, go to your **Salesforce Dashboard** -> **Setup (In Gear Icon)** -> **Quick Find Search** -> **Search for - Chat Buttons & Invitations** -> **Click on the button you have setup with the app** -> **Click on Edit** -> **Change Auto Greeting to message you want** -> **Click Save**
+
 ## Customising app responses
 
 1. You can go to the app setting page and customise app responses as per your requirement. You can customise the app responses for the following events:
 
-+ Live Agent Chat Ended.
-+ Live Agent Queue Position.
-+ Live Agent Queue Empty.
-+ Live Agent No Queue.
-+ No Live Agent Available.
++ Live Agent Events:
+    + User placed in a queue.
+    + User is next up in queue.
+    + No Queue.
+    + No Agent Available.
 + Technical Difficulty.
 
-2. To change this responses, just go to the app setting page and scroll down to the one you want to change. Change the message in the field(s) and click on **Save Changes**. For some messages that has a variable in them, you can use `%s` as a placeholder for that variable.
+1. To change this responses, just go to the app setting page and scroll down to the one you want to change. Change the message in the field(s) and click on **Save Changes**. For some messages that has a variable in them, you can use `%s` as a placeholder for that variable.
 
 ## Debug Mode
 
