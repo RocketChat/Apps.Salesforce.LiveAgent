@@ -60,15 +60,15 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
    `rc-apps deploy --url <YOUR SERVER URL> --username <YOUR ADMIN USERNAME> --password <YOUR ADMIN PASSWORD>`
 
-1. In Rocket Chat Server, you can now go to **Administration** -> **Apps** and you access our app from there.
+1. In your Rocket Chat Server, you can now go to **Administration** -> **Apps** and access the app from there.
 
 ---
 
 ## App Configuration
 
-1. **Salesforce Bot Username & Password** and **Handover Target Department Name**
+1. **Salesforce Bot Username & Password** and **Salesforce Bot Department Name**
 
-   - Create a new user from **Administration** -> **Users**, after filling all the details add, `bot` and `livechat-agent` roles. Paste this user's username and password in respective fields in app setting.
+   - Create a new user from **Administration** -> **Users**. Fill out all the details as you want, after filling all the details add, `bot` and `livechat-agent` to the **Roles** at the end of the form and hit **Save**. Paste this user's username and password in respective fields on app setting page.
 
    - Then go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our new bot user to that deparment. Paste this department name in **Handover Target Department Name** setting field. **Note:** Make sure to never add any other user other than the one we just added in this department.
 
@@ -86,41 +86,41 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
 5. **Chat Bot Configurations**
 
-   - Please refer to the following section to configure this setting.
+   - Please refer to the following section to configure these settings:
 
 ---
 
 ## Chat Bot Configuration
 
-1. This app requires a Bot user to be used along side Salesforce Live Agent user bot. This bot user can either be used to initiate a session with Live Agent or incase, Live Agent ends chat event, app automatically performs a handover to this bot. You can use any existing bot user or create a new one.
+1. This app requires a Bot user to be used along side Salesforce Live Agent user bot. This bot user can either be used to initiate a session with Live Agent or incase of Live Agent end chat event, app automatically performs a handover to this bot. You can use any existing bot user or create a new one.
 
 2. To create a new Chat Bot user, go to **Administration** -> **Users**, after filling all the details add, `bot` and `livechat-agent` roles. Paste this user's username and password in Chat Bot fields in app setting.
 
 3. Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to this new deparment. Paste this department name in `Chat Bot Department Name` field in app setting
 
-4. Then go to **Administration** -> **Livechat** -> **Routing**. There enable Assign new conversations to bot agent Setting. This setting will automatically assign a new Live Chat visitor to a bot user, depending on which department the visior is in.
+4. Then go to **Administration** -> **Livechat** -> **Routing**. There enable **Assign new conversations to bot agent** Setting. This setting will automatically assign a new Live Chat visitor to a bot user, depending on which department the visior is in.
 
-5. This ends our required app configuration. Following are the instructions on how to use the app.
+5. This ends our required app configuration. Following are the instructions on how to use the app:
 
 ---
 
 ## App Usage
 
-1. App should be running right away once you complete all required above configurations. Make sure your Live Agent is online, before making any session request.
+1. App should be running right away once you complete all required above configurations. However before making a new Chat request, make sure your Salesforce Live Agent is **Online**:
 
-   - To change your Live Agent status to online, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> On the right hand side, you will find an icon named **App Launcher** <img width="32" alt="Screenshot 2020-07-08 at 9 03 50 PM" src="https://user-images.githubusercontent.com/41849970/86938913-9939a580-c15e-11ea-8544-9aefab50555b.png"> -> Click on it and go to **Service Console**.
+   - To change your Live Agent status to online, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> On the right hand side, you will find an icon named **App Launcher** (<img width="32" alt="Screenshot 2020-07-08 at 9 03 50 PM" src="https://user-images.githubusercontent.com/41849970/86938913-9939a580-c15e-11ea-8544-9aefab50555b.png">) -> Click on this icon and go to **Service Console**.
 
-   - On Bottom Bar, click on **Omni-channel** and change status from `Offline` to `Available - Chat`.
+   - Once you are in Service Console, look at the bottom bar. From the bottom bar, click on **Omni-channel** and change status from `Offline` to `Available - Chat`.
 
-1. Once your Live Agent is online and ready to take new rquests. Go to your Rocket Chat Live Chat widget to initiate a session. Now you can initiate in either of the two ways:
+1. Once your Live Agent is online and ready to take new rquests. Go to your Rocket Chat Live Chat widget to initiate a session. Now you can initiate a new session in either of the two ways:
 
-	1. You can use the department with the Chat Bot user. If you are using this department and the Chat Bot is assigned as your Live Chat agent, you can send the following message to initiate a new session with Salesforce Liveagent:
+	1. **Using the department with the Chat Bot user:** If you are using the chatbot department and the Chat Bot is assigned as your Live Chat agent, send the following message to initiate a new session with Salesforce Liveagent:
 
 	   ```
 	   initiate_salesforce_session
 	   ```
 
-	1. You can use the department with Live Agent Bot user. If you are using this department, once you send any message and the Live Agent Bot user is assigned to you. It will automatically initiate a new session for you with the Salesforce Liveagent. In case the Live agent ends your chat or there is some technical error, you will be automatically handover to the Chat Bot Department.
+	1. **Using the department with Live Agent Bot user:**. If you are using this department, sending any message will automatically initiate a new session for you with the Salesforce Liveagent. In case the Live agent ends your chat or there is some technical error, you will be automatically handover to the Chat Bot Department.
 
 ---
 
