@@ -141,7 +141,7 @@ REST API Endpoints can be used to trigger specific actions in the app. You can g
 
 1. Welcome message is automatically sent to the Live Chat visitor on the successfull initiation of his/her chat session.
 
-2. To enable this message, go to your **Salesforce Dashboard** -> **Setup (In Gear Icon)** -> **Quick Find Search** -> **Search for - Chat Buttons & Invitations** -> **Click on the button you have setup with the app** -> **Click on Edit** -> **Change Auto Greeting to message you want** -> **Click Save**
+2. To enable this message, go to your **Salesforce Dashboard** -> **Setup (In Gear Icon)** -> **Quick Find Search** -> **Search for - Chat Buttons & Invitations** -> **Click on the button you have setup with the app** -> **Click on Edit** -> **Change Auto Greeting field value to the message of your choice** -> **Click on Save**
 
 ## Customising app responses
 
