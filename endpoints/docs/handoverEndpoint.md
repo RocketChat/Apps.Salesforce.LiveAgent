@@ -14,18 +14,6 @@
       http://localhost:3000/api/apps/public/0d3ac5b3-dd0b-43d3-924a-5a7433902589/handover \
       -d '{ "roomId": "uz7dyhqax2LNfaQBo", "targetDepartmentName": "salesforce" }'
     ```
-    **HTTP**
-
-  ```HTTP
-    POST /api/apps/public/0d3ac5b3-dd0b-43d3-924a-5a7433902589/handover HTTP/1.1
-    Host: localhost:3000
-    Content-Type: application/json
-
-    {
-        "roomId": "SNcSAm5czti6MbeQ3",
-        "targetDepartmentName": "salesforce"
-    }
-  ```
 
 * **Success Response:**
 
