@@ -159,33 +159,43 @@ Debug mode is a setting that is intended for the use of Developers to keep track
 
 	- Insert your preferred **Department name** to the following function, and this function to your `Live Chat installation script`:
 
-		```
-	   	RocketChat(function() {
-            this.setDepartment('<INSERT YOUR BOT DEPARMENT NAME HERE>');
-            this.onChatEnded(function() {
-               window.location.reload();
-            });
-		   });
-	   ```
+      ```
+      RocketChat(function () {
+			this.setDepartment("botDepartment");
+			this.onChatEnded(function () {
+				window.location.reload();
+			});
+		});
+      ```
+
 	- For example, your script should look like the following, after adding the API function:
 
       ```
-         <script type="text/javascript">
-         (function(w, d, s, u) {
-            w.RocketChat = function(c) { w.RocketChat._.push(c) }; w.RocketChat._ = []; w.RocketChat.url = u;
-            var h = d.getElementsByTagName(s)[0], j = d.createElement(s);
-            j.async = true; j.src = 'http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000';
-            h.parentNode.insertBefore(j, h);
-         })(window, document, 'script', 'http://localhost:3000/livechat');
+   <!-- Start of Rocket.Chat Livechat Script -->
+	<script type="text/javascript">
+		(function (w, d, s, u) {
+			w.RocketChat = function (c) {
+				w.RocketChat._.push(c);
+			};
+			w.RocketChat._ = [];
+			w.RocketChat.url = u;
+			var h = d.getElementsByTagName(s)[0],
+				j = d.createElement(s);
+			j.async = true;
+			j.src =
+				"http://localhost:3000/livechat/rocketchat-livechat.min.js?_=201903270000";
+			h.parentNode.insertBefore(j, h);
+		})(window, document, "script", "http://localhost:3000/livechat");
 
-         RocketChat(function() {
-            this.setDepartment('botDepartment');
-            this.onChatEnded(function() {
-               window.location.reload();
-               });
-         });
-		   </script>
-      ```
+		RocketChat(function () {
+			this.setDepartment("botDepartment");
+			this.onChatEnded(function () {
+				window.location.reload();
+			});
+		});
+	</script>
+	<!-- End of Rocket.Chat Livechat Script -->
+   ```
 
 2. Doing this should change your default Omnichannel department.
 
