@@ -25,16 +25,10 @@ export class PostMessageClassInitiate {
 			return;
 		}
 
-		const lmessage: ILivechatMessage = this.message;
-		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
-		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
-
 		if (this.message.text === 'initiate_salesforce_session') {
 			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.message, this.read, this.http, this.persistence, this.modify);
 			await initiateSalesforceSession.exec();
-		}
-
-		if (LcAgent.username === salesforceBotUsername) {
+		} else {
 			const liveAgentSession = new LiveAgentSession(this.app, this.message, this.read, this.http, this.persistence);
 			await liveAgentSession.exec();
 		}

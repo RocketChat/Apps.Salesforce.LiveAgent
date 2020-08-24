@@ -2,6 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
@@ -72,12 +73,18 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
+		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
+
 		await sendDebugLCMessage(this.read, this.modify, this.message.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, LcAgent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
 				console.log(InfoLogs.LIVEAGENT_SESSION_ID_GENERATED);
 				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, LcAgent);
 				const { id, affinityToken, key } = res;
+
+				const sessionTokens = { id, affinityToken, key };
+				await this.persistence.createWithAssociation(sessionTokens, assoc);
+
 				await sendChatRequest(
 					this.http,
 					salesforceChatApiEndpoint,
@@ -123,10 +130,12 @@ export class InitiateSalesforceSession {
 										this.app,
 										this.read,
 										this.modify,
+										this.persistence,
 										this.message,
 										pullMessagesContentParsed,
 										technicalDifficultyMessage,
 										LcAgent,
+										assoc,
 									);
 								} else {
 									// No error in initiating liveagent session. Executing Function to check for agent response.
@@ -141,7 +150,6 @@ export class InitiateSalesforceSession {
 										rocketChatServerUrl,
 										salesforceBotUsername,
 										salesforceBotPassword,
-										id,
 										affinityToken,
 										key,
 										targetDeptName,
@@ -149,6 +157,7 @@ export class InitiateSalesforceSession {
 										LAQueueEmptyMessage,
 										LAQueuePositionMessage,
 										technicalDifficultyMessage,
+										assoc,
 									);
 
 									await checkChatStatus.checkCurrentChatStatus();
@@ -156,6 +165,7 @@ export class InitiateSalesforceSession {
 							})
 							.catch(async (error) => {
 								console.log(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
+								await this.persistence.removeByAssociation(assoc);
 								await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 								await sendDebugLCMessage(
 									this.read,
@@ -168,6 +178,7 @@ export class InitiateSalesforceSession {
 					})
 					.catch(async (error) => {
 						console.log(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
+						await this.persistence.removeByAssociation(assoc);
 						await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 						await sendDebugLCMessage(
 							this.read,
@@ -180,6 +191,7 @@ export class InitiateSalesforceSession {
 			})
 			.catch(async (error) => {
 				console.log(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
+				await this.persistence.removeByAssociation(assoc);
 				await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`, LcAgent);
 			});

@@ -1,7 +1,9 @@
 import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
+import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILivechatRoom';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
@@ -42,6 +44,13 @@ export class LiveAgentSession {
 			}
 
 			if (this.message.text !== 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
+				const lroom: ILivechatRoom = this.message.room as ILivechatRoom;
+				const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
+
+				if (LcAgent.username !== salesforceBotUsername) {
+					return;
+				}
+
 				let messageText = '';
 				if (this.message.text) {
 					messageText = this.message.text;

@@ -1,12 +1,13 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
+import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
 import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssignedHandler';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
+import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
 import { CheckAgentStatusDirectCallback } from './DirectCheckAgentStatusCallback';
@@ -20,12 +21,12 @@ export class CheckChatStatusDirect {
 		private data: ILivechatEventContext,
 		private read: IRead,
 		private salesforceChatApiEndpoint: string,
-		private id: string,
 		private affinityToken: string,
 		private key: string,
 		private LAQueueEmptyMessage: string,
 		private LAQueuePositionMessage: string,
 		private technicalDifficultyMessage: string,
+		private assoc: RocketChatAssociationRecord,
 	) {}
 
 	public async checkCurrentChatStatus() {
@@ -46,7 +47,13 @@ export class CheckChatStatusDirect {
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
-					await this.checkCurrentChatStatus();
+					const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+					if (persisantAffinity !== null && persistantKey !== null) {
+						await this.checkCurrentChatStatus();
+					} else {
+						await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
+						return;
+					}
 				} else {
 					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
@@ -70,10 +77,6 @@ export class CheckChatStatusDirect {
 					if (isChatAccepted === true) {
 						console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
 
-						const sessionTokens = { id: this.id, affinityToken: this.affinityToken, key: this.key };
-						const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
-						await this.persistence.createWithAssociation(sessionTokens, assoc);
-
 						const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 						await salesforceAgentAssigned.exec();
 						return;
@@ -94,11 +97,23 @@ export class CheckChatStatusDirect {
 							await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 							return;
 						} else {
-							await this.checkCurrentChatStatus();
+							const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+							if (persisantAffinity !== null && persistantKey !== null) {
+								await this.checkCurrentChatStatus();
+							} else {
+								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
+								return;
+							}
 						}
 					} else {
 						console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
-						await this.checkCurrentChatStatus();
+						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+						if (persisantAffinity !== null && persistantKey !== null) {
+							await this.checkCurrentChatStatus();
+						} else {
+							await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
+							return;
+						}
 					}
 				}
 			})

@@ -1,11 +1,13 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
+import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
+import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
 import { checkAgentStatusCallbackData, checkAgentStatusCallbackError } from './CheckAgentStatusCallback';
@@ -22,7 +24,6 @@ export class CheckChatStatus {
 		private rocketChatServerUrl: string,
 		private salesforceBotUsername: string,
 		private salesforceBotPassword: string,
-		private id: string,
 		private affinityToken: string,
 		private key: string,
 		private targetDeptName: string,
@@ -30,6 +31,7 @@ export class CheckChatStatus {
 		private LAQueueEmptyMessage: string,
 		private LAQueuePositionMessage: string,
 		private technicalDifficultyMessage: string,
+		private assoc: RocketChatAssociationRecord,
 	) {}
 
 	public async checkCurrentChatStatus() {
@@ -37,11 +39,17 @@ export class CheckChatStatus {
 			.then(async (response) => {
 				if (response.statusCode === 403) {
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
-					await checkAgentStatusCallbackError('Chat session expired.', this.modify, this.message, this.LcAgent);
+					await checkAgentStatusCallbackError('Chat session expired.', this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
-					await this.checkCurrentChatStatus();
+					const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+					if (persisantAffinity !== null && persistantKey !== null) {
+						await this.checkCurrentChatStatus();
+					} else {
+						await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
+						return;
+					}
 				} else {
 					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
@@ -67,20 +75,18 @@ export class CheckChatStatus {
 						await checkAgentStatusCallbackData(
 							this.app,
 							this.modify,
+							this.persistence,
 							this.message,
 							this.LcAgent,
 							response,
 							this.http,
-							this.persistence,
 							this.read,
 							this.rocketChatServerUrl,
 							this.salesforceBotUsername,
 							this.salesforceBotPassword,
-							this.id,
-							this.affinityToken,
-							this.key,
 							this.targetDeptName,
 							this.technicalDifficultyMessage,
+							this.assoc,
 						);
 						return;
 					} else if (isChatAccepted === false) {
@@ -91,26 +97,38 @@ export class CheckChatStatus {
 								const NoLiveagentAvailableMessage: string = (
 									await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
 								).value;
-								await checkAgentStatusCallbackError(NoLiveagentAvailableMessage, this.modify, this.message, this.LcAgent);
+								await checkAgentStatusCallbackError(NoLiveagentAvailableMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
 								return;
 							}
-							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
+							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
 							return;
 						} else if (isChatEnded === true) {
-							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
+							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
 							return;
 						} else {
-							await this.checkCurrentChatStatus();
+							const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+							if (persisantAffinity !== null && persistantKey !== null) {
+								await this.checkCurrentChatStatus();
+							} else {
+								await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
+								return;
+							}
 						}
 					} else {
 						console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
-						await this.checkCurrentChatStatus();
+						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+						if (persisantAffinity !== null && persistantKey !== null) {
+							await this.checkCurrentChatStatus();
+						} else {
+							await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
+							return;
+						}
 					}
 				}
 			})
 			.catch(async (error) => {
 				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
-				await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.message, this.LcAgent);
+				await checkAgentStatusCallbackError(this.technicalDifficultyMessage, this.modify, this.persistence, this.message, this.LcAgent, this.assoc);
 				return;
 			});
 	}

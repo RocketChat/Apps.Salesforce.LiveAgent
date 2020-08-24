@@ -1,6 +1,7 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
@@ -70,6 +71,8 @@ export class InitiateSalesforceSessionDirect {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
+		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
+
 		await sendDebugLCMessage(this.read, this.modify, this.data.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
@@ -82,6 +85,10 @@ export class InitiateSalesforceSessionDirect {
 					this.data.agent,
 				);
 				const { id, affinityToken, key } = res;
+
+				const sessionTokens = { id, affinityToken, key };
+				await this.persistence.createWithAssociation(sessionTokens, assoc);
+
 				await sendChatRequest(
 					this.http,
 					salesforceChatApiEndpoint,
@@ -127,6 +134,7 @@ export class InitiateSalesforceSessionDirect {
 									switch (pullMessagesContentParsed.messages[0].message.reason) {
 										case 'Unavailable':
 											console.log(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
+											await this.persistence.removeByAssociation(assoc);
 											const NoLiveagentAvailableMessage: string = (
 												await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
 											).value;
@@ -135,6 +143,7 @@ export class InitiateSalesforceSessionDirect {
 
 										case 'NoPost':
 											console.log(ErrorLogs.APP_CONFIGURATION_INVALID);
+											await this.persistence.removeByAssociation(assoc);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
@@ -147,6 +156,7 @@ export class InitiateSalesforceSessionDirect {
 
 										case 'InternalFailure':
 											console.log(ErrorLogs.SALESFORCE_INTERNAL_FAILURE);
+											await this.persistence.removeByAssociation(assoc);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
@@ -159,6 +169,7 @@ export class InitiateSalesforceSessionDirect {
 
 										default:
 											console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE);
+											await this.persistence.removeByAssociation(assoc);
 											await sendDebugLCMessage(
 												this.read,
 												this.modify,
@@ -179,18 +190,19 @@ export class InitiateSalesforceSessionDirect {
 										this.data,
 										this.read,
 										salesforceChatApiEndpoint,
-										id,
 										affinityToken,
 										key,
 										LAQueueEmptyMessage,
 										LAQueuePositionMessage,
 										technicalDifficultyMessage,
+										assoc,
 									);
 									await checkChatStatusDirect.checkCurrentChatStatus();
 								}
 							})
 							.catch(async (error) => {
 								console.log(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
+								await this.persistence.removeByAssociation(assoc);
 								await sendDebugLCMessage(
 									this.read,
 									this.modify,
@@ -203,6 +215,7 @@ export class InitiateSalesforceSessionDirect {
 					})
 					.catch(async (error) => {
 						console.log(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
+						await this.persistence.removeByAssociation(assoc);
 						await sendDebugLCMessage(
 							this.read,
 							this.modify,
@@ -215,6 +228,7 @@ export class InitiateSalesforceSessionDirect {
 			})
 			.catch(async (error) => {
 				console.log(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
+				await this.persistence.removeByAssociation(assoc);
 				await sendDebugLCMessage(
 					this.read,
 					this.modify,
