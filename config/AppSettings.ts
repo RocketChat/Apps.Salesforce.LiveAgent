@@ -97,12 +97,21 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
+		id: AppSettingId.FINDING_LIVEAGENT_MESSAGE,
+		public: true,
+		type: SettingType.STRING,
+		packageValue: 'Finding an agent for you.',
+		i18nLabel: 'Finding Live Agent Message',
+		i18nDescription: 'Enter message to show to the user when the app starts looking for an active liveagent.',
+		required: true,
+	},
+	{
 		id: AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
 		packageValue: 'This session has been closed. Have a nice day.',
 		i18nLabel: 'Live Agent Chat Ended Message',
-		i18nDescription: 'Enter message to show to the user when Live Agent ends chat session.',
+		i18nDescription: 'Enter message to show to the user when liveagent ends chat session.',
 		required: true,
 	},
 	{

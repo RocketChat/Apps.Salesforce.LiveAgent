@@ -64,6 +64,8 @@ export class InitiateSalesforceSession {
 			.value;
 		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE)).value;
 		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_EMPTY_MESSAGE)).value;
+		const FindingLiveagentMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.FINDING_LIVEAGENT_MESSAGE))
+			.value;
 
 		const LcVisitor: IVisitor = lroom.visitor;
 		const LcVisitorName = LcVisitor.name;
@@ -84,6 +86,7 @@ export class InitiateSalesforceSession {
 
 				const sessionTokens = { id, affinityToken, key };
 				await this.persistence.createWithAssociation(sessionTokens, assoc);
+				await sendLCMessage(this.modify, this.message.room, FindingLiveagentMessage, LcAgent);
 
 				await sendChatRequest(
 					this.http,

@@ -9,6 +9,7 @@ export enum AppSettingId {
 	SALESFORCE_ORGANISATION_ID = 'salesforce_organisation_id',
 	SALESFORCE_DEPLOYMENT_ID = 'salesforce_deployment_id',
 	SALESFORCE_BUTTON_ID = 'salesforce_button_id',
+	FINDING_LIVEAGENT_MESSAGE = 'finding_liveagent_message',
 	LIVEAGENT_CHAT_ENDED_MESSAGE = 'la_chat_ended_message',
 	LIVEAGENT_QUEUE_POSITION_MESSAGE = 'la_queue_position_message',
 	LIVEAGENT_QUEUE_EMPTY_MESSAGE = 'la_queue_empty_message',
