@@ -16,6 +16,7 @@ import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettings } from './config/AppSettings';
 import { AvailabilityEndpoint } from './endpoints/AvailabilityEndpoint';
 import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
+import { AppSettingId } from './enum/AppSettingId';
 import { AgentAssignedClassInitiate } from './lib/AgentAssignedClassInitiateHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 
@@ -30,6 +31,11 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	}
 
 	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
+		const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+		if (data.agent.username !== salesforceBotUsername) {
+			return;
+		}
+
 		const salesforceAgentAssigned = new AgentAssignedClassInitiate(this, data, read, http, persistence, modify);
 		await salesforceAgentAssigned.exec();
 	}

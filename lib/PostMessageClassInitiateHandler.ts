@@ -6,6 +6,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { InitiateSalesforceSession } from '../handlers/InitiateSalesforceSessionHandler';
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
+import { sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 
 export class PostMessageClassInitiate {
 	constructor(
@@ -25,8 +26,14 @@ export class PostMessageClassInitiate {
 			return;
 		}
 
+		const FindingLiveagentMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.FINDING_LIVEAGENT_MESSAGE)).value;
+		const lmessage: ILivechatMessage = this.message;
+		const lroom: ILivechatRoom = lmessage.room as ILivechatRoom;
+		const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
+
 		if (this.message.text === 'initiate_salesforce_session') {
 			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.message, this.read, this.http, this.persistence, this.modify);
+			await sendLCMessage(this.modify, this.message.room, FindingLiveagentMessage, LcAgent);
 			await initiateSalesforceSession.exec();
 		} else {
 			const liveAgentSession = new LiveAgentSession(this.app, this.message, this.read, this.http, this.persistence);

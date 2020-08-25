@@ -64,8 +64,8 @@ export class InitiateSalesforceSession {
 			.value;
 		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE)).value;
 		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_EMPTY_MESSAGE)).value;
-		const FindingLiveagentMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.FINDING_LIVEAGENT_MESSAGE))
-			.value;
+		// const FindingLiveagentMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.FINDING_LIVEAGENT_MESSAGE))
+		// 	.value;
 
 		const LcVisitor: IVisitor = lroom.visitor;
 		const LcVisitorName = LcVisitor.name;
@@ -86,7 +86,8 @@ export class InitiateSalesforceSession {
 
 				const sessionTokens = { id, affinityToken, key };
 				await this.persistence.createWithAssociation(sessionTokens, assoc);
-				await sendLCMessage(this.modify, this.message.room, FindingLiveagentMessage, LcAgent);
+				// await sendLCMessage(this.modify, this.message.room, FindingLiveagentMessage, LcAgent);
+				this.sleep(5000);
 
 				await sendChatRequest(
 					this.http,
@@ -199,4 +200,12 @@ export class InitiateSalesforceSession {
 				await sendDebugLCMessage(this.read, this.modify, this.message.room, `${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`, LcAgent);
 			});
 	}
+
+	private sleep(milliseconds) {
+		const date = Date.now();
+		let currentDate;
+		do {
+		  currentDate = Date.now();
+		} while (currentDate - date < milliseconds);
+	  }
 }
