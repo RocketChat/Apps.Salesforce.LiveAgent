@@ -19,7 +19,6 @@ export class AgentAssignedClassInitiate {
 	) {}
 
 	public async exec() {
-		this.sleep(2000);
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
@@ -35,12 +34,4 @@ export class AgentAssignedClassInitiate {
 			await salesforceAgentAssigned.exec();
 		}
 	}
-
-	private sleep(milliseconds) {
-		const date = Date.now();
-		let currentDate;
-		do {
-		  currentDate = Date.now();
-		} while (currentDate - date < milliseconds);
-	  }
 }
