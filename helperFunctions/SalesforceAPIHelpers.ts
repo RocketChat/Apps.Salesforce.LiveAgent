@@ -91,6 +91,15 @@ export async function pullMessages(http: IHttp, liveAgentUrl: string, affinityTo
 	};
 	try {
 		const response = await http.get(pullMessagesEndpoint, pullMessagesHttpRequest);
+
+		if (response === undefined) {
+			// Undefined response from Salesforce
+			return {
+				statusCode: 204,
+				content: '{}',
+			};
+		}
+
 		return response;
 	} catch (error) {
 		throw Error(error);
