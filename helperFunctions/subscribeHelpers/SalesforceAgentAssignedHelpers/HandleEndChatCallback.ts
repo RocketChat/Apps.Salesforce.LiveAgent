@@ -2,8 +2,10 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { BlockElementType, ButtonStyle, ConditionalBlockFiltersEngine, IButtonElement, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit';
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
+import { InfoLogs } from '../../../enum/InfoLogs';
 import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 import { getAuthTokens, setBotStatus } from '../../RocketChatAPIHelpers';
@@ -24,35 +26,67 @@ export class HandleEndChatCallback {
 
 	public handleEndChat = async () => {
 		await this.persistence.removeByAssociation(this.assoc);
-		await sendLCMessage(this.modify, this.data.room, this.endChatReason, this.data.agent);
 
 		const chatBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHAT_BOT_USERNAME)).value;
 		const chatBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHAT_BOT_PASSWORD)).value;
 		const CBHandoverDepartmentName: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CB_HANDOVER_DEPARTMENT_NAME)).value;
 
-		await getAuthTokens(this.http, this.rocketChatServerUrl, chatBotUsername, chatBotPassword)
-			.then(async (loginRes) => {
-				const { authToken, userId } = loginRes;
-				await setBotStatus(this.http, this.rocketChatServerUrl, authToken, userId)
-					.then(async () => {
-						await performHandover(this.modify, this.read, this.data.room.id, CBHandoverDepartmentName);
-					})
-					.catch(async (botStatusErr) => {
-						console.log(ErrorLogs.SETTING_CHATBOT_STATUS_ERROR, botStatusErr);
-						await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
-						await sendDebugLCMessage(
-							this.read,
-							this.modify,
-							this.data.room,
-							`${ErrorLogs.SETTING_CHATBOT_STATUS_ERROR}: ${botStatusErr}`,
-							this.data.agent,
-						);
-					});
-			})
-			.catch(async (botLoginErr) => {
-				console.log(ErrorLogs.LOGIN_CHATBOT_ERROR, botLoginErr);
-				await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
-				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.LOGIN_CHATBOT_ERROR}: ${botLoginErr}`, this.data.agent);
-			});
+		if (chatBotUsername && chatBotPassword && CBHandoverDepartmentName) {
+			await sendLCMessage(this.modify, this.data.room, this.endChatReason, this.data.agent);
+			await getAuthTokens(this.http, this.rocketChatServerUrl, chatBotUsername, chatBotPassword)
+				.then(async (loginRes) => {
+					const { authToken, userId } = loginRes;
+					await setBotStatus(this.http, this.rocketChatServerUrl, authToken, userId)
+						.then(async () => {
+							await performHandover(this.modify, this.read, this.data.room.id, CBHandoverDepartmentName);
+						})
+						.catch(async (botStatusErr) => {
+							console.log(ErrorLogs.SETTING_CHATBOT_STATUS_ERROR, botStatusErr);
+							await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
+							await sendDebugLCMessage(
+								this.read,
+								this.modify,
+								this.data.room,
+								`${ErrorLogs.SETTING_CHATBOT_STATUS_ERROR}: ${botStatusErr}`,
+								this.data.agent,
+							);
+						});
+				})
+				.catch(async (botLoginErr) => {
+					console.log(ErrorLogs.LOGIN_CHATBOT_ERROR, botLoginErr);
+					await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
+					await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.LOGIN_CHATBOT_ERROR}: ${botLoginErr}`, this.data.agent);
+				});
+		} else {
+			try {
+				console.log(InfoLogs.CHATBOT_NOT_CONFIGURED);
+				const messageBuilder = this.modify.getCreator().startMessage();
+
+				const btn: IButtonElement = {
+					type: BlockElementType.BUTTON,
+					text: {
+						type: TextObjectType.PLAINTEXT,
+						text: 'Close Chat',
+					},
+					actionId: 'SFLAIA_CLOSE_ROOM_BUTTON',
+					style: ButtonStyle.DANGER,
+				};
+
+				const blocks = this.modify.getCreator().getBlockBuilder();
+				const innerBlocks = this.modify.getCreator().getBlockBuilder();
+
+				blocks.addConditionalBlock(
+					innerBlocks.addActionsBlock({
+						elements: [btn],
+					}),
+					{ engine: [ConditionalBlockFiltersEngine.LIVECHAT] },
+				);
+
+				messageBuilder.setRoom(this.data.room).setText(this.endChatReason).setSender(this.data.agent).addBlocks(blocks);
+				await this.modify.getCreator().finish(messageBuilder);
+			} catch (error) {
+				throw new Error(error);
+			}
+		}
 	}
 }

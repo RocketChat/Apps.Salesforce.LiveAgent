@@ -13,13 +13,15 @@ import { App } from '@rocket.chat/apps-engine/definition/App';
 import { ILivechatEventContext, IPostLivechatAgentAssigned } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
+import { IUIKitLivechatInteractionHandler, IUIKitResponse, UIKitLivechatBlockInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
 import { AppSettings } from './config/AppSettings';
 import { AvailabilityEndpoint } from './endpoints/AvailabilityEndpoint';
 import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
 import { AgentAssignedClassInitiate } from './lib/AgentAssignedClassInitiateHandler';
+import { LivechatBlockActionClassInitiate } from './lib/LivechatBlockActionHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 
-export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned {
+export class SalesforcePluginApp extends App implements IPostMessageSent, IPostLivechatAgentAssigned, IUIKitLivechatInteractionHandler {
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
 		super(info, logger, accessors);
 	}
@@ -27,6 +29,19 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	public async initialize(configurationExtend: IConfigurationExtend, environmentRead: IEnvironmentRead): Promise<void> {
 		await this.extendConfiguration(configurationExtend);
 		this.getLogger().log('App Initialized');
+	}
+
+	public async executeLivechatBlockActionHandler(
+		context: UIKitLivechatBlockInteractionContext,
+		read: IRead,
+		http: IHttp,
+		persistence: IPersistence,
+		modify: IModify,
+	): Promise<IUIKitResponse> {
+		const livechatBlockActionClassInitiate = new LivechatBlockActionClassInitiate(this, context, read, http, persistence, modify);
+		await livechatBlockActionClassInitiate.exec();
+
+		return context.getInteractionResponder().successResponse();
 	}
 
 	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {

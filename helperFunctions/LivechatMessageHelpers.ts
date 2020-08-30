@@ -5,7 +5,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 
 export async function sendLCMessage(modify: IModify, room: IRoom, messageText: string, sender: IUser) {
 	try {
-		const messageBuilder = modify.getNotifier().getMessageBuilder();
+		const messageBuilder = modify.getCreator().startMessage();
 		messageBuilder.setRoom(room).setText(messageText).setSender(sender);
 		await modify.getCreator().finish(messageBuilder);
 	} catch (error) {
@@ -20,7 +20,7 @@ export async function sendDebugLCMessage(read: IRead, modify: IModify, room: IRo
 			return;
 		}
 
-		const messageBuilder = modify.getNotifier().getMessageBuilder();
+		const messageBuilder = modify.getCreator().startMessage();
 		messageBuilder.setRoom(room).setText(messageText).setSender(sender);
 		await modify.getCreator().finish(messageBuilder);
 	} catch (error) {
