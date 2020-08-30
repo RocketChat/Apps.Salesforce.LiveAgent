@@ -29,7 +29,7 @@ export class LiveAgentSession {
 				return;
 			}
 
-			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
+			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
 			if (this.message.text === 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {

@@ -18,7 +18,7 @@ export class CheckAgentStatusDirectCallback {
 	) {}
 
 	public async checkAgentStatusCallbackError(error: string) {
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
+		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
 
 		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
 		try {

@@ -73,7 +73,7 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.message.room.id);
+		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
 
 		await sendDebugLCMessage(this.read, this.modify, this.message.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, LcAgent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)

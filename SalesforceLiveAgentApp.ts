@@ -40,7 +40,6 @@ export class SalesforcePluginApp extends App implements IPostMessageSent, IPostL
 	): Promise<IUIKitResponse> {
 		const livechatBlockActionClassInitiate = new LivechatBlockActionClassInitiate(this, context, read, http, persistence, modify);
 		await livechatBlockActionClassInitiate.exec();
-
 		return context.getInteractionResponder().successResponse();
 	}
 

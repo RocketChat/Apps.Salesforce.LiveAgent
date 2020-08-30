@@ -24,7 +24,7 @@ export class SalesforceAgentAssigned {
 			return;
 		}
 
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.ROOM, this.data.room.id);
+		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
 		const persitedData = await retrievePersistentTokens(this.read, assoc);
 		const { persisantAffinity, persistantKey } = persitedData;
 		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
