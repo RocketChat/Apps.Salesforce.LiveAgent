@@ -90,6 +90,13 @@ export class InitiateSalesforceSessionDirect {
 				await this.persistence.createWithAssociation(sessionTokens, assoc);
 				this.delay(3000);
 
+				let buttonId: string | undefined;
+				if (this.data.room.customFields && this.data.room.customFields.reqButtonId) {
+					buttonId = this.data.room.customFields.reqButtonId;
+				} else {
+					buttonId = undefined;
+				}
+
 				await sendChatRequest(
 					this.http,
 					salesforceChatApiEndpoint,
@@ -97,7 +104,7 @@ export class InitiateSalesforceSessionDirect {
 					key,
 					id,
 					salesforceOrganisationId,
-					salesforceButtonId,
+					buttonId ? buttonId : salesforceButtonId,
 					salesforceDeploymentId,
 					LcVisitorName,
 					LcVisitorEmail,
@@ -245,7 +252,7 @@ export class InitiateSalesforceSessionDirect {
 		const date = Date.now();
 		let currentDate;
 		do {
-		  currentDate = Date.now();
+			currentDate = Date.now();
 		} while (currentDate - date < milliseconds);
-	  }
+	}
 }

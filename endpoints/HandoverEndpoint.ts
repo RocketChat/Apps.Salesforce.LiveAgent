@@ -1,6 +1,5 @@
 import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
-import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
@@ -8,6 +7,7 @@ import { InfoLogs } from '../enum/InfoLogs';
 import { performHandover } from '../helperFunctions/HandoverHelpers';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 
 export class HandoverEndpoint extends ApiEndpoint {
 	public path = 'handover';
@@ -32,6 +32,11 @@ export class HandoverEndpoint extends ApiEndpoint {
 					{ 'Content-Type': 'application/json' },
 					{ result: 'Cannot perform handover amidst an active Liveagent session.' },
 				);
+			}
+
+			const targetDeptName: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SF_HANDOVER_DEPARTMENT_NAME)).value;
+			if (request.content.targetDepartmentName === targetDeptName && request.content.buttonId) {
+				updateRoomCustomFields(request.content.roomId, { reqButtonId: request.content.buttonId }, read, modify);
 			}
 
 			await performHandover(modify, read, request.content.roomId, request.content.targetDepartmentName);
