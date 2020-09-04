@@ -1,9 +1,6 @@
 export enum AppSettingId {
 	SALESFORCE_BOT_USERNAME = 'salesforce_bot_username',
-	SALESFORCE_BOT_PASSWORD = 'salesforce_bot_password',
 	SF_HANDOVER_DEPARTMENT_NAME = 'handover_department_name',
-	CHAT_BOT_USERNAME = 'chat_bot_username',
-	CHAT_BOT_PASSWORD = 'chat_bot_password',
 	CB_HANDOVER_DEPARTMENT_NAME = 'chat_handover_department_name',
 	SALESFORCE_CHAT_API_ENDPOINT = 'salesforce_chat_api_endpoint',
 	SALESFORCE_ORGANISATION_ID = 'salesforce_organisation_id',

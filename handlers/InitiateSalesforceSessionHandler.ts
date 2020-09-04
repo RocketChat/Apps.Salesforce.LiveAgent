@@ -7,7 +7,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
-import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForErrorEvents, checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
@@ -32,7 +32,6 @@ export class InitiateSalesforceSession {
 			return;
 		}
 
-		const salesforceBotPassword: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_PASSWORD)).value;
 		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_ORGANISATION_ID)).value;
 		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_DEPLOYMENT_ID)).value;
 		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BUTTON_ID)).value;
@@ -47,16 +46,6 @@ export class InitiateSalesforceSession {
 			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
 			await sendDebugLCMessage(this.read, this.modify, this.message.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, LcAgent);
 			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
-			return;
-		}
-
-		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
-		try {
-			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
-		} catch (error) {
-			await sendLCMessage(this.modify, this.message.room, technicalDifficultyMessage, LcAgent);
-			await sendDebugLCMessage(this.read, this.modify, this.message.room, ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, LcAgent);
-			console.log(ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND);
 			return;
 		}
 
@@ -148,9 +137,6 @@ export class InitiateSalesforceSession {
 										this.message,
 										this.read,
 										salesforceChatApiEndpoint,
-										rocketChatServerUrl,
-										salesforceBotUsername,
-										salesforceBotPassword,
 										affinityToken,
 										key,
 										targetDeptName,

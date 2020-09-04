@@ -27,7 +27,3 @@ export async function sendDebugLCMessage(read: IRead, modify: IModify, room: IRo
 		throw new Error(error);
 	}
 }
-
-export const getServerSettingValue = async (read: IRead, id: string) => {
-	return id && (await read.getEnvironmentReader().getServerSettings().getValueById(id));
-};

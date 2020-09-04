@@ -4,7 +4,7 @@ import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livec
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
-import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
 
@@ -30,16 +30,6 @@ export class SalesforceAgentAssigned {
 		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
 			.value;
 
-		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
-		try {
-			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
-		} catch (error) {
-			await sendLCMessage(this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, this.data.agent);
-			console.log(ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, error);
-			return;
-		}
-
 		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
@@ -62,7 +52,6 @@ export class SalesforceAgentAssigned {
 				this.data,
 				assoc,
 				salesforceChatApiEndpoint,
-				rocketChatServerUrl,
 				LAChatEndedMessage,
 				technicalDifficultyMessage,
 				persisantAffinity,

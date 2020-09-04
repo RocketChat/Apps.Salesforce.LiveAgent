@@ -12,15 +12,6 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
-		id: AppSettingId.SALESFORCE_BOT_PASSWORD,
-		public: true,
-		type: SettingType.STRING,
-		packageValue: '',
-		i18nLabel: 'Salesforce Bot Password',
-		i18nDescription: 'Enter Omnichannel agent password we will be using as Salesforce Live Agent.',
-		required: true,
-	},
-	{
 		id: AppSettingId.SF_HANDOVER_DEPARTMENT_NAME,
 		public: true,
 		type: SettingType.STRING,
@@ -68,24 +59,6 @@ export const AppSettings: Array<ISetting> = [
 		i18nDescription:
 			'To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of buttonId from Chat Code Snippet.',
 		required: true,
-	},
-	{
-		id: AppSettingId.CHAT_BOT_USERNAME,
-		public: true,
-		type: SettingType.STRING,
-		packageValue: '',
-		i18nLabel: 'Chat Bot Username (Optional)',
-		i18nDescription: 'Enter Omnichannel agent username we will be using as Chat Bot.',
-		required: false,
-	},
-	{
-		id: AppSettingId.CHAT_BOT_PASSWORD,
-		public: true,
-		type: SettingType.STRING,
-		packageValue: '',
-		i18nLabel: 'Chat Bot Password (Optional)',
-		i18nDescription: 'Enter Omnichannel agent password we will be using as Chat Bot.',
-		required: false,
 	},
 	{
 		id: AppSettingId.CB_HANDOVER_DEPARTMENT_NAME,

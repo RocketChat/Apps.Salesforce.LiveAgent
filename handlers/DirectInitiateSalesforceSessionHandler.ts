@@ -5,7 +5,7 @@ import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
-import { getServerSettingValue, sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusDirectCallback } from '../helperFunctions/subscribeHelpers/DirectInitiateSalesforceSessionHelpers/DirectCheckAgentStatusCallback';
@@ -44,16 +44,6 @@ export class InitiateSalesforceSessionDirect {
 		} catch (error) {
 			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
 			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
-			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
-			return;
-		}
-
-		let rocketChatServerUrl: string = await getServerSettingValue(this.read, 'Site_Url');
-		try {
-			rocketChatServerUrl = rocketChatServerUrl.replace(/\/?$/, '/');
-		} catch (error) {
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND, this.data.agent);
-			console.log(ErrorLogs.ROCKETCHAT_SERVER_URL_NOT_FOUND);
 			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			return;
 		}

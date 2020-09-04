@@ -19,7 +19,6 @@ export class SubscribeToLiveAgent {
 		private data: ILivechatEventContext,
 		private assoc: RocketChatAssociationRecord,
 		private salesforceChatApiEndpoint: string,
-		private rocketChatServerUrl: string,
 		private LAChatEndedMessage: string,
 		private technicalDifficultyMessage: string,
 		private persisantAffinity: string,
@@ -33,10 +32,8 @@ export class SubscribeToLiveAgent {
 			this.data,
 			this.read,
 			this.persistence,
-			this.http,
 			this.LAChatEndedMessage,
 			this.assoc,
-			this.rocketChatServerUrl,
 			this.technicalDifficultyMessage,
 		);
 		await pullMessages(this.http, this.salesforceChatApiEndpoint, this.persisantAffinity, this.persistantKey)

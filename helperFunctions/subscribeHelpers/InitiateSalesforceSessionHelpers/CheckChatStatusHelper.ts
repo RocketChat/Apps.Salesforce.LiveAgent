@@ -21,9 +21,6 @@ export class CheckChatStatus {
 		private message: IMessage,
 		private read: IRead,
 		private salesforceChatApiEndpoint: string,
-		private rocketChatServerUrl: string,
-		private salesforceBotUsername: string,
-		private salesforceBotPassword: string,
 		private affinityToken: string,
 		private key: string,
 		private targetDeptName: string,
@@ -75,18 +72,12 @@ export class CheckChatStatus {
 						await checkAgentStatusCallbackData(
 							this.app,
 							this.modify,
-							this.persistence,
 							this.message,
 							this.LcAgent,
 							response,
-							this.http,
 							this.read,
-							this.rocketChatServerUrl,
-							this.salesforceBotUsername,
-							this.salesforceBotPassword,
 							this.targetDeptName,
 							this.technicalDifficultyMessage,
-							this.assoc,
 						);
 						return;
 					} else if (isChatAccepted === false) {
