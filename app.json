@@ -1,0 +1,15 @@
+{
+	"id": "0d3ac5b3-dd0b-43d3-924a-5a7433902589",
+	"version": "1.0.0",
+	"requiredApiVersion": "^1.17.0",
+	"iconFile": "icon.png",
+	"author": {
+		"name": "Rocket.Chat",
+		"homepage": "https://github.com/RocketChat/Apps.Salesforce.LiveAgent",
+		"support": "https://github.com/RocketChat/Apps.Salesforce.LiveAgent/issues"
+	},
+	"name": "Saleforce Live Agent Integration",
+	"nameSlug": "salesforce-live-agent-integration",
+	"classFile": "SalesforceLiveAgentApp.ts",
+	"description": "Integration between Rocket.Chat and the Salesforce Live Agent (Chat). Please refer our Github repository for setup instructions."
+}
