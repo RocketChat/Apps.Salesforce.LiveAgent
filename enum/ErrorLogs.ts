@@ -20,4 +20,7 @@ export enum ErrorLogs {
 	INVALID_VISITOR_TOKEN = 'Visitor token not found.',
 	INVALID_DEPARTMENT_NAME = 'Invalid target department name.',
 	HANDOVER_REQUEST_FAILED = 'Handover request failed.',
+	SERVEDBY_NOT_FOUND = 'Livechat Rooms servedBy property missing',
+	ENDCHAT_EVENT_PARAMS_ISSUE = 'Dialogflow end chat event params missing/invalid.',
+	ENDCHAT_EVENT_API_CALL_FAIL = 'Cannot successfully call Dialogflow app incoming endpoint.',
 }

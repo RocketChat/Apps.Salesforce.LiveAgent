@@ -13,4 +13,5 @@ export enum InfoLogs {
 	AVAILABILITY_ENDPOINT_REQUEST_RECEIVED = 'Availability endpoint request recieved',
 	UNRESOLVED_LIVEAGENT_RESPONSE = 'Unresolved Liveagent response recieved.',
 	CHATBOT_NOT_CONFIGURED = 'Chatbot is not configured in app settings.',
+	ENDCHAT_EVENT_NOT_ENABLED = 'Dialogflow endchat event not enabled.',
 }

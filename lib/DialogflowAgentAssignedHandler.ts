@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
+import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 
 export class DialogflowAgentAssignedClass {
@@ -19,6 +20,7 @@ export class DialogflowAgentAssignedClass {
 		const isDialogflowEndEventEnabled: boolean = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_ENABLE_END_EVENT))
 			.value;
 		if (isDialogflowEndEventEnabled === false) {
+			console.log(InfoLogs.ENDCHAT_EVENT_NOT_ENABLED);
 			return;
 		}
 
@@ -66,13 +68,17 @@ export class DialogflowAgentAssignedClass {
 				};
 				try {
 					await this.http.post(appEventEndpoint, appEventEndpointHttpRequest);
+					return;
 				} catch (error) {
-					console.log(error);
+					console.log(ErrorLogs.ENDCHAT_EVENT_API_CALL_FAIL, error);
+					return;
 				}
 			} else {
+				console.log(ErrorLogs.ENDCHAT_EVENT_PARAMS_ISSUE);
 				return;
 			}
 		} else {
+			console.log(ErrorLogs.SERVEDBY_NOT_FOUND);
 			return;
 		}
 	}
