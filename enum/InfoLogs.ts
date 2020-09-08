@@ -14,4 +14,5 @@ export enum InfoLogs {
 	UNRESOLVED_LIVEAGENT_RESPONSE = 'Unresolved Liveagent response recieved.',
 	CHATBOT_NOT_CONFIGURED = 'Chatbot is not configured in app settings.',
 	ENDCHAT_EVENT_NOT_ENABLED = 'Dialogflow endchat event not enabled.',
+	UNHANDLED_BLOCK_ACTION_ID = 'Visitor interacted with unhandled actionId block.',
 }

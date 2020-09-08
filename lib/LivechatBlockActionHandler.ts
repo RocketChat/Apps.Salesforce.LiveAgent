@@ -2,6 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatMessage, ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { UIKitLivechatBlockInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import { InfoLogs } from '../enum/InfoLogs';
 
 export class LivechatBlockActionClassInitiate {
 	constructor(
@@ -21,11 +22,12 @@ export class LivechatBlockActionClassInitiate {
 
 		switch (interactionData.actionId) {
 			case 'SFLAIA_CLOSE_ROOM_BUTTON':
-				await this.modify.getUpdater().getLivechatUpdater().closeRoom(lroom, 'Chat closed by agent.');
+				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
+				await this.modify.getUpdater().getLivechatUpdater().closeRoom(lroom, 'Chat closed by visitor.');
 				return this.context.getInteractionResponder().successResponse();
 
 			default:
-				console.log(interactionData.actionId);
+				console.log(InfoLogs.UNHANDLED_BLOCK_ACTION_ID, interactionData.actionId);
 				return this.context.getInteractionResponder().successResponse();
 		}
 	}
