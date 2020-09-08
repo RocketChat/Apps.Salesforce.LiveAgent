@@ -8,7 +8,7 @@ import { SalesforceAgentAssigned } from '../handlers/SalesforceAgentAssignedHand
 import { sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 
-export class AgentAssignedClassInitiate {
+export class SalesforceAgentAssignedClass {
 	constructor(
 		private app: IApp,
 		private data: ILivechatEventContext,

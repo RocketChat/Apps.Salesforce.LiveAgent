@@ -3,6 +3,7 @@ export enum ErrorLogs {
 	AVAILABILITY_ENDPOINT_REQUEST_ERROR = 'Error completing recieved availability endpoint request.',
 	CHECKING_AVAILABILITY_ERROR = 'Error checking availabilty from Salesforce Org.',
 	SALESFORCE_CHAT_API_NOT_FOUND = 'Salesforce Chat API endpoint not found.',
+	ROCKETCHAT_SERVERURL_NOT_FOUND = 'Rocket Chat Server URL not found.',
 	GETTING_LIVEAGENT_RESPONSE_ERROR = 'Error getting Liveagent response.',
 	SENDING_LIVEAGENT_CHAT_REQUEST_ERROR = 'Error sending Liveagent chat request.',
 	GENERATING_LIVEAGENT_SESSION_ID_ERROR = 'Error generating Liveagent session ID.',
