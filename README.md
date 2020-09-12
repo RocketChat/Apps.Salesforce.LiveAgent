@@ -12,18 +12,21 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
 ## Index
 - [Salesforce Live Agent Integration App](#salesforce-live-agent-integration-app)
-  - [Index](#index)
-  - [Prerequisites](#prerequisites)
-  - [App Installation](#app-installation)
-  - [App Configuration](#app-configuration)
-  - [Chat Bot Configuration](#chat-bot-configuration)
-  - [App Usage](#app-usage)
-  - [REST API Endpoints](#rest-api-endpoints)
+	- [Index](#index)
+	- [Prerequisites](#prerequisites)
+	- [App Installation](#app-installation)
+	- [App Configuration](#app-configuration)
+		- [Required App Settings](#required-app-settings)
+		- [Dialogflow Chatbot Configurations (Optional)](#dialogflow-chatbot-configurations-optional)
+	- [App Usage](#app-usage)
+		- [Standalone App Usage](#standalone-app-usage)
+		- [Dialogflow Chatbot App Usage](#dialogflow-chatbot-app-usage)
+	- [REST API Endpoints](#rest-api-endpoints)
 - [Some Optional App Configurations](#some-optional-app-configurations)
-  - [Setting a default welcome message (Auto Greeting)](#setting-a-default-welcome-message-auto-greeting)
-  - [Customising app responses](#customising-app-responses)
-  - [Debug Mode](#debug-mode)
-  - [Setting a default Omnichannel department](#setting-a-default-omnichannel-department)
+	- [Setting a default welcome message (Auto Greeting)](#setting-a-default-welcome-message-auto-greeting)
+	- [Customising app responses](#customising-app-responses)
+	- [Debug Mode](#debug-mode)
+	- [Setting a default Omnichannel department](#setting-a-default-omnichannel-department)
 
 ---
 
@@ -33,7 +36,7 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
 2. Rocket Chat Instance with Live Chat Setup.
 
-   - Rocket Chat >= v3.5.0
+   - Rocket Chat >= v3.6.0
    - Rocket Chat setup guide [here.](https://docs.rocket.chat/guides/developer/quick-start)
    - Live Chat [guide](https://docs.rocket.chat/guides/administrator-guides/livechat#:~:text=Enable%20Livechat%20feature,Settings%20%3E%20Livechat%20and%20enable%20it.&text=Now%20the%20admin%20will%20have,left%20corner%20drop%20down%20menu.) and [repo](https://github.com/RocketChat/Rocket.Chat.Livechat)
 
@@ -43,6 +46,8 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 ---
 
 ## App Installation
+
+To install the app, just go to the Rocket.Chat Marketplace in your server from **Administration** -> **Marketplace** and search for the app. You will find an **Install** button, clicking on it will install the app in your server in no time. If you are a developer or want to modify the app/ contribute to the app, you can follow these instructions to deploy app manually on your Rocket.Chat instance:
 
 1. Clone this repository
 
@@ -66,61 +71,73 @@ Integration between Rocket.Chat and the Salesforce Live Agent (Chat).
 
 ## App Configuration
 
-1. **Salesforce Bot Username & Password** and **Salesforce Bot Department Name**
+### Required App Settings
 
-   - Create a new user from **Administration** -> **Users**. Fill out all the details as you want, after filling all the details add, `bot` and `livechat-agent` to the **Roles** at the end of the form and hit **Save**. Paste this user's username and password in respective fields on app setting page.
+1. **Salesforce Bot Username** and **Salesforce Bot Department Name**
 
-   - Then go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our new bot user to that deparment. Paste this department name in **Handover Target Department Name** setting field. **Note:** Make sure to never add any other user other than the one we just added in this department.
+   - Create a new user from **Administration** -> **Users**. Fill out all the details as you want, after filling all the details add, `bot` and `livechat-agent` to the **Roles** at the end of the form and hit **Save**. Paste this user's username in respective field on app setting page.
 
-2. **Salesforce Organization ID**
+   - Then go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our new bot user to that deparment. Paste this department name in **Salesforce Bot Department Name** setting field. **Note:** Make sure to never add any other user other than the one we just added in this department.
+
+1. **Salesforce Chat Endpoint**
+
+   - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for chat setting -> Click on Chat Settings option -> Copy Chat API Endpoint value.
+
+1. **Salesforce Organization ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for company information -> Click on Company Information option -> Copy Salesforce.com Organization ID value.
 
-3. **Salesforce Deployment ID**
+1. **Salesforce Deployment ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of deploymentId from Chat Code Snippet.
 
-4. **Salesforce Button ID**
+1. **Salesforce Button ID**
 
    - To find this value, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> Quick Find Search -> Search for embedded service deployments -> Click on Embedded Service Deployments option -> Locate current chat group and click on View -> From Embedded Service Code Snippets option, click on Get Code -> Locate the value of buttonId from Chat Code Snippet.
 
-5. **Chat Bot Configurations**
+Adding the above values to the app settings page is all you need to do to get Liveagent talking to your Livechat visitors. You can now proceed to [App Usage](#app-usage) section to know how to actually use this app. However this app is also designed to work with Dialogflow, so that you can include a Dialogflow Chatbot alongside your Liveagent. Please keep reading to know more about Dialogflow Chatbot Configurations.
 
-   - Please refer to the following section to configure these settings:
+### Dialogflow Chatbot Configurations (Optional)
 
----
+1. To configure the Dialogflow Chatbot, you will need to install [Dialogflow App](https://github.com/RocketChat/Apps.Dialogflow#appsdialogflow), available for free from the Rocket.Chat Marketplace. You can refer to the setup guide [here](https://github.com/RocketChat/Apps.Dialogflow#how-to-get-google-credential-file-or-private-key-file), for setup instructions.
 
-## Chat Bot Configuration
+2. Once you have the Dialogflow app completely setup and running on your Rocket.Chat instance. Paste the Dialogflow Bot User username and department name in **Dialogflow Bot Username** and **Dialogflow Bot Department Name** fields respectively on Salesforce Liveagent Integration app settings page.
 
-1. This app requires a Bot user to be used along side Salesforce Live Agent user bot. This bot user can either be used to initiate a session with Live Agent or incase of Live Agent end chat event, app automatically performs a handover to this bot. You can use any existing bot user or create a new one.
+3. Now you can provide your visitors with a **Handover** button, this button will enable visitors to perform a handover to Liveagent. To add this button in your Dialogflow response, just add the [Handover Button Block](https://github.com/RocketChat/Apps.Dialogflow/blob/master/docs/QuickReplies.md#handover-button) block in your **Quick replies** Payload. Once you have this block added in your Quick replied payload, go to the Dialogflow app settings and paste the Salesforce Bot Department name in **Target Department for Handover** field.
 
-2. To create a new Chat Bot user, go to **Administration** -> **Users**, after filling all the details add, `bot` and `livechat-agent` roles. Paste this user's username and password in Chat Bot fields in app setting.
+4. Awesome! You have now Dialogflow Chatbot and Salesforce Liveagent working alongside each other. You can even take it a step further by providing a **End Chat Event**. This is an event that is triggered automatically when the chat is ended with Salesforce Liveagent and the visitor is handed back to Dialogflow.
 
-3. Go to **Omnichannel** -> **Departments** -> **New Department** and create a new department. Assign our bot user to this new deparment. Paste this department name in `Chat Bot Department Name` field in app setting
+5. To enable the **End Chat Event**, just go to your **Salesforce Liveagent app settings** -> Toggle the **Enable Dialogflow End Chat Event (Optional)** setting to **ON**. This will enable the **End Chat Event**.
 
-4. Then go to **Administration** -> **Livechat** -> **Routing**. There enable **Assign new conversations to bot agent** Setting. This setting will automatically assign a new Live Chat visitor to a bot user, depending on which department the visior is in.
+6. Now provide the name of the [Dialogflow event](https://cloud.google.com/dialogflow/es/docs/events-overview) in the **Dialogflow End Chat Event Name (Optional)** of the Salesforce Liveagent app settings. For example if your Dialogflow event name is `end_live_chat`, then provide that name in the setting field.
 
-5. This ends our required app configuration. Following are the instructions on how to use the app:
+7. If your Dialogflow event is using language other than **English**, then provide a language code in **Dialogflow End Chat Event Language Code (Optional)**. By default it is set to `en`.
+
+8. Following are the instructions on how to use the app:
 
 ---
 
 ## App Usage
 
-1. App should be running right away once you complete all required above configurations. However before making a new Chat request, make sure your Salesforce Live Agent is **Online**:
+App should be running right away once you complete all required above configurations. However before making a new Chat request, make sure your Salesforce Live Agent is **Online**:
 
    - To change your Live Agent status to online, go to your Salesforce Dashboard -> Setup (In Gear Icon) -> On the right hand side, you will find an icon named **App Launcher** (<img width="32" alt="Screenshot 2020-07-08 at 9 03 50 PM" src="https://user-images.githubusercontent.com/41849970/86938913-9939a580-c15e-11ea-8544-9aefab50555b.png">) -> Click on this icon and go to **Service Console**.
 
    - Once you are in Service Console, look at the bottom bar. From the bottom bar, click on **Omni-channel** and change status from `Offline` to `Available - Chat`.
 
-1. Once your Live Agent is online and ready to take new rquests. Go to your Rocket Chat Live Chat widget to initiate a session. Now you can initiate a new session in either of the two ways:
+Once your Live Agent is online and ready to take new requests. Go to your Rocket Chat Live Chat widget to initiate a session. Now you can initiate a new session in either of the two ways, based on how you setup your app:
 
-	1. **Using the department with the Chat Bot user:** If you are using the chatbot department and the Chat Bot is assigned as your Live Chat agent, send the following message to initiate a new session with Salesforce Liveagent:
+### Standalone App Usage
 
-	   ```
-	   initiate_salesforce_session
-	   ```
+In this type, a new chat session will be automatically initiated once your visitor enters the **Salesforce Bot Department** of Rocket.Chat Livechat. Refers to following steps for more info:
 
-	1. **Using the department with Live Agent Bot user:**. If you are using this department, sending any message will automatically initiate a new session for you with the Salesforce Liveagent. In case the Live agent ends your chat or there is some technical error, you will be automatically handover to the Chat Bot Department.
+![Standalone Usage Steps](https://user-images.githubusercontent.com/41849970/92993133-2b6a7b00-f50d-11ea-87a0-644075387f19.png)
+
+### Dialogflow Chatbot App Usage
+
+In this type, the visitor will enter the **Dialogflow Bot department** and will be provided with a **Handover Button** as per your configured settings. For example: If you have set your "Quick replies payload with Handover button" in **Default Fallback Intent**, Dialogflow Bot will provide the handover option to visitor, whenever the Dialogflow is unsure of the user question:
+
+![Chatbot Usage Steps](https://user-images.githubusercontent.com/41849970/92993416-f7905500-f50e-11ea-9bf3-8bc31cfb020a.png)
 
 ---
 
@@ -169,9 +186,6 @@ Debug mode is a setting that is intended for the use of Developers to keep track
       ```
       RocketChat(function () {
 			this.setDepartment("botDepartment");
-			this.onChatEnded(function () {
-				window.location.reload();
-			});
 		});
       ```
 
@@ -195,9 +209,6 @@ Debug mode is a setting that is intended for the use of Developers to keep track
 
 		RocketChat(function () {
 			this.setDepartment("botDepartment");
-			this.onChatEnded(function () {
-				window.location.reload();
-			});
 		});
 	   </script>
       ```
