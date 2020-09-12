@@ -165,13 +165,14 @@ REST API Endpoints can be used to trigger specific actions in the app. You can g
 1. You can go to the app setting page and customise app responses as per your requirement. You can customise the app responses for the following events:
 
 	+ Live Agent Events:
+    	+ Finding Live Agent.
 	    + User placed in a queue.
 	    + User is next up in queue.
 	    + No Queue.
 	    + No Agent Available.
 	+ Technical Difficulty.
 
-1. To change this responses, just go to the app setting page and scroll down to the one you want to change. Change the message in the field(s) and click on **Save Changes**. For some messages that has a variable in them, you can use `%s` as a placeholder for that variable.
+2. To change this responses, just go to the app setting page and scroll down to the one you want to change. Change the message in the field(s) and click on **Save Changes**. For some messages that has a variable in them, you can use `%s` as a placeholder for that variable.
 
 ## Debug Mode
 
