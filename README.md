@@ -51,7 +51,7 @@ To install the app, just go to the Rocket.Chat Marketplace in your server from *
 
 1. Clone this repository
 
-   `git clone https://github.com/RocketChat/Apps.Salesforce.LiveAgent`
+   `git clone https://github.com/WideChat/Apps.Salesforce.LiveAgent`
 
 1. Change to root directory
 
@@ -99,11 +99,11 @@ Adding the above values to the app settings page is all you need to do to get Li
 
 ### Dialogflow Chatbot Configurations (Optional)
 
-1. To configure the Dialogflow Chatbot, you will need to install [Dialogflow App](https://github.com/RocketChat/Apps.Dialogflow#appsdialogflow), available for free from the Rocket.Chat Marketplace. You can refer to the setup guide [here](https://github.com/RocketChat/Apps.Dialogflow#how-to-get-google-credential-file-or-private-key-file), for setup instructions.
+1. To configure the Dialogflow Chatbot, you will need to install [Dialogflow App](https://github.com/WideChat/Apps.Dialogflow#appsdialogflow), available for free from the Rocket.Chat Marketplace. You can refer to the setup guide [here](https://github.com/WideChat/Apps.Dialogflow#how-to-get-google-credential-file-or-private-key-file), for setup instructions.
 
 2. Once you have the Dialogflow app completely setup and running on your Rocket.Chat instance. Paste the Dialogflow Bot User username and department name in **Dialogflow Bot Username** and **Dialogflow Bot Department Name** fields respectively on Salesforce Liveagent Integration app settings page.
 
-3. Now you can provide your visitors with a **Handover** button, this button will enable visitors to perform a handover to Liveagent. To add this button in your Dialogflow response, just add the [Handover Button Block](https://github.com/RocketChat/Apps.Dialogflow/blob/master/docs/QuickReplies.md#handover-button) block in your **Quick replies** Payload. Once you have this block added in your Quick replied payload, go to the Dialogflow app settings and paste the Salesforce Bot Department name in **Target Department for Handover** field.
+3. Now you can provide your visitors with a **Handover** button, this button will enable visitors to perform a handover to Liveagent. To add this button in your Dialogflow response, just add the [Handover Button Block](https://github.com/WideChat/Apps.Dialogflow/blob/master/docs/QuickReplies.md#handover-button) block in your **Quick replies** Payload. Once you have this block added in your Quick replied payload, go to the Dialogflow app settings and paste the Salesforce Bot Department name in **Target Department for Handover** field.
 
 4. Awesome! You have now Dialogflow Chatbot and Salesforce Liveagent working alongside each other. You can even take it a step further by providing a **End Chat Event**. This is an event that is triggered automatically when the chat is ended with Salesforce Liveagent and the visitor is handed back to Dialogflow.
 
