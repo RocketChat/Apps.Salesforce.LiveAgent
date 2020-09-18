@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { BlockElementType, ButtonStyle, ConditionalBlockFiltersEngine, IButtonElement, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit';
+import { ActionId } from '../../../enum/ActionId';
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
@@ -46,7 +47,7 @@ export class HandleEndChatCallback {
 						type: TextObjectType.PLAINTEXT,
 						text: 'Close Chat',
 					},
-					actionId: 'SFLAIA_CLOSE_ROOM_BUTTON',
+					actionId: ActionId.CLOSE_CHAT_BUTTON,
 					style: ButtonStyle.DANGER,
 				};
 
