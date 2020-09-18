@@ -3,7 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
 import { AppSettingId } from '../enum/AppSettingId';
-import { InitiateSalesforceSessionDirect } from '../handlers/DirectInitiateSalesforceSessionHandler';
+import { InitiateSalesforceSession } from '../handlers/InitiateSalesforceSessionHandler';
 import { SalesforceAgentAssigned } from '../handlers/SalesforceAgentAssignedHandler';
 import { sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
@@ -26,7 +26,7 @@ export class SalesforceAgentAssignedClass {
 			.value;
 
 		if (persisantAffinity === null && persistantKey === null && this.data.agent.username === salesforceBotUsername) {
-			const initiateSalesforceSession = new InitiateSalesforceSessionDirect(this.app, this.data, this.read, this.http, this.persistence, this.modify);
+			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 			await sendLCMessage(this.modify, this.data.room, FindingLiveagentMessage, this.data.agent);
 			await initiateSalesforceSession.exec();
 		} else {
