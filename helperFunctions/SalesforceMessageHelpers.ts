@@ -1,10 +1,7 @@
-import { IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
-import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
-import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from './LivechatMessageHelpers';
@@ -44,55 +41,6 @@ export function checkForEvent(messageArray: any, eventToCheck: string) {
 		}
 		return false;
 	} catch (error) {
-		throw new Error(error);
-	}
-}
-
-export async function checkForErrorEvents(
-	app: IApp,
-	read: IRead,
-	modify: IModify,
-	persistence: IPersistence,
-	message: IMessage,
-	messageArray: any,
-	technicalDifficultyMessage: string,
-	LcAgent: IUser,
-	assoc: RocketChatAssociationRecord,
-) {
-	try {
-		switch (messageArray.messages[0].message.reason) {
-			case 'Unavailable':
-				console.log(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
-				await persistence.removeByAssociation(assoc);
-				const NoLiveagentAvailableMessage: string = (
-					await read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
-				).value;
-				await sendLCMessage(modify, message.room, NoLiveagentAvailableMessage, LcAgent);
-				break;
-
-			case 'NoPost':
-				console.log(ErrorLogs.APP_CONFIGURATION_INVALID);
-				await persistence.removeByAssociation(assoc);
-				await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(read, modify, message.room, ErrorLogs.APP_CONFIGURATION_INVALID, LcAgent);
-				break;
-
-			case 'InternalFailure':
-				console.log(ErrorLogs.SALESFORCE_INTERNAL_FAILURE);
-				await persistence.removeByAssociation(assoc);
-				await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(read, modify, message.room, ErrorLogs.SALESFORCE_INTERNAL_FAILURE, LcAgent);
-				break;
-
-			default:
-				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE);
-				await persistence.removeByAssociation(assoc);
-				await sendLCMessage(modify, message.room, technicalDifficultyMessage, LcAgent);
-				await sendDebugLCMessage(read, modify, message.room, ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, LcAgent);
-				break;
-		}
-	} catch (error) {
-		await persistence.removeByAssociation(assoc);
 		throw new Error(error);
 	}
 }

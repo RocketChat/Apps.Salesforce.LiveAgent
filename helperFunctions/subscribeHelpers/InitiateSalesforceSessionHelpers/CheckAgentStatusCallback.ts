@@ -4,7 +4,7 @@ import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livec
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { HandleEndChatCallback } from '../SalesforceAgentAssignedHelpers/HandleEndChatCallback';
 
-export class CheckAgentStatusDirectCallback {
+export class CheckAgentStatusCallback {
 	constructor(
 		private app: IApp,
 		private http: IHttp,

@@ -10,9 +10,9 @@ import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
-import { CheckAgentStatusDirectCallback } from './CheckAgentStatusCallback';
+import { CheckAgentStatusCallback } from './CheckAgentStatusCallback';
 
-export class CheckChatStatusDirect {
+export class CheckChatStatus {
 	constructor(
 		private app: IApp,
 		private http: IHttp,
@@ -30,7 +30,7 @@ export class CheckChatStatusDirect {
 	) {}
 
 	public async checkCurrentChatStatus() {
-		const checkAgentStatusDirectCallback = new CheckAgentStatusDirectCallback(
+		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
 			this.app,
 			this.http,
 			this.modify,
