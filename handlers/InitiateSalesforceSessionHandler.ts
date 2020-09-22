@@ -8,8 +8,8 @@ import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
-import { CheckAgentStatusDirectCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
-import { CheckChatStatusDirect } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
+import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
+import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 
 export class InitiateSalesforceSession {
 	constructor(
@@ -28,7 +28,7 @@ export class InitiateSalesforceSession {
 		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
 			.value;
 
-		const checkAgentStatusDirectCallback = new CheckAgentStatusDirectCallback(
+		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
 			this.app,
 			this.http,
 			this.modify,
@@ -180,7 +180,7 @@ export class InitiateSalesforceSession {
 									}
 								} else {
 									// No error in initiating liveagent session. Executing Function to check for agent response.
-									const checkChatStatusDirect = new CheckChatStatusDirect(
+									const checkChatStatusDirect = new CheckChatStatus(
 										this.app,
 										this.http,
 										this.modify,
