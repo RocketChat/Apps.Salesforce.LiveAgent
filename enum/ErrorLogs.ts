@@ -23,4 +23,5 @@ export enum ErrorLogs {
 	SERVEDBY_NOT_FOUND = 'Livechat Rooms servedBy property missing',
 	ENDCHAT_EVENT_PARAMS_ISSUE = 'Dialogflow end chat event params missing/invalid.',
 	ENDCHAT_EVENT_API_CALL_FAIL = 'Cannot successfully call Dialogflow app incoming endpoint.',
+	DIALOGFLOW_ERROR_SESSION = 'Error encountered in session. Triggering DIALOGFLOW_SESSION_ERROR_EVENT',
 }

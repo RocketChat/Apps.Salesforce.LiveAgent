@@ -105,11 +105,11 @@ Adding the above values to the app settings page is all you need to do to get Li
 
 3. Now you can provide your visitors with a **Handover** button, this button will enable visitors to perform a handover to Liveagent. To add this button in your Dialogflow response, just add the [Handover Button Block](https://github.com/RocketChat/Apps.Dialogflow/blob/master/docs/QuickReplies.md#handover-button) block in your **Quick replies** Payload. Once you have this block added in your Quick replied payload, go to the Dialogflow app settings and paste the Salesforce Bot Department name in **Target Department for Handover** field.
 
-4. Awesome! You have now Dialogflow Chatbot and Salesforce Liveagent working alongside each other. You can even take it a step further by providing a **End Chat Event**. This is an event that is triggered automatically when the chat is ended with Salesforce Liveagent and the visitor is handed back to Dialogflow.
+4. Awesome! You have now Dialogflow Chatbot and Salesforce Liveagent working alongside each other. You can even take it a step further by providing enabling **Dialogflow End Chat Events**. This events are triggered automatically when the chat is ended with Salesforce Liveagent and the visitor is handed back to Dialogflow.
 
-5. To enable the **End Chat Event**, just go to your **Salesforce Liveagent app settings** -> Toggle the **Enable Dialogflow End Chat Event (Optional)** setting to **ON**. This will enable the **End Chat Event**.
+5. To enable the **End Chat Event**, just go to your **Salesforce Liveagent app settings** -> Toggle the **Enable Dialogflow Events (Optional)** setting to **ON**. This will enable the **Dialogflow End Chat Events**.
 
-6. Now provide the name of the [Dialogflow event](https://cloud.google.com/dialogflow/es/docs/events-overview) in the **Dialogflow End Chat Event Name (Optional)** of the Salesforce Liveagent app settings. For example if your Dialogflow event name is `end_live_chat`, then provide that name in the setting field.
+6. Now provide the name of the [Dialogflow event](https://cloud.google.com/dialogflow/es/docs/events-overview) you want to enable in the either/all of the three following setting fields of the Salesforce Liveagent app settings. For example if you want Dialogflow event namely `sucess_end_live_chat` to trigger when there was a succesful chat session, then write `sucess_end_live_chat` in the **Dialogflow Agent Ended Chat Event Name (Optional)**.
 
 7. If your Dialogflow event is using language other than **English**, then provide a language code in **Dialogflow End Chat Event Language Code (Optional)**. By default it is set to `en`.
 

@@ -14,4 +14,6 @@ export enum InfoLogs {
 	CHATBOT_NOT_CONFIGURED = 'Chatbot is not configured in app settings.',
 	ENDCHAT_EVENT_NOT_ENABLED = 'Dialogflow endchat event not enabled.',
 	UNHANDLED_BLOCK_ACTION_ID = 'Visitor interacted with unhandled actionId block.',
+	DIALOGFLOW_AGENT_ENDED_CHAT = 'Agent Ended Chat. Triggering DIALOGFLOW_END_EVENT',
+	DIALOGFLOW_AGENT_UNAVAILABLE_SESSION = 'No Agent Found. Triggering DIALOGFLOW_AGENT_UNAVAILABLE_EVENT',
 }
