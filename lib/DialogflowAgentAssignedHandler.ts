@@ -28,6 +28,7 @@ export class DialogflowAgentAssignedClass {
 		const oldAgentUsername: string = this.data.agent.username;
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 		const chatBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHATBOT_USERNAME)).value;
+		const { customFields } = this.data.room;
 
 		let serverUrl = await this.read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
 		try {
@@ -39,23 +40,38 @@ export class DialogflowAgentAssignedClass {
 			return;
 		}
 
-		const dialogflowEndChatEventName: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_END_EVENT_NAME)).value;
+		const dialogflowEndChatEventName: string = (
+			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME)
+		).value;
+		const dialogflowAgentUnavailableEventName: string = (
+			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME)
+		).value;
+		const dialogflowSessionErrorEventName: string = (
+			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME)
+		).value;
 		const dialogflowEndChatEventLCode: string = (
 			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE)
 		).value;
 
 		if (lroom.servedBy) {
 			const newAgentUsername = lroom.servedBy.username;
-			if (
-				newAgentUsername === chatBotUsername &&
-				oldAgentUsername === salesforceBotUsername &&
-				dialogflowEndChatEventLCode &&
-				dialogflowEndChatEventName
-			) {
+			if (newAgentUsername === chatBotUsername && oldAgentUsername === salesforceBotUsername && dialogflowEndChatEventLCode) {
 				const eventParams = {
-					name: dialogflowEndChatEventName,
+					name: '',
 					languageCode: dialogflowEndChatEventLCode,
 				};
+
+				if (customFields && customFields.agentEndedChat === true && dialogflowEndChatEventName) {
+					console.log(InfoLogs.DIALOGFLOW_AGENT_ENDED_CHAT);
+					eventParams.name = dialogflowEndChatEventName;
+				} else if (customFields && customFields.agentUnavailable === true && dialogflowAgentUnavailableEventName) {
+					console.log(InfoLogs.DIALOGFLOW_AGENT_UNAVAILABLE_SESSION);
+					eventParams.name = dialogflowAgentUnavailableEventName;
+				} else if (customFields && customFields.errorSession === true && dialogflowSessionErrorEventName) {
+					console.log(ErrorLogs.DIALOGFLOW_ERROR_SESSION);
+					eventParams.name = dialogflowSessionErrorEventName;
+				}
+
 				const appEventEndpoint = `${serverUrl}api/apps/public/21b7d3ba-031b-41d9-8ff2-fbbfa081ae90/incoming`;
 				const appEventEndpointHttpRequest: IHttpRequest = {
 					data: {
