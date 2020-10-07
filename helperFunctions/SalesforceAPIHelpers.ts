@@ -145,3 +145,21 @@ export async function sendMessages(http: IHttp, liveAgentUrl: string, affinityTo
 		throw Error(error);
 	}
 }
+
+export async function chasitorTyping(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string, typing: boolean) {
+	const chasitorTypingEndpoint = liveAgentUrl + (typing ? 'Chasitor/ChasitorTyping' : 'Chasitor/ChasitorNotTyping');
+	const chasitorTypingHttpRequest: IHttpRequest = {
+		headers: {
+			'X-LIVEAGENT-API-VERSION': '49',
+			'X-LIVEAGENT-AFFINITY': affinityToken,
+			'X-LIVEAGENT-SESSION-KEY': key,
+		},
+		data: {},
+	};
+	try {
+		const response = await http.post(chasitorTypingEndpoint, chasitorTypingHttpRequest);
+		return response;
+	} catch (error) {
+		throw Error(error);
+	}
+}
