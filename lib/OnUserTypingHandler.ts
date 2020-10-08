@@ -18,7 +18,6 @@ export class OnUserTypingHandler {
 	) {}
 
 	public async exec() {
-		this.app.getLogger().log(this.data);
 
 		if (!this.data.roomId || !this.data.username) {
 			return;
