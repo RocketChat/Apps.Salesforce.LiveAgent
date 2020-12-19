@@ -187,6 +187,15 @@ export const AppSettings: Array<ISetting> = [
 		required: true,
 	},
 	{
+		id: AppSettingId.CUSTOMER_TIMEOUT_WARNING_MESSAGE,
+		public: true,
+		type: SettingType.STRING,
+		packageValue: 'Are you still there? Please send a message within %t or this chat will time out.',
+		i18nLabel: 'Customer Timeout Warning Message',
+		i18nDescription: 'Enter message to show to user as idle timeout warning. Use %t as placeholder for count down.',
+		required: true,
+	},
+	{
 		id: AppSettingId.DEBUG_BUTTON,
 		public: true,
 		type: SettingType.BOOLEAN,

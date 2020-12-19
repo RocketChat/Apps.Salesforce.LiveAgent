@@ -19,5 +19,6 @@ export enum AppSettingId {
 	LIVEAGENT_NO_QUEUE_MESSAGE = 'la_no_queue_message',
 	NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE = 'la_no_liveagent_available',
 	TECHNICAL_DIFFICULTY_MESSAGE = 'technical_difficulty_message',
+	CUSTOMER_TIMEOUT_WARNING_MESSAGE = 'customer_timeout_warning_message',
 	DEBUG_BUTTON = 'debug_button',
 }

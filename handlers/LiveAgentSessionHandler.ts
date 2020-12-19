@@ -1,4 +1,4 @@
-import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILivechatRoom';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
@@ -11,7 +11,7 @@ import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers'
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class LiveAgentSession {
-	constructor(private app: IApp, private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence) {}
+	constructor(private app: IApp, private message: IMessage, private read: IRead, private modify: IModify, private http: IHttp, private persistence: IPersistence) {}
 
 	public async exec() {
 		try {
@@ -32,8 +32,10 @@ export class LiveAgentSession {
 			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
-			if (this.message.text === 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
-				await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey)
+			if ((this.message.text === 'Closed by visitor' || this.message.text === 'customer_idle_timeout' )
+				&& persisantAffinity !== null && persistantKey !== null) {
+					const reason = this.message.text === 'customer_idle_timeout' ? 'clientIdleTimeout' : '';
+				 await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason)
 					.then(async () => {
 						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
 						await this.persistence.removeByAssociation(assoc);
