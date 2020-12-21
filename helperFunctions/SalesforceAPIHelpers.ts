@@ -33,6 +33,7 @@ export async function sendChatRequest(
 	salesforceDeploymentId: string,
 	LcVisitorName: string,
 	LcVisitorEmail?: string,
+	salesforceId?: string
 ) {
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
 	const sendChatRequestHttpRequest: IHttpRequest = {
@@ -66,6 +67,21 @@ export async function sendChatRequest(
 					transcriptFields: ['c__EmailAddress'],
 					displayToAgent: true,
 				},
+				{
+                    label:'Case Id',
+                    value: salesforceId,
+                    entityMaps:[
+						{
+								entityName:'Case',
+								fieldName:'ID'
+						}
+                    ],
+					transcriptFields:[
+						'CaseID'
+					],
+					displayToAgent:true
+                       
+				}
 			],
 			prechatEntities: [],
 			receiveQueueUpdates: true,
