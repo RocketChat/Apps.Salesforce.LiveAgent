@@ -106,7 +106,7 @@ export async function pullMessages(http: IHttp, liveAgentUrl: string, affinityTo
 	}
 }
 
-export async function closeChat(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string) {
+export async function closeChat(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string, reason: string = 'client') {
 	const closeLiveAgentChatEndpoint = liveAgentUrl + 'Chasitor/ChatEnd';
 	const closeLiveAgentChatHttpRequest: IHttpRequest = {
 		headers: {
@@ -115,7 +115,7 @@ export async function closeChat(http: IHttp, liveAgentUrl: string, affinityToken
 			'X-LIVEAGENT-SESSION-KEY': key,
 		},
 		data: {
-			reason: 'client',
+			reason: reason || 'client',
 		},
 	};
 	try {

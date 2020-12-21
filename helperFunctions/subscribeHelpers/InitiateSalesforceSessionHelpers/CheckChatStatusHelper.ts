@@ -27,7 +27,7 @@ export class CheckChatStatus {
 		private LAQueuePositionMessage: string,
 		private technicalDifficultyMessage: string,
 		private assoc: RocketChatAssociationRecord,
-	) {}
+	) { }
 
 	public async checkCurrentChatStatus() {
 		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
@@ -76,6 +76,11 @@ export class CheckChatStatus {
 					const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 					if (isChatAccepted === true) {
 						console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
+						const chatEstablishedMessage = messageArray[0].message;
+						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout;
+						const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+
+						await this.persistence.updateByAssociation(this.assoc, { id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout });
 
 						const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 						await salesforceAgentAssigned.exec();

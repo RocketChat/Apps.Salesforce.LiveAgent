@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { AppSettingId } from '../enum/AppSettingId';
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
+import { handleTimeout } from '../helperFunctions/TimeoutHelper';
 
 export class PostMessageClassInitiate {
 	constructor(
@@ -16,13 +17,16 @@ export class PostMessageClassInitiate {
 
 	public async exec() {
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+
+		handleTimeout(this.app, this.message, this.read, this.http, this.persistence, this.modify);
+
 		if (this.message.sender.username === salesforceBotUsername) {
 			return;
 		} else if (this.message.room.type !== 'l') {
 			return;
 		}
 
-		const liveAgentSession = new LiveAgentSession(this.app, this.message, this.read, this.http, this.persistence);
+		const liveAgentSession = new LiveAgentSession(this.app, this.message, this.read, this.modify, this.http, this.persistence);
 		await liveAgentSession.exec();
 	}
 }
