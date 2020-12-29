@@ -10,7 +10,7 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
 import { App } from '@rocket.chat/apps-engine/definition/App';
-import { ILivechatEventContext, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned } from '@rocket.chat/apps-engine/definition/livechat';
+import { ILivechatEventContext, ILivechatRoom, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned, IPostLivechatRoomClosed } from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoomUserTyping, IRoomUserTypingContext } from '@rocket.chat/apps-engine/definition/rooms';
@@ -20,13 +20,15 @@ import { AvailabilityEndpoint } from './endpoints/AvailabilityEndpoint';
 import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
 import { DialogflowAgentAssignedClass } from './lib/DialogflowAgentAssignedHandler';
 import { LivechatBlockActionClassInitiate } from './lib/LivechatBlockActionHandler';
+import { LivechatRoomClosedClass } from './lib/LivechatRoomClosedHandler';
 import { OnUserTypingHandler } from './lib/OnUserTypingHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 import { SalesforceAgentAssignedClass } from './lib/SalesforceAgentAssignedHandler';
 
 export class SalesforcePluginApp
 	extends App
-	implements IPostMessageSent, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned, IRoomUserTyping, IUIKitLivechatInteractionHandler {
+	implements IPostMessageSent, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned, IPostLivechatRoomClosed, IRoomUserTyping,
+	IUIKitLivechatInteractionHandler {
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
 		super(info, logger, accessors);
 	}
@@ -56,6 +58,11 @@ export class SalesforcePluginApp
 	public async executePostLivechatAgentUnassigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
 		const dialogflowAgentAssigned = new DialogflowAgentAssignedClass(this, data, read, http, persistence, modify);
 		await dialogflowAgentAssigned.exec();
+	}
+
+	public async executePostLivechatRoomClosed(room: ILivechatRoom, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
+		const livechatRoomClosedClass = new LivechatRoomClosedClass(this, room, read, http, persistence, modify);
+		await livechatRoomClosedClass.exec();
 	}
 
 	public async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
