@@ -8,6 +8,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class LiveAgentSession {
@@ -34,7 +35,11 @@ export class LiveAgentSession {
 
 			if ((this.message.text === 'Closed by visitor' || this.message.text === 'customer_idle_timeout' )
 				&& persisantAffinity !== null && persistantKey !== null) {
-					const reason = this.message.text === 'customer_idle_timeout' ? 'clientIdleTimeout' : '';
+					let reason = '';
+					if (this.message.text === 'customer_idle_timeout' ) {
+						reason = 'clientIdleTimeout';
+						updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
+					}
 				 await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason)
 					.then(async () => {
 						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);

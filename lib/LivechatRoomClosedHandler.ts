@@ -1,15 +1,15 @@
 import { IHttp, IHttpRequest, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { ILivechatEventContext, ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
+import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 
-export class DialogflowAgentAssignedClass {
+export class LivechatRoomClosedClass {
 	constructor(
 		private app: IApp,
-		private data: ILivechatEventContext,
+		private room: ILivechatRoom,
 		private read: IRead,
 		private http: IHttp,
 		private persistence: IPersistence,
@@ -24,18 +24,17 @@ export class DialogflowAgentAssignedClass {
 			return;
 		}
 
-		const lroom: ILivechatRoom = this.data.room as ILivechatRoom;
-		const oldAgentUsername: string = this.data.agent.username;
+		const lroom: ILivechatRoom = this.room as ILivechatRoom;
 		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
-		const chatBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHATBOT_USERNAME)).value;
-		const { customFields } = this.data.room;
+		const { customFields } = this.room;
 
 		let serverUrl = await this.read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
 		try {
 			serverUrl = serverUrl.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendLCMessage(this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, this.data.agent);
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, this.data.agent);
+			const user = await this.read.getUserReader().getByUsername(salesforceBotUsername);
+			await sendLCMessage(this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
+			await sendDebugLCMessage(this.read, this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
 			console.log(ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND);
 			return;
 		}
@@ -56,9 +55,10 @@ export class DialogflowAgentAssignedClass {
 			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE)
 		).value;
 
+		const isHandedOverFromDialogFlow = (customFields && customFields.isHandedOverFromDialogFlow === true) || false;
+
 		if (lroom.servedBy) {
-			const newAgentUsername = lroom.servedBy.username;
-			if (newAgentUsername === chatBotUsername && oldAgentUsername === salesforceBotUsername && dialogflowEndChatEventLCode) {
+			if (isHandedOverFromDialogFlow && dialogflowEndChatEventLCode) {
 				const eventParams = {
 					name: '',
 					languageCode: dialogflowEndChatEventLCode,
@@ -88,6 +88,7 @@ export class DialogflowAgentAssignedClass {
 						},
 					},
 				};
+
 				try {
 					await this.http.post(appEventEndpoint, appEventEndpointHttpRequest);
 					return;

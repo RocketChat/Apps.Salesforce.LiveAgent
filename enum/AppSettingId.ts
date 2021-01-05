@@ -7,6 +7,7 @@ export enum AppSettingId {
 	DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME = 'dialogflow_agent_ended_chat_event_name',
 	DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME = 'dialogflow_agent_unavailable_event_name',
 	DIALOGFLOW_SESSION_ERROR_EVENT_NAME = 'dialogflow_session_error_event_name',
+	DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME = 'dialogflow_customer_idle_timeout_event_name',
 	DIALOGFLOW_END_EVENT_LANGUAGE_CODE = 'dialogflow_end_event_language_code',
 	SALESFORCE_CHAT_API_ENDPOINT = 'salesforce_chat_api_endpoint',
 	SALESFORCE_ORGANISATION_ID = 'salesforce_organisation_id',

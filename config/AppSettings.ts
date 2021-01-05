@@ -106,6 +106,15 @@ export const AppSettings: Array<ISetting> = [
 		required: false,
 	},
 	{
+		id: AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME,
+		public: true,
+		type: SettingType.STRING,
+		packageValue: '',
+		i18nLabel: 'Dialogflow Customer Idle Timeout Event Name (Optional)',
+		i18nDescription: 'Enter the Dialogflow event name you want app to trigger when the customer idle timeout is triggered.',
+		required: false,
+	},
+	{
 		id: AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME,
 		public: true,
 		type: SettingType.STRING,
