@@ -33,15 +33,8 @@ export async function sendChatRequest(
 	salesforceDeploymentId: string,
 	LcVisitorName: string,
 	LcVisitorEmail?: string,
-	salesforceId?: string,
-	customDetail?: string
+	salesforceId?: string
 ) {
-	let customDetailJSON: object | undefined;
-	
-	if (customDetail) {
-		 customDetailJSON = JSON.parse(JSON.stringify(customDetail));
-	}
-	
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
 	const sendChatRequestHttpRequest: IHttpRequest = {
 		headers: {
@@ -88,8 +81,7 @@ export async function sendChatRequest(
 					],
 					displayToAgent:true
                        
-				},
-				customDetailJSON
+				}
 			],
 			prechatEntities: [],
 			receiveQueueUpdates: true,
