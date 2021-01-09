@@ -34,7 +34,7 @@ export async function sendChatRequest(
 	LcVisitorName: string,
 	LcVisitorEmail?: string,
 	salesforceId?: string,
-	customDetail?: string
+	customDetail?: string,
 ) {
 	let customDetailJSON: object | undefined;
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
@@ -42,13 +42,13 @@ export async function sendChatRequest(
 	if (customDetail) {
 		try {
 			customDetailJSON = JSON.parse(customDetail);
-		} catch(error) {
+		} catch (error) {
 			throw Error(error);
 
 		}
-	}   
+	}
 
-	let sendChatRequestHttpRequest: IHttpRequest = {
+	const sendChatRequestHttpRequest: IHttpRequest = {
 		headers: {
 			'X-LIVEAGENT-API-VERSION': '49',
 			'X-LIVEAGENT-AFFINITY': affinityToken,
@@ -80,27 +80,27 @@ export async function sendChatRequest(
 					displayToAgent: true,
 				},
 				{
-                    label:'Case Id',
-                    value: salesforceId,
-                    entityMaps:[
+					label: 'Case Id',
+					value: salesforceId,
+					entityMaps: [
 						{
-								entityName:'Case',
-								fieldName:'ID'
-						}
-                    ],
-					transcriptFields:[
-						'CaseID'
+								entityName: 'Case',
+								fieldName: 'ID',
+						},
 					],
-					displayToAgent:true
-                       
-				}
+					transcriptFields: [
+						'CaseID',
+					],
+					displayToAgent: true,
+
+				},
 			],
 			prechatEntities: [],
 			receiveQueueUpdates: true,
 			isPost: true,
 		},
 	};
-	
+
 	if (customDetailJSON) {
 		sendChatRequestHttpRequest.data.prechatDetails.push(customDetailJSON);
 	}
@@ -191,6 +191,27 @@ export async function chasitorTyping(http: IHttp, liveAgentUrl: string, affinity
 	};
 	try {
 		const response = await http.post(chasitorTypingEndpoint, chasitorTypingHttpRequest);
+		return response;
+	} catch (error) {
+		throw Error(error);
+	}
+}
+
+export async function chasitorSneakPeak(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string, text: string) {
+	const chasitorSneakPeekEndpoint = liveAgentUrl + 'Chasitor/ChasitorSneakPeek';
+	const chasitorSneakPeekHttpRequest: IHttpRequest = {
+		headers: {
+			'X-LIVEAGENT-API-VERSION': '49',
+			'X-LIVEAGENT-AFFINITY': affinityToken,
+			'X-LIVEAGENT-SESSION-KEY': key,
+		},
+		data: {
+			position: 0,
+			text,
+		},
+	};
+	try {
+		const response = await http.post(chasitorSneakPeekEndpoint, chasitorSneakPeekHttpRequest);
 		return response;
 	} catch (error) {
 		throw Error(error);

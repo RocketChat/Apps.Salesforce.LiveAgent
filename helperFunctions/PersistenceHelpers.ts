@@ -37,6 +37,7 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 				chasitorIdleTimeout: contentParsed.chasitorIdleTimeout,
 				persisantAffinity: contentParsed.affinityToken as string,
 				persistantKey: contentParsed.key as string,
+				sneakPeekEnabled: contentParsed.sneakPeekEnabled as boolean,
 			};
 		}
 
@@ -45,6 +46,7 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 			chasitorIdleTimeout: null,
 			persisantAffinity: null,
 			persistantKey: null,
+			sneakPeekEnabled: null,
 		};
 	} catch (error) {
 		throw new Error(error);

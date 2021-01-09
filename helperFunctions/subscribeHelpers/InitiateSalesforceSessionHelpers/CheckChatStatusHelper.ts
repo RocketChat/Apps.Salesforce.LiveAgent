@@ -77,10 +77,12 @@ export class CheckChatStatus {
 					if (isChatAccepted === true) {
 						console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
 						const chatEstablishedMessage = messageArray[0].message;
-						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout;
+						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout || false;
+						const sneakPeekEnabled = chatEstablishedMessage.sneakPeekEnabled;
 						const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
 
-						await this.persistence.updateByAssociation(this.assoc, { id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout });
+						await this.persistence.updateByAssociation(this.assoc,
+							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled });
 
 						const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 						await salesforceAgentAssigned.exec();
