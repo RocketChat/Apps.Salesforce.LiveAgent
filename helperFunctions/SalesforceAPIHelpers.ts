@@ -33,10 +33,22 @@ export async function sendChatRequest(
 	salesforceDeploymentId: string,
 	LcVisitorName: string,
 	LcVisitorEmail?: string,
-	salesforceId?: string
+	salesforceId?: string,
+	customDetail?: string
 ) {
+	let customDetailJSON: object | undefined;
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
-	const sendChatRequestHttpRequest: IHttpRequest = {
+
+	if (customDetail) {
+		try {
+			customDetailJSON = JSON.parse(customDetail);
+		} catch(error) {
+			throw Error(error);
+
+		}
+	}   
+
+	let sendChatRequestHttpRequest: IHttpRequest = {
 		headers: {
 			'X-LIVEAGENT-API-VERSION': '49',
 			'X-LIVEAGENT-AFFINITY': affinityToken,
@@ -88,6 +100,11 @@ export async function sendChatRequest(
 			isPost: true,
 		},
 	};
+	
+	if (customDetailJSON) {
+		sendChatRequestHttpRequest.data.prechatDetails.push(customDetailJSON);
+	}
+
 	try {
 		const response = await http.post(sendChatRequestEndpoint, sendChatRequestHttpRequest);
 		return response;
