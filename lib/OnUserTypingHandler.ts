@@ -5,8 +5,8 @@ import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket
 import { IRoomUserTypingContext } from '@rocket.chat/apps-engine/definition/rooms';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
-import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
-import { chasitorTyping } from '../helperFunctions/SalesforceAPIHelpers';
+import { retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
+import { chasitorTyping, chasitorSneakPeak } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class OnUserTypingHandler {
 	constructor(
@@ -45,16 +45,28 @@ export class OnUserTypingHandler {
 			return;
 		}
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.roomId}`);
-		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
+		const { persisantAffinity, persistantKey, sneakPeekEnabled } = await retrievePersistentData(this.read, assoc);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
-			await chasitorTyping(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.typing)
-			.then(async () => {
-				// ChasitorTyping/ChasitorNotTyping API Success
-			})
-			.catch((error) => {
-				console.log(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
-			});
+			if (sneakPeekEnabled) {
+				if (this.data.data.text || this.data.data.text === '') {
+					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.data.text)
+					.then(async () => {
+						// ChasitorSneakPeak API Success
+					})
+					.catch((error) => {
+						console.log(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
+					});
+				}
+			} else {
+				await chasitorTyping(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.typing)
+				.then(async () => {
+					// ChasitorTyping/ChasitorNotTyping API Success
+				})
+				.catch((error) => {
+					console.log(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
+				});
+			}
 		}
 	}
 }

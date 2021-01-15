@@ -25,4 +25,5 @@ export enum ErrorLogs {
 	ENDCHAT_EVENT_API_CALL_FAIL = 'Cannot successfully call Dialogflow app incoming endpoint.',
 	DIALOGFLOW_ERROR_SESSION = 'Error encountered in session. Triggering DIALOGFLOW_SESSION_ERROR_EVENT',
 	CHASITOR_TYPING_API_CALL_FAIL = 'Cannot successfully call ChasitorTyping/ChasitorNotTyping api.',
+	CHASITOR_SNEAKPEAK_API_CALL_FAIL = 'Cannot successfully call ChasitorSneakPeek api.',
 }

@@ -13,7 +13,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 
 	const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
 	const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${message.room.id}`);
-	const { chasitorIdleTimeout } = await retrievePersistentData(read, assoc);
+	const { chasitorIdleTimeout, sneakPeekEnabled } = await retrievePersistentData(read, assoc);
 
 	if (chasitorIdleTimeout && chasitorIdleTimeout.isEnabled) {
 
@@ -56,6 +56,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				idleTimeoutTimeoutTime: timeoutTime,
 				idleTimeoutMessage: timeoutWarningMessage,
 			});
+			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
 			modify.getExtender().finish(await msgExtender);
 		} else {
 			// Guest sent message
@@ -71,7 +72,16 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				idleTimeoutTimeoutTime: timeoutTime,
 				idleTimeoutMessage: timeoutWarningMessage,
 			});
+			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
 			modify.getExtender().finish(await msgExtender);
 		}
+	} else {
+		if (!message.id) {
+			return;
+		}
+		const user = await read.getUserReader().getByUsername(salesforceBotUsername);
+		const msgExtender = modify.getExtender().extendMessage(message.id, user);
+		(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
+		modify.getExtender().finish(await msgExtender);
 	}
 };
