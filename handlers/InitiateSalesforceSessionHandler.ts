@@ -94,6 +94,13 @@ export class InitiateSalesforceSession {
 					salesforceId = undefined;
 				}
 
+				let customDetail: string | undefined;
+				if (this.data.room.customFields && this.data.room.customFields.customDetail) {
+					customDetail = this.data.room.customFields.customDetail;
+				} else {
+					customDetail = undefined;
+				}
+
 				await sendChatRequest(
 					this.http,
 					salesforceChatApiEndpoint,
@@ -105,7 +112,8 @@ export class InitiateSalesforceSession {
 					salesforceDeploymentId,
 					LcVisitorName,
 					LcVisitorEmail,
-					salesforceId
+					salesforceId,
+					customDetail,
 				)
 					.then(async (sendChatRequestres) => {
 						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);

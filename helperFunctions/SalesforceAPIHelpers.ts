@@ -84,8 +84,8 @@ export async function sendChatRequest(
 					value: salesforceId,
 					entityMaps: [
 						{
-								entityName: 'Case',
-								fieldName: 'ID',
+							entityName: 'Case',
+							fieldName: 'ID',
 						},
 					],
 					transcriptFields: [
