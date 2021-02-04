@@ -50,3 +50,18 @@ export function checkForEvent(messageArray: any, eventToCheck: string) {
 		throw new Error(error);
 	}
 }
+
+export function getForEvent(messageArray: any, eventToCheck: string) {
+	try {
+		if (messageArray && messageArray.length > 0) {
+			for (let i = 0; i < messageArray.length; i++) {
+				if (messageArray[i].type === eventToCheck) {
+					return messageArray[i];
+				}
+			}
+		}
+		return false;
+	} catch (error) {
+		throw new Error(error);
+	}
+}

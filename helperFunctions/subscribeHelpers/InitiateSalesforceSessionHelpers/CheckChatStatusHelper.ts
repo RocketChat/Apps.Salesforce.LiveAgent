@@ -23,7 +23,7 @@ export class CheckChatStatus {
 		private salesforceChatApiEndpoint: string,
 		private affinityToken: string,
 		private key: string,
-		private LAQueueEmptyMessage: string,
+		private LANoQueueMessage: string,
 		private LAQueuePositionMessage: string,
 		private technicalDifficultyMessage: string,
 		private assoc: RocketChatAssociationRecord,
@@ -41,6 +41,7 @@ export class CheckChatStatus {
 		);
 		pullMessages(this.http, this.salesforceChatApiEndpoint, this.affinityToken, this.key)
 			.then(async (response) => {
+				console.log(response)
 				if (response.statusCode === 403) {
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await checkAgentStatusDirectCallback.checkAgentStatusCallbackError('Chat session expired.');
@@ -64,10 +65,10 @@ export class CheckChatStatus {
 					if (isQueueUpdate === true) {
 						const queueUpdateMessages = messageArray[0].message;
 						const queueUpdatePosition = queueUpdateMessages.position;
-						if (queueUpdatePosition === 1) {
-							const queueEmptyMessage = this.LAQueueEmptyMessage.replace(/%s/g, queueUpdatePosition);
-							await sendLCMessage(this.modify, this.data.room, queueEmptyMessage, this.data.agent);
-						} else if (queueUpdatePosition > 1) {
+						if (queueUpdatePosition === 0) {
+							const noQueueMessage = this.LANoQueueMessage.replace(/%s/g, queueUpdatePosition);
+							await sendLCMessage(this.modify, this.data.room, noQueueMessage, this.data.agent);
+						} else if (queueUpdatePosition > 0) {
 							const queuePosMessage = this.LAQueuePositionMessage.replace(/%s/g, queueUpdatePosition);
 							await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent);
 						}
