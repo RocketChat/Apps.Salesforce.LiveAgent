@@ -16,7 +16,6 @@ export enum AppSettingId {
 	FINDING_LIVEAGENT_MESSAGE = 'finding_liveagent_message',
 	LIVEAGENT_CHAT_ENDED_MESSAGE = 'la_chat_ended_message',
 	LIVEAGENT_QUEUE_POSITION_MESSAGE = 'la_queue_position_message',
-	LIVEAGENT_QUEUE_EMPTY_MESSAGE = 'la_queue_empty_message',
 	LIVEAGENT_NO_QUEUE_MESSAGE = 'la_no_queue_message',
 	NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE = 'la_no_liveagent_available',
 	TECHNICAL_DIFFICULTY_MESSAGE = 'technical_difficulty_message',

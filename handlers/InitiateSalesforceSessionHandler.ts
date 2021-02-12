@@ -7,7 +7,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
-import { checkForEvent } from '../helperFunctions/SalesforceMessageHelpers';
+import { checkForEvent, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
 import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 
@@ -51,7 +51,6 @@ export class InitiateSalesforceSession {
 		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE))
 			.value;
 		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE)).value;
-		const LAQueueEmptyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_EMPTY_MESSAGE)).value;
 
 		const LcVisitor: IVisitor = this.data.room.visitor;
 		const LcVisitorName = LcVisitor.name;
@@ -131,13 +130,16 @@ export class InitiateSalesforceSession {
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
 								const isChatRequestSuccess = checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
-								if (isChatRequestSuccess === true) {
-									const chatSuccessMessageArray = pullMessagesMessageArray[0].message;
-									const { queuePosition } = chatSuccessMessageArray;
-									if (queuePosition === 1) {
-										// User Queue Position = 1
-										await sendLCMessage(this.modify, this.data.room, LANoQueueMessage, this.data.agent);
-									} else if (queuePosition > 1) {
+								const hasQueueUpdateMessage = checkForEvent(pullMessagesMessageArray, 'QueueUpdate');
+
+								if ( hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
+									const queueMessage = hasQueueUpdateMessage ? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message : getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
+									const queuePosition = hasQueueUpdateMessage ? queueMessage.position : queueMessage.queuePosition;
+									if (queuePosition === 0) {
+										// User Queue Position = 0
+										const queuePosMessage = LANoQueueMessage.replace(/%s/g, queuePosition);
+										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent);
+									} else if (queuePosition > 0) {
 										// User Queue Position > 1
 										const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
 										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent);
@@ -206,7 +208,7 @@ export class InitiateSalesforceSession {
 										salesforceChatApiEndpoint,
 										affinityToken,
 										key,
-										LAQueueEmptyMessage,
+										LANoQueueMessage,
 										LAQueuePositionMessage,
 										technicalDifficultyMessage,
 										assoc,
