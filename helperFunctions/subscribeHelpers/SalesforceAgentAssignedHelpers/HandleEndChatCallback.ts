@@ -1,9 +1,9 @@
 import { IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
+import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
+import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
-import { BlockElementType, ButtonStyle, ConditionalBlockFiltersEngine, IButtonElement, TextObjectType } from '@rocket.chat/apps-engine/definition/uikit';
-import { ActionId } from '../../../enum/ActionId';
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
@@ -39,30 +39,19 @@ export class HandleEndChatCallback {
 		} else {
 			try {
 				console.log(InfoLogs.CHATBOT_NOT_CONFIGURED);
-				const messageBuilder = this.modify.getCreator().startMessage();
+				const lroom: ILivechatRoom = this.data.room as ILivechatRoom;
 
-				const btn: IButtonElement = {
-					type: BlockElementType.BUTTON,
-					text: {
-						type: TextObjectType.PLAINTEXT,
-						text: 'Close Chat',
-					},
-					actionId: ActionId.CLOSE_CHAT_BUTTON,
-					style: ButtonStyle.DANGER,
+				const data: IMessage = {
+					room: this.data.room,
+					sender: this.data.agent,
 				};
 
-				const blocks = this.modify.getCreator().getBlockBuilder();
-				const innerBlocks = this.modify.getCreator().getBlockBuilder();
+				const messageBuilder = this.modify.getCreator().startMessage(data);
+				messageBuilder.setText(this.endChatReason);
 
-				blocks.addConditionalBlock(
-					innerBlocks.addActionsBlock({
-						elements: [btn],
-					}),
-					{ engine: [ConditionalBlockFiltersEngine.LIVECHAT] },
-				);
-
-				messageBuilder.setRoom(this.data.room).setText(this.endChatReason).setSender(this.data.agent).addBlocks(blocks);
 				await this.modify.getCreator().finish(messageBuilder);
+				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
+				await this.modify.getUpdater().getLivechatUpdater().closeRoom(lroom, 'Chat closed by visitor.');
 			} catch (error) {
 				throw new Error(error);
 			}
