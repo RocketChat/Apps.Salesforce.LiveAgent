@@ -73,7 +73,7 @@ export const AppSettings: Array<ISetting> = [
 		id: AppSettingId.CB_HANDOVER_DEPARTMENT_NAME,
 		public: true,
 		type: SettingType.STRING,
-		packageValue: 'Viasat Virtual Assistant',
+		packageValue: '',
 		i18nLabel: 'Dialogflow Bot Department Name (Optional)',
 		i18nDescription: 'Enter Omnichannel department name containing Dialogflow Bot user.',
 		required: false,
