@@ -100,6 +100,21 @@ export class InitiateSalesforceSession {
 					customDetail = undefined;
 				}
 
+				const logHandoverFailure = (errorMessage, error?) => {
+					let handoverFailure = {
+						errorMessage,
+						error,
+						'dialogflow_SessionID': this.data.room.id,
+						'salesforce_SessionTokens': sessionTokens,
+						'salesforce_ID': salesforceId,
+						'salesforce_OrganizationID': salesforceOrganisationId,
+						'salesforce_ButtonID': buttonId ? buttonId : salesforceButtonId,
+						'customDetailes': customDetail
+					}
+					Object.keys(handoverFailure).forEach(key => handoverFailure[key] === undefined && delete handoverFailure[key]);
+					console.log('Failed to handover', handoverFailure);
+				};
+
 				await sendChatRequest(
 					this.http,
 					salesforceChatApiEndpoint,
@@ -149,7 +164,7 @@ export class InitiateSalesforceSession {
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
 									switch (pullMessagesContentParsed.messages[0].message.reason) {
 										case 'Unavailable':
-											console.log(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
+											logHandoverFailure(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
 											await this.persistence.removeByAssociation(assoc);
 											const NoLiveagentAvailableMessage: string = (
 												await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
@@ -158,7 +173,7 @@ export class InitiateSalesforceSession {
 											break;
 
 										case 'NoPost':
-											console.log(ErrorLogs.APP_CONFIGURATION_INVALID);
+											logHandoverFailure(ErrorLogs.APP_CONFIGURATION_INVALID);
 											await this.persistence.removeByAssociation(assoc);
 											await sendDebugLCMessage(
 												this.read,
@@ -171,7 +186,7 @@ export class InitiateSalesforceSession {
 											break;
 
 										case 'InternalFailure':
-											console.log(ErrorLogs.SALESFORCE_INTERNAL_FAILURE);
+											logHandoverFailure(ErrorLogs.SALESFORCE_INTERNAL_FAILURE);
 											await this.persistence.removeByAssociation(assoc);
 											await sendDebugLCMessage(
 												this.read,
@@ -184,7 +199,7 @@ export class InitiateSalesforceSession {
 											break;
 
 										default:
-											console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE);
+											logHandoverFailure(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE);
 											await this.persistence.removeByAssociation(assoc);
 											await sendDebugLCMessage(
 												this.read,
@@ -217,7 +232,7 @@ export class InitiateSalesforceSession {
 								}
 							})
 							.catch(async (error) => {
-								console.log(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
+								logHandoverFailure(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
 								await this.persistence.removeByAssociation(assoc);
 								await sendDebugLCMessage(
 									this.read,
@@ -230,7 +245,7 @@ export class InitiateSalesforceSession {
 							});
 					})
 					.catch(async (error) => {
-						console.log(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
+						logHandoverFailure(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
 						await this.persistence.removeByAssociation(assoc);
 						await sendDebugLCMessage(
 							this.read,
