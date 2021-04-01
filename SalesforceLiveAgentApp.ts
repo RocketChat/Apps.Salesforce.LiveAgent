@@ -25,7 +25,7 @@ import { OnUserTypingHandler } from './lib/OnUserTypingHandler';
 import { PostMessageClassInitiate } from './lib/PostMessageClassInitiateHandler';
 import { SalesforceAgentAssignedClass } from './lib/SalesforceAgentAssignedHandler';
 
-export class SalesforcePluginApp
+export class SalesforceLiveAgentApp
 	extends App
 	implements IPostMessageSent, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned, IPostLivechatRoomClosed, IRoomUserTyping,
 	IUIKitLivechatInteractionHandler {
