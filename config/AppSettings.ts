@@ -172,7 +172,7 @@ export const AppSettings: Array<ISetting> = [
 		id: AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
-		packageValue: 'No agents are available for chat right now.',
+		packageValue: 'There are no agents currently available. Our Customer Care team is available by phone 24/7 at 1-855-463-9333.',
 		i18nLabel: 'No Live Agent Available Message',
 		i18nDescription: 'Enter message to show when there is no liveagent available to accept user request.',
 		required: true,
