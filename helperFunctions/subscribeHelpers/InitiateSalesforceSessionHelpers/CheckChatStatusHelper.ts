@@ -67,10 +67,10 @@ export class CheckChatStatus {
 						const queueUpdatePosition = queueUpdateMessages.position;
 						if (queueUpdatePosition === 0) {
 							const noQueueMessage = this.LANoQueueMessage.replace(/%s/g, queueUpdatePosition);
-							await sendLCMessage(this.modify, this.data.room, noQueueMessage, this.data.agent);
+							await sendLCMessage(this.modify, this.data.room, noQueueMessage, this.data.agent, true);
 						} else if (queueUpdatePosition > 0) {
 							const queuePosMessage = this.LAQueuePositionMessage.replace(/%s/g, queueUpdatePosition);
-							await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent);
+							await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent, true);
 						}
 					}
 

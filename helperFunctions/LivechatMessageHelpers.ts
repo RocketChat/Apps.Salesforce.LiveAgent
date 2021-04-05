@@ -1,12 +1,25 @@
 import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 
-export async function sendLCMessage(modify: IModify, room: IRoom, messageText: string, sender: IUser) {
+export async function sendLCMessage(modify: IModify, room: IRoom, messageText: string, sender: IUser, disableInput?: boolean) {
 	try {
 		const messageBuilder = modify.getCreator().startMessage();
-		messageBuilder.setRoom(room).setText(messageText).setSender(sender);
+		const message: IMessage = {
+			room,
+			text: messageText,
+			sender,
+		};
+		if (disableInput) {
+			message.customFields = {
+				disableInput: true,
+				disableInputMessage: 'Please wait',
+				displayTyping: false,
+			};
+		}
+		messageBuilder.setData(message);
 		await modify.getCreator().finish(messageBuilder);
 	} catch (error) {
 		throw new Error(error);

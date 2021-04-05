@@ -39,10 +39,19 @@ export class HandleEndChatCallback {
 		} else {
 			try {
 				console.log(InfoLogs.CHATBOT_NOT_CONFIGURED);
-				const lroom: ILivechatRoom = this.data.room as ILivechatRoom;
+
+				const room: ILivechatRoom = (await this.read.getRoomReader().getById(this.data.room.id)) as ILivechatRoom;
+				if (!room) {
+					throw new Error(ErrorLogs.INVALID_ROOM_ID);
+				}
+
+				const { isOpen } = room;
+				if (!isOpen) {
+					return;
+				}
 
 				const data: IMessage = {
-					room: this.data.room,
+					room,
 					sender: this.data.agent,
 				};
 
@@ -51,7 +60,7 @@ export class HandleEndChatCallback {
 
 				await this.modify.getCreator().finish(messageBuilder);
 				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-				await this.modify.getUpdater().getLivechatUpdater().closeRoom(lroom, 'Chat closed by visitor.');
+				await this.modify.getUpdater().getLivechatUpdater().closeRoom(room, 'Chat closed by visitor.');
 			} catch (error) {
 				throw new Error(error);
 			}
