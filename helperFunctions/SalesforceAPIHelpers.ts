@@ -1,4 +1,18 @@
-import { IHttp, IHttpRequest } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IHttpRequest, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { AppSettingId } from '../enum/AppSettingId';
+import { ErrorLogs } from '../enum/ErrorLogs';
+
+export async function getSalesforceChatAPIEndpoint(read: IRead): Promise<string> {
+	let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT))
+	.value;
+	try {
+		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
+	} catch (error) {
+		console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
+		return '';
+	}
+	return salesforceChatApiEndpoint;
+}
 
 export async function getSessionTokens(http: IHttp, liveAgentUrl: string) {
 	const generateTokenEndpoint = liveAgentUrl + 'System/SessionId';

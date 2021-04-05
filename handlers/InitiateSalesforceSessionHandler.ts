@@ -138,11 +138,11 @@ export class InitiateSalesforceSession {
 									if (queuePosition === 0) {
 										// User Queue Position = 0
 										const queuePosMessage = LANoQueueMessage.replace(/%s/g, queuePosition);
-										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent);
+										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent, true);
 									} else if (queuePosition > 0) {
 										// User Queue Position > 1
 										const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
-										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent);
+										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent, true);
 									}
 								}
 

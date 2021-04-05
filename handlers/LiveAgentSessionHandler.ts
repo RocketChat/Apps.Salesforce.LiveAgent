@@ -8,8 +8,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
-import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
-import { closeChat, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
+import { getSalesforceChatAPIEndpoint, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 
 export class LiveAgentSession {
 	constructor(private app: IApp, private message: IMessage, private read: IRead, private modify: IModify, private http: IHttp, private persistence: IPersistence) {}
@@ -21,34 +20,9 @@ export class LiveAgentSession {
 				return;
 			}
 
-			let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT))
-				.value;
-			try {
-				salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-			} catch (error) {
-				console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
-				return;
-			}
-
+			const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
 			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
-
-			if ((this.message.text === 'Closed by visitor' || this.message.text === 'customer_idle_timeout' )
-				&& persisantAffinity !== null && persistantKey !== null) {
-					let reason = '';
-					if (this.message.text === 'customer_idle_timeout' ) {
-						reason = 'clientIdleTimeout';
-						updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
-					}
-				 await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason)
-					.then(async () => {
-						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-						await this.persistence.removeByAssociation(assoc);
-					})
-					.catch((error) => {
-						console.log(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
-					});
-			}
 
 			if (this.message.text !== 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
 				const lroom: ILivechatRoom = this.message.room as ILivechatRoom;
