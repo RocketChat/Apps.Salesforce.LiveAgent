@@ -40,6 +40,7 @@ export class LivechatRoomClosedClass {
 		}
 
 		const dialogflowEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME);
+		const dialogflowCustomerEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME);
 		const dialogflowAgentUnavailableEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME);
 		const dialogflowCustomerIdleTimeoutEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME);
 		const dialogflowSessionErrorEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME);
@@ -66,6 +67,9 @@ export class LivechatRoomClosedClass {
 				} else if (customFields && customFields.errorSession === true && dialogflowSessionErrorEventName) {
 					console.log(ErrorLogs.DIALOGFLOW_ERROR_SESSION);
 					eventParams.name = dialogflowSessionErrorEventName;
+				} else if (dialogflowCustomerEndChatEventName) {
+					console.log(InfoLogs.DIALOGFLOW_CUSTOMER_ENDED_CHAT);
+					eventParams.name = dialogflowCustomerEndChatEventName;
 				}
 
 				const appEventEndpoint = `${serverUrl}api/apps/public/21b7d3ba-031b-41d9-8ff2-fbbfa081ae90/incoming`;

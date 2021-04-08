@@ -5,6 +5,7 @@ export enum AppSettingId {
 	CHATBOT_USERNAME = 'chat_bot_username',
 	DIALOGFLOW_ENABLE_END_EVENT = 'dialogflow_enable_end_event',
 	DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME = 'dialogflow_agent_ended_chat_event_name',
+	DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME = 'dialogflow_customer_ended_chat_event_name',
 	DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME = 'dialogflow_agent_unavailable_event_name',
 	DIALOGFLOW_SESSION_ERROR_EVENT_NAME = 'dialogflow_session_error_event_name',
 	DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME = 'dialogflow_customer_idle_timeout_event_name',

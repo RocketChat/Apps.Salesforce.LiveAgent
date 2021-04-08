@@ -97,6 +97,15 @@ export const AppSettings: Array<ISetting> = [
 		required: false,
 	},
 	{
+		id: AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME,
+		public: true,
+		type: SettingType.STRING,
+		packageValue: 'end_live_chat',
+		i18nLabel: 'Dialogflow Customer Ended Chat Event Name (Optional)',
+		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is sucessfully ended by customer.',
+		required: false,
+	},
+	{
 		id: AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME,
 		public: true,
 		type: SettingType.STRING,
