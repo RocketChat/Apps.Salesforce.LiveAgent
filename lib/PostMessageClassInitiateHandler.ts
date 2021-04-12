@@ -11,6 +11,7 @@ import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers'
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/SalesforceAPIHelpers';
 import { handleTimeout } from '../helperFunctions/TimeoutHelper';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class PostMessageClassInitiate {
 	constructor(
@@ -23,7 +24,7 @@ export class PostMessageClassInitiate {
 	) {}
 
 	public async exec() {
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
 		const { text, editedAt } = this.message;
 		const livechatRoom = this.message.room as ILivechatRoom;
 		const { type, servedBy, isOpen } = livechatRoom;

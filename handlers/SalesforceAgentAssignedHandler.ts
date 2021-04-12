@@ -7,6 +7,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssigned {
 	constructor(
@@ -19,7 +20,7 @@ export class SalesforceAgentAssigned {
 	) {}
 
 	public async exec() {
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
 		if (this.data.agent.username !== salesforceBotUsername) {
 			return;
 		}
@@ -27,10 +28,9 @@ export class SalesforceAgentAssigned {
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
 		const persitedData = await retrievePersistentTokens(this.read, assoc);
 		const { persisantAffinity, persistantKey } = persitedData;
-		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
-			.value;
+		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
 
-		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -39,7 +39,7 @@ export class SalesforceAgentAssigned {
 			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
 		}
-		const LAChatEndedMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE)).value;
+		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.

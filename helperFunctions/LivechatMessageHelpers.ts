@@ -3,6 +3,7 @@ import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
+import { getAppSettingValue } from '../lib/Settings';
 
 export async function sendLCMessage(modify: IModify, room: IRoom, messageText: string, sender: IUser, disableInput?: boolean) {
 	try {
@@ -28,7 +29,7 @@ export async function sendLCMessage(modify: IModify, room: IRoom, messageText: s
 
 export async function sendDebugLCMessage(read: IRead, modify: IModify, room: IRoom, messageText: string, sender: IUser) {
 	try {
-		const debugMode: boolean = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.DEBUG_BUTTON)).value;
+		const debugMode: boolean = await getAppSettingValue(read, AppSettingId.DEBUG_BUTTON);
 		if (debugMode !== true) {
 			return;
 		}

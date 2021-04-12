@@ -10,6 +10,7 @@ import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFuncti
 import { checkForEvent, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
 import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class InitiateSalesforceSession {
 	constructor(
@@ -22,11 +23,10 @@ export class InitiateSalesforceSession {
 	) {}
 
 	public async exec() {
-		const salesforceOrganisationId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_ORGANISATION_ID)).value;
-		const salesforceDeploymentId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_DEPLOYMENT_ID)).value;
-		const salesforceButtonId: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BUTTON_ID)).value;
-		const technicalDifficultyMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE))
-			.value;
+		const salesforceOrganisationId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_ORGANISATION_ID);
+		const salesforceDeploymentId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_DEPLOYMENT_ID);
+		const salesforceButtonId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BUTTON_ID);
+		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
 
 		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
 			this.app,
@@ -38,7 +38,7 @@ export class InitiateSalesforceSession {
 			technicalDifficultyMessage,
 		);
 
-		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -48,9 +48,8 @@ export class InitiateSalesforceSession {
 			return;
 		}
 
-		const LAQueuePositionMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE))
-			.value;
-		const LANoQueueMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE)).value;
+		const LAQueuePositionMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE);
+		const LANoQueueMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE);
 
 		const LcVisitor: IVisitor = this.data.room.visitor;
 		const LcVisitorName = LcVisitor.name;
@@ -166,9 +165,7 @@ export class InitiateSalesforceSession {
 										case 'Unavailable':
 											logHandoverFailure(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
 											await this.persistence.removeByAssociation(assoc);
-											const NoLiveagentAvailableMessage: string = (
-												await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
-											).value;
+											const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 											break;
 

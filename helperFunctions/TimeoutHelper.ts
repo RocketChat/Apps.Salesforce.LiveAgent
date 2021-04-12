@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
+import { getAppSettingValue } from '../lib/Settings';
 import { retrievePersistentData } from './PersistenceHelpers';
 
 export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify ) => {
@@ -11,7 +12,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 		return;
 	}
 
-	const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+	const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
 	const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${message.room.id}`);
 	const { chasitorIdleTimeout, sneakPeekEnabled } = await retrievePersistentData(read, assoc);
 
@@ -40,8 +41,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 		// On Timeout : Close chat
 		// On Warning : Show Countdown Popup in Livechat Widget
 
-		const timeoutWarningMessage: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.CUSTOMER_TIMEOUT_WARNING_MESSAGE))
-			.value;
+		const timeoutWarningMessage: string = await getAppSettingValue(read, AppSettingId.CUSTOMER_TIMEOUT_WARNING_MESSAGE);
 
 		if (message.sender.username === salesforceBotUsername) {
 			// Agent sent message

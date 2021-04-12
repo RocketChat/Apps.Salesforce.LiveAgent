@@ -5,6 +5,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class DialogflowAgentAssignedClass {
 	constructor(
@@ -17,8 +18,7 @@ export class DialogflowAgentAssignedClass {
 	) {}
 
 	public async exec() {
-		const isDialogflowEndEventEnabled: boolean = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_ENABLE_END_EVENT))
-			.value;
+		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_ENABLE_END_EVENT);
 		if (isDialogflowEndEventEnabled === false) {
 			console.log(InfoLogs.ENDCHAT_EVENT_NOT_ENABLED);
 			return;
@@ -26,8 +26,8 @@ export class DialogflowAgentAssignedClass {
 
 		const lroom: ILivechatRoom = this.data.room as ILivechatRoom;
 		const oldAgentUsername: string = this.data.agent.username;
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
-		const chatBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CHATBOT_USERNAME)).value;
+		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
+		const chatBotUsername: string = await getAppSettingValue(this.read, AppSettingId.CHATBOT_USERNAME);
 		const { customFields } = this.data.room;
 
 		let serverUrl = await this.read.getEnvironmentReader().getServerSettings().getValueById('Site_Url');
@@ -40,21 +40,11 @@ export class DialogflowAgentAssignedClass {
 			return;
 		}
 
-		const dialogflowEndChatEventName: string = (
-			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME)
-		).value;
-		const dialogflowAgentUnavailableEventName: string = (
-			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME)
-		).value;
-		const dialogflowCustomerIdleTimeoutEventName: string = (
-			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME)
-		).value;
-		const dialogflowSessionErrorEventName: string = (
-			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME)
-		).value;
-		const dialogflowEndChatEventLCode: string = (
-			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE)
-		).value;
+		const dialogflowEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME);
+		const dialogflowAgentUnavailableEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME);
+		const dialogflowCustomerIdleTimeoutEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME);
+		const dialogflowSessionErrorEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME);
+		const dialogflowEndChatEventLCode: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE);
 
 		if (lroom.servedBy) {
 			const newAgentUsername = lroom.servedBy.username;

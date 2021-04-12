@@ -6,6 +6,7 @@ import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
 import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssignedHandler';
+import { getAppSettingValue } from '../../../lib/Settings';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
@@ -93,9 +94,7 @@ export class CheckChatStatus {
 						const isChatEnded = checkForEvent(messageArray, 'ChatEnded');
 						if (isChatRequestFail === true) {
 							if (messageArray[0].message.reason === 'Unavailable') {
-								const NoLiveagentAvailableMessage: string = (
-									await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
-								).value;
+								const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 								return;
 							}

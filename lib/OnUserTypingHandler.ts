@@ -6,7 +6,8 @@ import { IRoomUserTypingContext } from '@rocket.chat/apps-engine/definition/room
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
-import { chasitorTyping, chasitorSneakPeak } from '../helperFunctions/SalesforceAPIHelpers';
+import { chasitorSneakPeak, chasitorTyping } from '../helperFunctions/SalesforceAPIHelpers';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class OnUserTypingHandler {
 	constructor(
@@ -36,8 +37,7 @@ export class OnUserTypingHandler {
 			return;
 		}
 
-		let salesforceChatApiEndpoint: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT))
-				.value;
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {

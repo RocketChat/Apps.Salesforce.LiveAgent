@@ -4,6 +4,7 @@ import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
+import { getAppSettingValue } from '../lib/Settings';
 import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHelper';
 import { sendLCMessage } from './LivechatMessageHelpers';
 
@@ -18,7 +19,7 @@ export async function messageFilter(app: IApp, modify: IModify, read: IRead, mes
 					break;
 
 				case 'AgentTyping':
-					const salesforceBotUsername: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+					const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
 					await agentTypingListener(messageRoom.id, modify.getNotifier().typing({ id: messageRoom.id, username: salesforceBotUsername }));
 					break;
 
