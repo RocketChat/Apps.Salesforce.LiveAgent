@@ -8,6 +8,7 @@ import { performHandover } from '../helperFunctions/HandoverHelpers';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class HandoverEndpoint extends ApiEndpoint {
 	public path = 'handover';
@@ -34,7 +35,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 				);
 			}
 
-			const targetDeptName: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SF_HANDOVER_DEPARTMENT_NAME)).value;
+			const targetDeptName: string = await getAppSettingValue(read, AppSettingId.SF_HANDOVER_DEPARTMENT_NAME);
 			if (request.content.targetDepartmentName === targetDeptName && request.content.buttonId) {
 				updateRoomCustomFields(request.content.roomId, { reqButtonId: request.content.buttonId }, read, modify);
 			}

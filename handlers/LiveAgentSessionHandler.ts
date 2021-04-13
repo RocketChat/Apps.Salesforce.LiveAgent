@@ -9,13 +9,14 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { getSalesforceChatAPIEndpoint, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class LiveAgentSession {
 	constructor(private app: IApp, private message: IMessage, private read: IRead, private modify: IModify, private http: IHttp, private persistence: IPersistence) {}
 
 	public async exec() {
 		try {
-			const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+			const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
 			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {
 				return;
 			}

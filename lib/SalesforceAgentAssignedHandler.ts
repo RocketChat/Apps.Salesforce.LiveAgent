@@ -7,6 +7,7 @@ import { InitiateSalesforceSession } from '../handlers/InitiateSalesforceSession
 import { SalesforceAgentAssigned } from '../handlers/SalesforceAgentAssignedHandler';
 import { sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssignedClass {
 	constructor(
@@ -20,10 +21,9 @@ export class SalesforceAgentAssignedClass {
 
 	public async exec() {
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
-		const salesforceBotUsername: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BOT_USERNAME)).value;
+		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
 		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
-		const FindingLiveagentMessage: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.FINDING_LIVEAGENT_MESSAGE))
-			.value;
+		const FindingLiveagentMessage: string = await getAppSettingValue(this.read, AppSettingId.FINDING_LIVEAGENT_MESSAGE);
 
 		if (persisantAffinity === null && persistantKey === null && this.data.agent.username === salesforceBotUsername) {
 			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.data, this.read, this.http, this.persistence, this.modify);

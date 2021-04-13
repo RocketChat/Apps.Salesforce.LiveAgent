@@ -3,6 +3,7 @@ import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../../../enum/AppSettingId';
+import { getAppSettingValue } from '../../../lib/Settings';
 import { updateRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { HandleEndChatCallback } from '../SalesforceAgentAssignedHelpers/HandleEndChatCallback';
 
@@ -20,9 +21,7 @@ export class CheckAgentStatusCallback {
 	public async checkAgentStatusCallbackError(error: string) {
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
 
-		const NoLiveagentAvailableMessage: string = (
-			await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE)
-		).value;
+		const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
 
 		if (error === NoLiveagentAvailableMessage) {
 			updateRoomCustomFields(this.data.room.id, { agentUnavailable: true }, this.read, this.modify);

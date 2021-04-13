@@ -1,10 +1,10 @@
 import { IHttp, IHttpRequest, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
+import { getAppSettingValue } from '../lib/Settings';
 
 export async function getSalesforceChatAPIEndpoint(read: IRead): Promise<string> {
-	let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT))
-	.value;
+	let salesforceChatApiEndpoint: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 	try {
 		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 	} catch (error) {

@@ -7,6 +7,7 @@ import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
+import { getAppSettingValue } from '../../../lib/Settings';
 import { performHandover } from '../../HandoverHelpers';
 import { sendDebugLCMessage, sendLCMessage } from '../../LivechatMessageHelpers';
 
@@ -24,7 +25,7 @@ export class HandleEndChatCallback {
 
 	public handleEndChat = async () => {
 		await this.persistence.removeByAssociation(this.assoc);
-		const CBHandoverDepartmentName: string = (await this.read.getEnvironmentReader().getSettings().getById(AppSettingId.CB_HANDOVER_DEPARTMENT_NAME)).value;
+		const CBHandoverDepartmentName: string = await getAppSettingValue(this.read, AppSettingId.CB_HANDOVER_DEPARTMENT_NAME);
 
 		if (CBHandoverDepartmentName) {
 			await sendLCMessage(this.modify, this.data.room, this.endChatReason, this.data.agent);

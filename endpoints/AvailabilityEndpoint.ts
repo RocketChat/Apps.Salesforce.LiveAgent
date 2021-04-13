@@ -4,6 +4,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
+import { getAppSettingValue } from '../lib/Settings';
 
 export class AvailabilityEndpoint extends ApiEndpoint {
 	public path = 'availability';
@@ -21,7 +22,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 			const { button_ids } = request.query;
 
 			if (!button_ids) {
-				const salesforceButtonId: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_BUTTON_ID)).value;
+				const salesforceButtonId: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BUTTON_ID);
 				const response = await this.checkAvailability(http, read, salesforceButtonId);
 				return createHttpResponse(response.statusCode, { 'Content-Type': 'application/json' }, { result: response.results });
 			} else {
@@ -40,10 +41,10 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 
 	private async checkAvailability(http: IHttp, read: IRead, buttonId: string) {
 		try {
-			let salesforceChatApiEndpoint: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_CHAT_API_ENDPOINT)).value;
+			let salesforceChatApiEndpoint: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
-			const salesforceOrganisationId: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_ORGANISATION_ID)).value;
-			const salesforceDeploymentId: string = (await read.getEnvironmentReader().getSettings().getById(AppSettingId.SALESFORCE_DEPLOYMENT_ID)).value;
+			const salesforceOrganisationId: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_ORGANISATION_ID);
+			const salesforceDeploymentId: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_DEPLOYMENT_ID);
 
 			const checkAvailabilityHttpRequest: IHttpRequest = {
 				headers: {
