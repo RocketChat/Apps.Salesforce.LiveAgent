@@ -111,7 +111,7 @@ export class InitiateSalesforceSession {
 						'customDetailes': customDetail
 					}
 					Object.keys(handoverFailure).forEach(key => handoverFailure[key] === undefined && delete handoverFailure[key]);
-					console.log('Failed to handover', handoverFailure);
+					console.log('Failed to handover', JSON.stringify(handoverFailure));
 				};
 
 				await sendChatRequest(
