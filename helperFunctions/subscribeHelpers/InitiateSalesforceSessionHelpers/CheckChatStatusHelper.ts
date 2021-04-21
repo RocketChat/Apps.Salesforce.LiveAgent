@@ -9,6 +9,7 @@ import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssign
 import { getAppSettingValue } from '../../../lib/Settings';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
+import { extendRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from './CheckAgentStatusCallback';
@@ -82,6 +83,8 @@ export class CheckChatStatus {
 						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout || false;
 						const sneakPeekEnabled = chatEstablishedMessage.sneakPeekEnabled;
 						const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+						const agentName = chatEstablishedMessage.name;
+						await extendRoomCustomFields(this.data.room.id,'salesforceAgentName', agentName, this.read, this.modify);
 
 						await this.persistence.updateByAssociation(this.assoc,
 							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled });

@@ -4,6 +4,7 @@ import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livec
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
+import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
@@ -41,6 +42,13 @@ export class SalesforceAgentAssigned {
 		}
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
+		const updatedRoom = await this.read.getRoomReader().getById(this.data.room.id);
+		if (updatedRoom) {
+			const salesforceAgentName = updatedRoom.customFields ? updatedRoom.customFields.salesforceAgentName : 'undefined';
+			const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`
+			await sendLCMessage(this.modify, updatedRoom, connectedToAgentMessage, this.data.agent);
+		}
+		
 		if (persisantAffinity !== null && persistantKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.
 			const subscribeLiveAgentClass = new SubscribeToLiveAgent(

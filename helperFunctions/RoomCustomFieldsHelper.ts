@@ -18,8 +18,30 @@ export const updateRoomCustomFields = async (rid: string, data: any, read: IRead
 	roomBuilder.setCustomFields(customFields);
 
 	try {
-		modify.getUpdater().finish(roomBuilder);
+		await modify.getUpdater().finish(roomBuilder);
 	} catch (error) {
 		throw new Error(error);
 	}
 };
+
+export const extendRoomCustomFields = async (rid: string, key : string, data: any, read: IRead, modify: IModify): Promise<any> => {
+	const room = await read.getRoomReader().getById(rid);
+	if (!room) {
+		throw new Error(`${ErrorLogs.INVALID_ROOM_ID} ${rid}`);
+	}
+
+	const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
+	const user = await read.getUserReader().getByUsername(salesforceBotUsername);
+
+	let { customFields = {} } = room;
+	customFields = Object.assign(customFields, data);
+	const roomExtender = await modify.getExtender().extendRoom(rid, user);
+	roomExtender.addCustomField(key, data);
+
+	try {
+		await modify.getExtender().finish(roomExtender);
+	} catch (error) {
+		throw new Error(error);
+	}
+};
+
