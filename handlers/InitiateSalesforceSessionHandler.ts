@@ -107,8 +107,7 @@ export class InitiateSalesforceSession {
 						'salesforce_SessionTokens': sessionTokens,
 						'salesforce_ID': salesforceId,
 						'salesforce_OrganizationID': salesforceOrganisationId,
-						'salesforce_ButtonID': buttonId ? buttonId : salesforceButtonId,
-						'customDetailes': customDetail
+						'salesforce_ButtonID': buttonId ? buttonId : salesforceButtonId
 					}
 					Object.keys(handoverFailure).forEach(key => handoverFailure[key] === undefined && delete handoverFailure[key]);
 					console.log('Failed to handover', JSON.stringify(handoverFailure));
