@@ -83,11 +83,10 @@ export class CheckChatStatus {
 						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout || false;
 						const sneakPeekEnabled = chatEstablishedMessage.sneakPeekEnabled;
 						const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
-						const agentName = chatEstablishedMessage.name;
-						await extendRoomCustomFields(this.data.room.id,'salesforceAgentName', agentName, this.read, this.modify);
+						const salesforceAgentName = chatEstablishedMessage.name;
 
 						await this.persistence.updateByAssociation(this.assoc,
-							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled });
+							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName });
 
 						const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 						await salesforceAgentAssigned.exec();
