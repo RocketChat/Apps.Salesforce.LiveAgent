@@ -9,7 +9,6 @@ import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssign
 import { getAppSettingValue } from '../../../lib/Settings';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
-import { extendRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from './CheckAgentStatusCallback';

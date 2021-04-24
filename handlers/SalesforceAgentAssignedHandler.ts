@@ -6,7 +6,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
-import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { retrievePersistentData, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -29,6 +29,7 @@ export class SalesforceAgentAssigned {
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
 		const persitedData = await retrievePersistentTokens(this.read, assoc);
 		const { persisantAffinity, persistantKey } = persitedData;
+		const salesforceAgentName = (await retrievePersistentData(this.read, assoc)).salesforceAgentName;
 		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
 
 		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
@@ -42,12 +43,8 @@ export class SalesforceAgentAssigned {
 		}
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
-		const updatedRoom = await this.read.getRoomReader().getById(this.data.room.id);
-		if (updatedRoom) {
-			const salesforceAgentName = updatedRoom.customFields ? updatedRoom.customFields.salesforceAgentName : 'undefined';
-			const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`
-			await sendLCMessage(this.modify, updatedRoom, connectedToAgentMessage, this.data.agent);
-		}
+			const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`;
+			await sendLCMessage(this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
 		
 		if (persisantAffinity !== null && persistantKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.

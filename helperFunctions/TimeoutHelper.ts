@@ -14,7 +14,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 
 	const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
 	const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${message.room.id}`);
-	const { chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName } = await retrievePersistentData(read, assoc);
+	const { chasitorIdleTimeout, sneakPeekEnabled } = await retrievePersistentData(read, assoc);
 
 	if (chasitorIdleTimeout && chasitorIdleTimeout.isEnabled) {
 
@@ -57,7 +57,6 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				idleTimeoutMessage: timeoutWarningMessage,
 			});
 			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
-			(await msgExtender).addCustomField('salesforceAgentName', salesforceAgentName);
 			modify.getExtender().finish(await msgExtender);
 		} else {
 			// Guest sent message
