@@ -7,7 +7,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
-import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { retrievePersistentData, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/SalesforceAPIHelpers';
 import { handleTimeout } from '../helperFunctions/TimeoutHelper';
@@ -67,6 +67,15 @@ export class PostMessageClassInitiate {
 		}
 
 		handleTimeout(this.app, this.message, this.read, this.http, this.persistence, this.modify);
+
+		if (this.message && this.message.id) {
+			const { salesforceAgentName } = await retrievePersistentData(this.read, assoc);
+			const user = await this.read.getUserReader().getByUsername(salesforceBotUsername);
+			const msgExtender = this.modify.getExtender().extendMessage(this.message.id, user);
+			(await msgExtender).addCustomField('salesforceAgentName', salesforceAgentName);
+			await this.modify.getExtender().finish(await msgExtender);
+		}
+		
 
 		if (this.message.sender.username === salesforceBotUsername) {
 			return;

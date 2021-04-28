@@ -38,6 +38,7 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 				persisantAffinity: contentParsed.affinityToken as string,
 				persistantKey: contentParsed.key as string,
 				sneakPeekEnabled: contentParsed.sneakPeekEnabled as boolean,
+				salesforceAgentName: contentParsed.salesforceAgentName as string,
 			};
 		}
 
@@ -47,6 +48,7 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 			persisantAffinity: null,
 			persistantKey: null,
 			sneakPeekEnabled: null,
+			salesforceAgentName: null,
 		};
 	} catch (error) {
 		throw new Error(error);
