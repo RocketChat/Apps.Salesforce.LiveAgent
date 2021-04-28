@@ -36,7 +36,7 @@ export class DialogflowAgentAssignedClass {
 		} catch (error) {
 			await sendLCMessage(this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, this.data.agent);
 			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, this.data.agent);
-			console.log(ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND);
+			console.error(ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND);
 			return;
 		}
 

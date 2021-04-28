@@ -22,4 +22,5 @@ export enum AppSettingId {
 	TECHNICAL_DIFFICULTY_MESSAGE = 'technical_difficulty_message',
 	CUSTOMER_TIMEOUT_WARNING_MESSAGE = 'customer_timeout_warning_message',
 	DEBUG_BUTTON = 'debug_button',
+	LOG_LEVEL = 'log_level',
 }

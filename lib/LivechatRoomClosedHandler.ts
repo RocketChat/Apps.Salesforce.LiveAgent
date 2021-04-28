@@ -35,7 +35,7 @@ export class LivechatRoomClosedClass {
 			const user = await this.read.getUserReader().getByUsername(salesforceBotUsername);
 			await sendLCMessage(this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
 			await sendDebugLCMessage(this.read, this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
-			console.log(ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND);
+			console.error(ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND);
 			return;
 		}
 
@@ -87,7 +87,7 @@ export class LivechatRoomClosedClass {
 					await this.http.post(appEventEndpoint, appEventEndpointHttpRequest);
 					return;
 				} catch (error) {
-					console.log(ErrorLogs.ENDCHAT_EVENT_API_CALL_FAIL, error);
+					console.error(ErrorLogs.ENDCHAT_EVENT_API_CALL_FAIL, error);
 					return;
 				}
 			} else {

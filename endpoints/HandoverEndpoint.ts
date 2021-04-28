@@ -43,7 +43,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 			await performHandover(modify, read, request.content.roomId, request.content.targetDepartmentName);
 			return createHttpResponse(HttpStatusCode.OK, { 'Content-Type': 'application/json' }, { result: 'Handover request completed successfully' });
 		} catch (error) {
-			console.log(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED, error);
+			console.error(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED, error);
 			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: error.message });
 		}
 	}

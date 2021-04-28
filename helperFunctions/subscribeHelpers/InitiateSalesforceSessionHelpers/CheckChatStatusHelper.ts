@@ -42,7 +42,6 @@ export class CheckChatStatus {
 		);
 		pullMessages(this.http, this.salesforceChatApiEndpoint, this.affinityToken, this.key)
 			.then(async (response) => {
-				console.log(response)
 				if (response.statusCode === 403) {
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await checkAgentStatusDirectCallback.checkAgentStatusCallbackError('Chat session expired.');
@@ -113,7 +112,7 @@ export class CheckChatStatus {
 							}
 						}
 					} else {
-						console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
+						console.error(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
 						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
 						if (persisantAffinity !== null && persistantKey !== null) {
 							await this.checkCurrentChatStatus();
@@ -125,7 +124,7 @@ export class CheckChatStatus {
 				}
 			})
 			.catch(async (error) => {
-				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
+				console.error(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 				return;
 			});
