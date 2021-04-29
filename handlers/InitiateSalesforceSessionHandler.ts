@@ -43,7 +43,7 @@ export class InitiateSalesforceSession {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
-			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
+			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			return;
 		}
@@ -100,17 +100,17 @@ export class InitiateSalesforceSession {
 				}
 
 				const logHandoverFailure = (errorMessage, error?) => {
-					let handoverFailure = {
+					const handoverFailure = {
 						errorMessage,
 						error,
-						'dialogflow_SessionID': this.data.room.id,
-						'salesforce_SessionTokens': sessionTokens,
-						'salesforce_ID': salesforceId,
-						'salesforce_OrganizationID': salesforceOrganisationId,
-						'salesforce_ButtonID': buttonId ? buttonId : salesforceButtonId
-					}
-					Object.keys(handoverFailure).forEach(key => handoverFailure[key] === undefined && delete handoverFailure[key]);
-					console.log('Failed to handover', JSON.stringify(handoverFailure));
+						dialogflow_SessionID: this.data.room.id,
+						salesforce_SessionTokens: sessionTokens,
+						salesforce_ID: salesforceId,
+						salesforce_OrganizationID: salesforceOrganisationId,
+						salesforce_ButtonID: buttonId ? buttonId : salesforceButtonId,
+					};
+					Object.keys(handoverFailure).forEach((prop) => handoverFailure[prop] === undefined && delete handoverFailure[prop]);
+					console.error('Failed to handover', JSON.stringify(handoverFailure));
 				};
 
 				await sendChatRequest(
@@ -254,7 +254,7 @@ export class InitiateSalesforceSession {
 					});
 			})
 			.catch(async (error) => {
-				console.log(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
+				console.error(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
 				await this.persistence.removeByAssociation(assoc);
 				await sendDebugLCMessage(
 					this.read,

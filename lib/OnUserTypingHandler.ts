@@ -41,7 +41,7 @@ export class OnUserTypingHandler {
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
-			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
+			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 			return;
 		}
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.roomId}`);
@@ -55,7 +55,7 @@ export class OnUserTypingHandler {
 						// ChasitorSneakPeak API Success
 					})
 					.catch((error) => {
-						console.log(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
+						console.error(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
 					});
 				}
 			} else {
@@ -64,7 +64,7 @@ export class OnUserTypingHandler {
 					// ChasitorTyping/ChasitorNotTyping API Success
 				})
 				.catch((error) => {
-					console.log(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
+					console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
 				});
 			}
 		}

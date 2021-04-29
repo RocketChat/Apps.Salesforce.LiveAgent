@@ -42,11 +42,11 @@ export class LiveAgentSession {
 						console.log(InfoLogs.MESSAGE_SENT_TO_LIVEAGENT);
 					})
 					.catch((error) => {
-						console.log(ErrorLogs.SENDING_MESSAGE_TO_LIVEAGENT_ERROR, error);
+						console.error(ErrorLogs.SENDING_MESSAGE_TO_LIVEAGENT_ERROR, error);
 					});
 			}
 		} catch (error) {
-			console.log(ErrorLogs.LIVEAGENT_SESSION_CLASS_FAILED, error);
+			console.error(ErrorLogs.LIVEAGENT_SESSION_CLASS_FAILED, error);
 		}
 	}
 }

@@ -38,7 +38,7 @@ export class SalesforceAgentAssigned {
 		} catch (error) {
 			await sendLCMessage(this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
 			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
-			console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
+			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
 		}
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);

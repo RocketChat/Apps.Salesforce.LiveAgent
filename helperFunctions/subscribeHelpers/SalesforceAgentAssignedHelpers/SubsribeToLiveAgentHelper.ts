@@ -77,7 +77,7 @@ export class SubscribeToLiveAgent {
 				}
 			})
 			.catch(async (error) => {
-				console.log(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
+				console.error(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await handleEndChatCallback.handleEndChat();
 				return;
 			});

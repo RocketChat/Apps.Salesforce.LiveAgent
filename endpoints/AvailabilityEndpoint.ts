@@ -30,7 +30,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 				return createHttpResponse(response.statusCode, { 'Content-Type': 'application/json' }, { result: response.results });
 			}
 		} catch (error) {
-			console.log(ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR, error);
+			console.error(ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR, error);
 			return createHttpResponse(
 				HttpStatusCode.INTERNAL_SERVER_ERROR,
 				{ 'Content-Type': 'application/json' },
@@ -70,7 +70,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 				results: response.content,
 			};
 		} catch (error) {
-			console.log(ErrorLogs.CHECKING_AVAILABILITY_ERROR, error);
+			console.error(ErrorLogs.CHECKING_AVAILABILITY_ERROR, error);
 			throw new Error(error);
 		}
 	}

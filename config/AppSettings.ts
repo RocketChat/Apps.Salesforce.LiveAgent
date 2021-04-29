@@ -213,4 +213,26 @@ export const AppSettings: Array<ISetting> = [
 		i18nDescription: 'This mode enables debug messages for your app.',
 		required: false,
 	},
+	{
+		id: AppSettingId.LOG_LEVEL,
+		public: true,
+		type: SettingType.SELECT,
+		packageValue: '0',
+		value: '0',
+		values: [
+			{
+				key: '0',
+				i18nLabel: '0_Errors_Only',
+			}, {
+				key: '1',
+				i18nLabel: '1_Errors_and_Information',
+			}, {
+				key: '2',
+				i18nLabel: '2_Erros_Information_and_Debug',
+			},
+		],
+		i18nLabel: 'Salesforce App Log Level',
+		i18nDescription: 'Redeploying app or restarting server is required to apply changes',
+		required: false,
+	},
 ];

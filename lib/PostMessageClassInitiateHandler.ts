@@ -46,7 +46,7 @@ export class PostMessageClassInitiate {
 						await this.persistence.removeByAssociation(assoc);
 					})
 					.catch((error) => {
-						console.log(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
+						console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
 					});
 			}
 

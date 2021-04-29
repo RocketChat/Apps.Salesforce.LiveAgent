@@ -33,14 +33,12 @@ export class HandleEndChatCallback {
 			try {
 				await performHandover(this.modify, this.read, this.data.room.id, CBHandoverDepartmentName);
 			} catch (error) {
-				console.log(ErrorLogs.HANDOVER_REQUEST_FAILED, error);
+				console.error(ErrorLogs.HANDOVER_REQUEST_FAILED, error);
 				await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
 				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.HANDOVER_REQUEST_FAILED}: ${error}`, this.data.agent);
 			}
 		} else {
 			try {
-				console.log(InfoLogs.CHATBOT_NOT_CONFIGURED);
-
 				const room: ILivechatRoom = (await this.read.getRoomReader().getById(this.data.room.id)) as ILivechatRoom;
 				if (!room) {
 					throw new Error(ErrorLogs.INVALID_ROOM_ID);

@@ -8,7 +8,7 @@ export async function getSalesforceChatAPIEndpoint(read: IRead): Promise<string>
 	try {
 		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 	} catch (error) {
-		console.log(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
+		console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 		return '';
 	}
 	return salesforceChatApiEndpoint;
