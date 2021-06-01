@@ -43,9 +43,9 @@ export class SalesforceAgentAssigned {
 		}
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
-			const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`;
-			await sendLCMessage(this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
-		
+		const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`;
+		await sendLCMessage(this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
+
 		if (persisantAffinity !== null && persistantKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.
 			const subscribeLiveAgentClass = new SubscribeToLiveAgent(

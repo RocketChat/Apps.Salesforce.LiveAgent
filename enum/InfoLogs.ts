@@ -18,5 +18,5 @@ export enum InfoLogs {
 	DIALOGFLOW_CUSTOMER_ENDED_CHAT = 'Customer Ended Chat. Triggering DIALOGFLOW_END_EVENT',
 	DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT = 'Chat ended due to customer idle timeout',
 	DIALOGFLOW_AGENT_UNAVAILABLE_SESSION = 'No Agent Found. Triggering DIALOGFLOW_AGENT_UNAVAILABLE_EVENT',
-	CONNECTING_TO_SALESFORCE_LIVEAGENT = 'Connected to salesforce agent:',
+	CONNECTING_TO_SALESFORCE_LIVEAGENT = 'Connected to agent:',
 }
