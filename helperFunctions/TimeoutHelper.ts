@@ -42,38 +42,50 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 		// On Warning : Show Countdown Popup in Livechat Widget
 
 		const timeoutWarningMessage: string = await getAppSettingValue(read, AppSettingId.CUSTOMER_TIMEOUT_WARNING_MESSAGE);
+		const sessionTimeoutHandler: string = await getAppSettingValue(read, AppSettingId.TIMEOUT_HANDLER);
 
 		if (message.sender.username === salesforceBotUsername) {
 			// Agent sent message
 			if (!message.id) {
 				return;
 			}
-			const user = await read.getUserReader().getByUsername(salesforceBotUsername);
-			const msgExtender = modify.getExtender().extendMessage(message.id, user);
-			(await msgExtender).addCustomField('idleTimeoutConfig', {
-				idleTimeoutAction: 'start',
-				idleTimeoutWarningTime: warningTime,
-				idleTimeoutTimeoutTime: timeoutTime,
-				idleTimeoutMessage: timeoutWarningMessage,
-			});
-			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
-			modify.getExtender().finish(await msgExtender);
+
+			if (sessionTimeoutHandler === 'widget') {
+				const user = await read.getUserReader().getByUsername(salesforceBotUsername);
+				const msgExtender = modify.getExtender().extendMessage(message.id, user);
+				(await msgExtender).addCustomField('idleTimeoutConfig', {
+					idleTimeoutAction: 'start',
+					idleTimeoutWarningTime: warningTime,
+					idleTimeoutTimeoutTime: timeoutTime,
+					idleTimeoutMessage: timeoutWarningMessage,
+				});
+				(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
+				modify.getExtender().finish(await msgExtender);
+			} else {
+				await scheduleTimeOut(message, read, modify, persistence, timeoutTime, app, assoc);
+			}
 		} else {
 			// Guest sent message
 
 			if (!message.id) {
 				return;
 			}
-			const user = await read.getUserReader().getByUsername(salesforceBotUsername);
-			const msgExtender = modify.getExtender().extendMessage(message.id, user);
-			(await msgExtender).addCustomField('idleTimeoutConfig', {
-				idleTimeoutAction: 'stop',
-				idleTimeoutWarningTime: warningTime,
-				idleTimeoutTimeoutTime: timeoutTime,
-				idleTimeoutMessage: timeoutWarningMessage,
-			});
-			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
-			modify.getExtender().finish(await msgExtender);
+
+			if (sessionTimeoutHandler === 'widget') {
+				const user = await read.getUserReader().getByUsername(salesforceBotUsername);
+				const msgExtender = modify.getExtender().extendMessage(message.id, user);
+				(await msgExtender).addCustomField('idleTimeoutConfig', {
+					idleTimeoutAction: 'stop',
+					idleTimeoutWarningTime: warningTime,
+					idleTimeoutTimeoutTime: timeoutTime,
+					idleTimeoutMessage: timeoutWarningMessage,
+				});
+				(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
+				modify.getExtender().finish(await msgExtender);
+			} else {
+				await persistence.createWithAssociation({ idleSessionScheduleStarted: false }, assoc);
+				modify.getScheduler().cancelJob('idle-session-timeout');
+			}
 		}
 	} else {
 		if (!message.id) {
@@ -85,3 +97,23 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 		modify.getExtender().finish(await msgExtender);
 	}
 };
+
+async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, persistence: IPersistence, idleTimeoutTimeoutTime: number, app: IApp, assoc) {
+	const rid = message.room.id;
+	const { idleSessionScheduleStarted } = await retrievePersistentData(read, assoc);
+
+	if (idleSessionScheduleStarted === true) {
+		await modify.getScheduler().cancelJob('idle-session-timeout');
+	} else {
+		await persistence.createWithAssociation({ idleSessionScheduleStarted: true }, assoc);
+	}
+
+	const task = {
+		id: 'idle-session-timeout',
+		app,
+		message,
+		when: `${idleTimeoutTimeoutTime} seconds`,
+		data: {rid},
+	};
+	await modify.getScheduler().scheduleOnce(task);
+}

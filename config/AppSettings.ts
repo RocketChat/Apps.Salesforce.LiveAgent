@@ -79,6 +79,25 @@ export const AppSettings: Array<ISetting> = [
 		required: false,
 	},
 	{
+		id: AppSettingId.TIMEOUT_HANDLER,
+		public: true,
+		type: SettingType.SELECT,
+		packageValue: 'widget',
+		value: 'widget',
+		values: [
+			{
+				key: 'widget',
+				i18nLabel: 'Widget',
+			}, {
+				key: 'app',
+				i18nLabel: 'App',
+			},
+		],
+		i18nLabel: 'Salesforce Session Timeout Handler',
+		i18nDescription: 'Change to App in case the widget is not used for the client',
+		required: true,
+	},
+	{
 		id: AppSettingId.DIALOGFLOW_ENABLE_END_EVENT,
 		public: true,
 		type: SettingType.BOOLEAN,
