@@ -84,7 +84,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				modify.getExtender().finish(await msgExtender);
 			} else {
 				await persistence.createWithAssociation({ idleSessionScheduleStarted: false }, assoc);
-				modify.getScheduler().cancelJob('idle-session-timeout');
+				await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
 			}
 		}
 	} else {
@@ -103,7 +103,7 @@ async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, 
 	const { idleSessionScheduleStarted } = await retrievePersistentData(read, assoc);
 
 	if (idleSessionScheduleStarted === true) {
-		await modify.getScheduler().cancelJob('idle-session-timeout');
+		await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
 	} else {
 		await persistence.createWithAssociation({ idleSessionScheduleStarted: true }, assoc);
 	}
@@ -113,7 +113,8 @@ async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, 
 		app,
 		message,
 		when: `${idleTimeoutTimeoutTime} seconds`,
-		data: {rid},
+		data: {rid,
+		taskType: 'sessionTimeout'},
 	};
 	await modify.getScheduler().scheduleOnce(task);
 }
