@@ -23,4 +23,5 @@ export enum AppSettingId {
 	CUSTOMER_TIMEOUT_WARNING_MESSAGE = 'customer_timeout_warning_message',
 	DEBUG_BUTTON = 'debug_button',
 	LOG_LEVEL = 'log_level',
+	TIMEOUT_HANDLER = 'timeout_handler',
 }

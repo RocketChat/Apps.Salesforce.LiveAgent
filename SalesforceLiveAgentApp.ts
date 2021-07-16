@@ -19,6 +19,7 @@ import { AppSettings } from './config/AppSettings';
 import { AvailabilityEndpoint } from './endpoints/AvailabilityEndpoint';
 import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
 import { DialogflowAgentAssignedClass } from './lib/DialogflowAgentAssignedHandler';
+import { IdleSessionTimeoutProcessor } from './lib/IdleSessionTimeoutProcessor';
 import { LivechatBlockActionClassInitiate } from './lib/LivechatBlockActionHandler';
 import { LivechatRoomClosedClass } from './lib/LivechatRoomClosedHandler';
 import { OnUserTypingHandler } from './lib/OnUserTypingHandler';
@@ -81,6 +82,10 @@ export class SalesforceLiveAgentApp
 			security: ApiSecurity.UNSECURE,
 			endpoints: [new HandoverEndpoint(this), new AvailabilityEndpoint(this)],
 		});
+
+		await configuration.scheduler.registerProcessors([
+			new IdleSessionTimeoutProcessor('idle-session-timeout'),
+		]);
 
 		AppSettings.forEach((setting) => configuration.settings.provideSetting(setting));
 	}
