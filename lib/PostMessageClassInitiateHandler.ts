@@ -2,10 +2,9 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILivechatRoom';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
-import { retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
+import { retrievePersistentData, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { handleTimeout } from '../helperFunctions/TimeoutHelper';
 import { getAppSettingValue } from '../lib/Settings';
@@ -26,7 +25,7 @@ export class PostMessageClassInitiate {
 		const livechatRoom = this.message.room as ILivechatRoom;
 		const { type, servedBy, isOpen, customFields: roomCustomFields } = livechatRoom;
 
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
+		const assoc = RoomAssoc(this.message.room.id);
 
 		if (text === 'customer_idle_timeout' ) {
 			if (roomCustomFields && roomCustomFields.isHandedOverFromDialogFlow === true) {

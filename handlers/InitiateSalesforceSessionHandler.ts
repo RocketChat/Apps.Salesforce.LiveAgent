@@ -1,12 +1,12 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getError } from '../helperFunctions/Log';
+import { RoomAssoc } from '../helperFunctions/PersistenceHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
@@ -60,7 +60,7 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
+		const assoc = RoomAssoc(this.data.room.id);
 
 		await sendDebugLCMessage(this.read, this.modify, this.data.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
