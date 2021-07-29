@@ -1,11 +1,12 @@
 import { IHttp, IHttpRequest, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
+import { getError } from '../helperFunctions/Log';
 import { getAppSettingValue } from '../lib/Settings';
 
 const validateResponse = (response) => {
 	if (response.statusCode !== 200) {
-		console.error(response);
+		console.error(getError(response));
 	}
 };
 
@@ -14,7 +15,7 @@ export async function getSalesforceChatAPIEndpoint(read: IRead): Promise<string>
 	try {
 		salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 	} catch (error) {
-		console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
+		console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, getError(error));
 		return '';
 	}
 	return salesforceChatApiEndpoint;
@@ -30,6 +31,7 @@ export async function getSessionTokens(http: IHttp, liveAgentUrl: string) {
 	};
 	try {
 		const response = await http.get(generateTokenEndpoint, generateSessionIdHttpRequest);
+		validateResponse(response);
 		const responseJSON = JSON.parse(response.content || '{}');
 		const { id, affinityToken, key } = responseJSON;
 		return {

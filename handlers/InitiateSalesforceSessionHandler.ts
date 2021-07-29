@@ -6,6 +6,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { getError } from '../helperFunctions/Log';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
@@ -43,7 +44,7 @@ export class InitiateSalesforceSession {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
-			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
+			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			return;
 		}
@@ -160,6 +161,7 @@ export class InitiateSalesforceSession {
 								}
 
 								if (pullMessagesContentParsed.messages[0].type === 'ChatRequestFail') {
+									console.error(getError(pullMessagesContentParsed));
 									switch (pullMessagesContentParsed.messages[0].message.reason) {
 										case 'Unavailable':
 											logHandoverFailure(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);

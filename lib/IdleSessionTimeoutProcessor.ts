@@ -45,7 +45,7 @@ export class IdleSessionTimeoutProcessor implements IProcessor {
 				await persis.removeByAssociation(assoc);
 			})
 			.catch((error) => {
-				console.log('Close Chat Error')
+				console.log('Close Chat Error');
 				console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
 			});
 		} else {
