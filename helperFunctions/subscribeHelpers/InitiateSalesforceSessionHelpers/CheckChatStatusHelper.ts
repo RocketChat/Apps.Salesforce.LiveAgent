@@ -8,6 +8,7 @@ import { InfoLogs } from '../../../enum/InfoLogs';
 import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssignedHandler';
 import { getAppSettingValue } from '../../../lib/Settings';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
+import { getError } from '../../Log';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { pullMessages } from '../../SalesforceAPIHelpers';
 import { checkForEvent } from '../../SalesforceMessageHelpers';
@@ -43,8 +44,9 @@ export class CheckChatStatus {
 		pullMessages(this.http, this.salesforceChatApiEndpoint, this.affinityToken, this.key)
 			.then(async (response) => {
 				if (response.statusCode === 403) {
+					console.error('pullMessages: Chat session is expired.', getError(response));
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
-					await checkAgentStatusDirectCallback.checkAgentStatusCallbackError('Chat session expired.');
+					await checkAgentStatusDirectCallback.checkAgentStatusCallbackError('Chat session is expired.');
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
@@ -93,6 +95,7 @@ export class CheckChatStatus {
 						const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 						const isChatEnded = checkForEvent(messageArray, 'ChatEnded');
 						if (isChatRequestFail === true) {
+							console.error(getError(contentParsed));
 							if (messageArray[0].message.reason === 'Unavailable') {
 								const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
