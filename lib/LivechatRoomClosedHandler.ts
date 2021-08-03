@@ -5,6 +5,8 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
+import { retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/SalesforceAPIHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class LivechatRoomClosedClass {
@@ -15,9 +17,31 @@ export class LivechatRoomClosedClass {
 		private http: IHttp,
 		private persistence: IPersistence,
 		private modify: IModify,
-	) {}
+	) { }
+
+	public async closeChatFromSalesforce() {
+		const { customFields, id: rid } = this.room;
+		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, RoomAssoc(rid));
+		const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
+
+		if (persisantAffinity !== null && persistantKey !== null) {
+			let reason = '';
+			if (customFields && customFields.customerIdleTimeout === true) {
+				reason = 'clientIdleTimeout';
+
+			}
+			await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason).then(async () => {
+				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
+				await this.persistence.removeByAssociation(RoomAssoc(rid));
+			}).catch((error) => {
+				console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
+			});
+		}
+	}
 
 	public async exec() {
+		await this.closeChatFromSalesforce();
+
 		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_ENABLE_END_EVENT);
 		if (isDialogflowEndEventEnabled === false) {
 			console.log(InfoLogs.ENDCHAT_EVENT_NOT_ENABLED);

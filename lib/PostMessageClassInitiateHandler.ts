@@ -4,12 +4,9 @@ import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILiv
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
-import { ErrorLogs } from '../enum/ErrorLogs';
-import { InfoLogs } from '../enum/InfoLogs';
 import { LiveAgentSession } from '../handlers/LiveAgentSessionHandler';
-import { retrievePersistentData, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
-import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/SalesforceAPIHelpers';
 import { handleTimeout } from '../helperFunctions/TimeoutHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -30,25 +27,11 @@ export class PostMessageClassInitiate {
 		const { type, servedBy, isOpen } = livechatRoom;
 
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
-		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
-		const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
 
-		if ((text === 'Closed by visitor' || text === 'customer_idle_timeout' )
-				&& persisantAffinity !== null && persistantKey !== null) {
-					let reason = '';
-					if (this.message.text === 'customer_idle_timeout' ) {
-						reason = 'clientIdleTimeout';
-						updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
-					}
-				 await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason)
-					.then(async () => {
-						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-						await this.persistence.removeByAssociation(assoc);
-					})
-					.catch((error) => {
-						console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
-					});
-			}
+		if (text === 'customer_idle_timeout' ) {
+			await this.modify.getUpdater().getLivechatUpdater().closeRoom(this.message.room, 'Chat closed due to timeout');
+			updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
+		}
 
 		if (!type || type !== 'l') {
 			return;
@@ -75,7 +58,6 @@ export class PostMessageClassInitiate {
 			(await msgExtender).addCustomField('salesforceAgentName', salesforceAgentName);
 			await this.modify.getExtender().finish(await msgExtender);
 		}
-		
 
 		if (this.message.sender.username === salesforceBotUsername) {
 			return;
