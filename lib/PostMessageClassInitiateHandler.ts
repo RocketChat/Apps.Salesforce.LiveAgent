@@ -24,13 +24,15 @@ export class PostMessageClassInitiate {
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
 		const { text, editedAt } = this.message;
 		const livechatRoom = this.message.room as ILivechatRoom;
-		const { type, servedBy, isOpen } = livechatRoom;
+		const { type, servedBy, isOpen, customFields: roomCustomFields } = livechatRoom;
 
 		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.message.room.id}`);
 
 		if (text === 'customer_idle_timeout' ) {
-			await this.modify.getUpdater().getLivechatUpdater().closeRoom(this.message.room, 'Chat closed due to timeout');
-			updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
+			if (roomCustomFields && roomCustomFields.isHandedOverFromDialogFlow === true) {
+				await this.modify.getUpdater().getLivechatUpdater().closeRoom(this.message.room, 'Chat closed due to timeout');
+				updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
+			}
 		}
 
 		if (!type || type !== 'l') {

@@ -33,6 +33,7 @@ export class LivechatRoomClosedClass {
 			await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason).then(async () => {
 				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
 				await this.persistence.removeByAssociation(RoomAssoc(rid));
+				await this.modify.getScheduler().cancelJobByDataQuery({rid, taskType: 'sessionTimeout'});
 			}).catch((error) => {
 				console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
 			});
