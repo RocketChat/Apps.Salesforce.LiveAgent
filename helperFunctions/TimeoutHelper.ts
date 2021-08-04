@@ -109,11 +109,8 @@ async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, 
 
 	const task = {
 		id: 'idle-session-timeout',
-		app,
-		message,
 		when: `${idleTimeoutTimeoutTime} seconds`,
-		data: {rid,
-		taskType: 'sessionTimeout'},
+		data: { rid, taskType: 'sessionTimeout' },
 	};
 	await modify.getScheduler().scheduleOnce(task);
 }
