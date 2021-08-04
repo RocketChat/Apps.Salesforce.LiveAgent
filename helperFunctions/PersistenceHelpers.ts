@@ -1,5 +1,7 @@
 import { IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+
+export const RoomAssoc = (rid: string) => new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${rid}`);
 
 export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAssociationRecord) {
 	try {
