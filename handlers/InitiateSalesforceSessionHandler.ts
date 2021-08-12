@@ -6,7 +6,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getError } from '../helperFunctions/Log';
-import { RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc } from '../helperFunctions/PersistenceHelpers';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
 import { checkForEvent, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
@@ -60,7 +60,7 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		const assoc = RoomAssoc(this.data.room.id);
+		const assoc = getRoomAssoc(this.data.room.id);
 
 		await sendDebugLCMessage(this.read, this.modify, this.data.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)

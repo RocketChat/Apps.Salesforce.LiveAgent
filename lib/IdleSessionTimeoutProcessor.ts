@@ -2,7 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILivechatRoom';
 import { IJobContext, IProcessor } from '@rocket.chat/apps-engine/definition/scheduler';
 import { ErrorLogs } from '../enum/ErrorLogs';
-import { retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 
 export class IdleSessionTimeoutProcessor implements IProcessor {
@@ -14,7 +14,7 @@ export class IdleSessionTimeoutProcessor implements IProcessor {
 
 	public async processor(jobContext: IJobContext, read: IRead, modify: IModify, http: IHttp, persis: IPersistence): Promise<void> {
 
-		const assoc = RoomAssoc(jobContext.rid);
+		const assoc = getRoomAssoc(jobContext.rid);
 		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
 
 		if (persisantAffinity !== null && persistantKey !== null) {

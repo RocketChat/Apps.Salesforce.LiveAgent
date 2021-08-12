@@ -5,7 +5,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { performHandover } from '../helperFunctions/HandoverHelpers';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
-import { retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens  } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -22,7 +22,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 	): Promise<IApiResponse> {
 		console.log(InfoLogs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {
-			const assoc = RoomAssoc(request.content.roomId);
+			const assoc = getRoomAssoc(request.content.roomId);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
 
 			if (persisantAffinity !== null && persistantKey !== null) {

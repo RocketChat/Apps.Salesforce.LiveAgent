@@ -5,7 +5,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
-import { retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/SalesforceAPIHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -21,7 +21,7 @@ export class LivechatRoomClosedClass {
 
 	public async closeChatFromSalesforce() {
 		const { customFields, id: rid } = this.room;
-		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, RoomAssoc(rid));
+		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, getRoomAssoc(rid));
 		const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
@@ -32,7 +32,7 @@ export class LivechatRoomClosedClass {
 			}
 			await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason).then(async () => {
 				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-				await this.persistence.removeByAssociation(RoomAssoc(rid));
+				await this.persistence.removeByAssociation(getRoomAssoc(rid));
 				await this.modify.getScheduler().cancelJobByDataQuery({rid, taskType: 'sessionTimeout'});
 			}).catch((error) => {
 				console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);

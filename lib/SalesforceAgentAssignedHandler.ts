@@ -5,7 +5,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { InitiateSalesforceSession } from '../handlers/InitiateSalesforceSessionHandler';
 import { SalesforceAgentAssigned } from '../handlers/SalesforceAgentAssignedHandler';
 import { sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
-import { retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssignedClass {
@@ -19,7 +19,7 @@ export class SalesforceAgentAssignedClass {
 	) {}
 
 	public async exec() {
-		const assoc = RoomAssoc(this.data.room.id);this.data.room.id
+		const assoc = getRoomAssoc(this.data.room.id);
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
 		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 		const FindingLiveagentMessage: string = await getAppSettingValue(this.read, AppSettingId.FINDING_LIVEAGENT_MESSAGE);

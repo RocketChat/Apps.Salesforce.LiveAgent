@@ -2,7 +2,7 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { AppSettingId } from '../enum/AppSettingId';
-import { retrievePersistentData, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
 export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify ) => {
@@ -12,7 +12,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 	}
 
 	const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
-	const assoc = RoomAssoc(message.room.id);
+	const assoc = getRoomAssoc(message.room.id);
 	const { chasitorIdleTimeout, sneakPeekEnabled } = await retrievePersistentData(read, assoc);
 
 	if (chasitorIdleTimeout && chasitorIdleTimeout.isEnabled) {

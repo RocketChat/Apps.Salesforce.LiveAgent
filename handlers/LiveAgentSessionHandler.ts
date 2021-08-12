@@ -6,7 +6,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
-import { retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { getSalesforceChatAPIEndpoint, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -21,7 +21,7 @@ export class LiveAgentSession {
 			}
 
 			const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
-			const assoc = RoomAssoc(this.message.room.id);
+			const assoc = getRoomAssoc(this.message.room.id);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
 			if (this.message.text !== 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {

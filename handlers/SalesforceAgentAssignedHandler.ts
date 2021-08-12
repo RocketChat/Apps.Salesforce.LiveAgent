@@ -5,7 +5,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
-import { retrievePersistentData, retrievePersistentTokens, RoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentData, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -25,7 +25,7 @@ export class SalesforceAgentAssigned {
 			return;
 		}
 
-		const assoc = RoomAssoc(this.data.room.id);
+		const assoc = getRoomAssoc(this.data.room.id);
 		const persitedData = await retrievePersistentTokens(this.read, assoc);
 		const { persisantAffinity, persistantKey } = persitedData;
 		const salesforceAgentName = (await retrievePersistentData(this.read, assoc)).salesforceAgentName;
