@@ -1,11 +1,10 @@
 import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { ILivechatRoom, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { IRoomUserTypingContext } from '@rocket.chat/apps-engine/definition/rooms';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
-import { retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { chasitorSneakPeak, chasitorTyping } from '../helperFunctions/SalesforceAPIHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -44,7 +43,7 @@ export class OnUserTypingHandler {
 			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND);
 			return;
 		}
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.roomId}`);
+		const assoc = getRoomAssoc(this.data.roomId);
 		const { persisantAffinity, persistantKey, sneakPeekEnabled } = await retrievePersistentData(this.read, assoc);
 
 		if (persisantAffinity !== null && persistantKey !== null) {

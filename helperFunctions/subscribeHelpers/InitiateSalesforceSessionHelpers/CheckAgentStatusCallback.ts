@@ -1,8 +1,8 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../../../enum/AppSettingId';
+import { getRoomAssoc } from '../../../helperFunctions/PersistenceHelpers';
 import { getAppSettingValue } from '../../../lib/Settings';
 import { updateRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { HandleEndChatCallback } from '../SalesforceAgentAssignedHelpers/HandleEndChatCallback';
@@ -19,7 +19,7 @@ export class CheckAgentStatusCallback {
 	) {}
 
 	public async checkAgentStatusCallbackError(error: string) {
-		const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${this.data.room.id}`);
+		const assoc = getRoomAssoc(this.data.room.id);
 
 		const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
 

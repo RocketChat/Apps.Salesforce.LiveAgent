@@ -1,10 +1,9 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
+import { getRoomAssoc, retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { getAppSettingValue } from '../lib/Settings';
-import { retrievePersistentData } from './PersistenceHelpers';
 
 export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify ) => {
 
@@ -13,7 +12,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 	}
 
 	const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
-	const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${message.room.id}`);
+	const assoc = getRoomAssoc(message.room.id);
 	const { chasitorIdleTimeout, sneakPeekEnabled } = await retrievePersistentData(read, assoc);
 
 	if (chasitorIdleTimeout && chasitorIdleTimeout.isEnabled) {
@@ -110,11 +109,8 @@ async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, 
 
 	const task = {
 		id: 'idle-session-timeout',
-		app,
-		message,
 		when: `${idleTimeoutTimeoutTime} seconds`,
-		data: {rid,
-		taskType: 'sessionTimeout'},
+		data: { rid, taskType: 'sessionTimeout' },
 	};
 	await modify.getScheduler().scheduleOnce(task);
 }

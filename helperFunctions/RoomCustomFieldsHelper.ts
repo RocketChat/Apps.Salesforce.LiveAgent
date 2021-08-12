@@ -23,4 +23,3 @@ export const updateRoomCustomFields = async (rid: string, data: any, read: IRead
 		throw new Error(error);
 	}
 };
-

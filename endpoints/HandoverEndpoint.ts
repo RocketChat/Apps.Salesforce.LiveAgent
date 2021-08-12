@@ -1,12 +1,11 @@
 import { HttpStatusCode, IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiEndpoint, IApiEndpointInfo, IApiRequest, IApiResponse } from '@rocket.chat/apps-engine/definition/api';
-import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { performHandover } from '../helperFunctions/HandoverHelpers';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
-import { retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens  } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -23,7 +22,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 	): Promise<IApiResponse> {
 		console.log(InfoLogs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {
-			const assoc = new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${request.content.roomId}`);
+			const assoc = getRoomAssoc(request.content.roomId);
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
 
 			if (persisantAffinity !== null && persistantKey !== null) {
