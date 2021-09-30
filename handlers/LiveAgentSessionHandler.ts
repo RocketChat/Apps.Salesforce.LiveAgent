@@ -1,6 +1,5 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
-import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat/ILivechatEventContext';
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILivechatRoom';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
@@ -11,8 +10,6 @@ import { InfoLogs } from '../enum/InfoLogs';
 import { getError } from '../helperFunctions/Log';
 import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { getSalesforceChatAPIEndpoint, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
-import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
-import { HandleEndChatCallback } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/HandleEndChatCallback';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class LiveAgentSession {
