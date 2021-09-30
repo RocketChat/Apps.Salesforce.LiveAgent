@@ -1,8 +1,9 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
+import { IOnetimeSchedule } from '@rocket.chat/apps-engine/definition/scheduler';
 import { AppSettingId } from '../enum/AppSettingId';
-import { getRoomAssoc, retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentData, updatePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
 export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify ) => {
@@ -82,7 +83,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
 				modify.getExtender().finish(await msgExtender);
 			} else {
-				await persistence.createWithAssociation({ idleSessionScheduleStarted: false }, assoc);
+				await updatePersistentData(read, persistence, assoc, { idleSessionScheduleStarted: false });
 				await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
 			}
 		}
@@ -104,12 +105,12 @@ async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, 
 	if (idleSessionScheduleStarted === true) {
 		await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
 	} else {
-		await persistence.createWithAssociation({ idleSessionScheduleStarted: true }, assoc);
+		await updatePersistentData(read, persistence, assoc, { idleSessionScheduleStarted: true });
 	}
 
-	const task = {
+	const task: IOnetimeSchedule = {
 		id: 'idle-session-timeout',
-		when: `${idleTimeoutTimeoutTime} seconds`,
+		when: `${idleTimeoutTimeoutTime / 60} minutes`,
 		data: { rid, taskType: 'sessionTimeout' },
 	};
 	await modify.getScheduler().scheduleOnce(task);
