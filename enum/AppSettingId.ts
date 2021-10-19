@@ -25,3 +25,6 @@ export enum AppSettingId {
 	LOG_LEVEL = 'log_level',
 	TIMEOUT_HANDLER = 'timeout_handler',
 }
+
+// WIDECHAT: Temp hack for compiling app succedully. Latest Apps-compiler is somehow having issue for this file.
+export const FIX = {};
