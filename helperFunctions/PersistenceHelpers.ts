@@ -41,7 +41,8 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 				persistantKey: contentParsed.key as string,
 				sneakPeekEnabled: contentParsed.sneakPeekEnabled as boolean,
 				salesforceAgentName: contentParsed.salesforceAgentName as string,
-				idleSessionScheduleStarted: contentParsed.idleSessionScheduleStarted as boolean,
+				isIdleSessionTimerScheduled: contentParsed.isIdleSessionTimerScheduled as boolean,
+				idleSessionTimerId: contentParsed.idleSessionTimerId as string,
 			};
 		}
 
@@ -52,7 +53,8 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 			persistantKey: null,
 			sneakPeekEnabled: null,
 			salesforceAgentName: null,
-			idleSessionScheduleStarted: null,
+			isIdleSessionTimerScheduled: null,
+			idleSessionTimerId: null,
 		};
 	} catch (error) {
 		throw new Error(error);

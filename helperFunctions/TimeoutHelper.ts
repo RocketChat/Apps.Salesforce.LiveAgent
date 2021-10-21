@@ -83,7 +83,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
 				modify.getExtender().finish(await msgExtender);
 			} else {
-				await updatePersistentData(read, persistence, assoc, { idleSessionScheduleStarted: false });
+				await updatePersistentData(read, persistence, assoc, { isIdleSessionTimerScheduled: false, idleSessionTimerId: '' });
 				await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
 			}
 		}
@@ -100,18 +100,19 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 
 async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, persistence: IPersistence, idleTimeoutTimeoutTime: number, app: IApp, assoc) {
 	const rid = message.room.id;
-	const { idleSessionScheduleStarted } = await retrievePersistentData(read, assoc);
+	const { isIdleSessionTimerScheduled, idleSessionTimerId } = await retrievePersistentData(read, assoc);
 
-	if (idleSessionScheduleStarted === true) {
-		await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
-	} else {
-		await updatePersistentData(read, persistence, assoc, { idleSessionScheduleStarted: true });
+	if (isIdleSessionTimerScheduled === true) {
+		if (idleSessionTimerId) {
+			await modify.getScheduler().cancelJob(idleSessionTimerId);
+		}
 	}
 
 	const task: IOnetimeSchedule = {
 		id: 'idle-session-timeout',
-		when: `${idleTimeoutTimeoutTime / 60} minutes`,
+		when: new Date(new Date().getTime() + idleTimeoutTimeoutTime * 1000),
 		data: { rid, taskType: 'sessionTimeout' },
 	};
-	await modify.getScheduler().scheduleOnce(task);
+	const jobId = await modify.getScheduler().scheduleOnce(task);
+	await updatePersistentData(read, persistence, assoc, { isIdleSessionTimerScheduled: true, idleSessionTimerId: jobId });
 }
