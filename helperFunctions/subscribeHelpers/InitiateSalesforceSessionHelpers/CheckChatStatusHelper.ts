@@ -86,7 +86,7 @@ export class CheckChatStatus {
 						const salesforceAgentName = chatEstablishedMessage.name;
 
 						await this.persistence.updateByAssociation(this.assoc,
-							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName });
+							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName }, true);
 
 						const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 						await salesforceAgentAssigned.exec();

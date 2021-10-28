@@ -1,4 +1,4 @@
-import { IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 
 export const getRoomAssoc = (rid: string) => new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${rid}`);
@@ -41,7 +41,8 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 				persistantKey: contentParsed.key as string,
 				sneakPeekEnabled: contentParsed.sneakPeekEnabled as boolean,
 				salesforceAgentName: contentParsed.salesforceAgentName as string,
-				idleSessionScheduleStarted: contentParsed.idleSessionScheduleStarted as boolean,
+				isIdleSessionTimerScheduled: contentParsed.isIdleSessionTimerScheduled as boolean,
+				idleSessionTimerId: contentParsed.idleSessionTimerId as string,
 			};
 		}
 
@@ -52,8 +53,25 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 			persistantKey: null,
 			sneakPeekEnabled: null,
 			salesforceAgentName: null,
-			idleSessionScheduleStarted: null,
+			isIdleSessionTimerScheduled: null,
+			idleSessionTimerId: null,
 		};
+	} catch (error) {
+		throw new Error(error);
+	}
+}
+
+export async function updatePersistentData(read: IRead, persistence: IPersistence,  assoc: RocketChatAssociationRecord, data: object) {
+	try {
+		const persistentData = await retrievePersistentData(read, assoc);
+		const { persisantAffinity, persistantKey } = persistentData;
+		const updatedData = {
+			...persistentData,
+			affinityToken: persisantAffinity,
+			key: persistantKey,
+			...data,
+		};
+		await persistence.updateByAssociation(assoc, updatedData, true);
 	} catch (error) {
 		throw new Error(error);
 	}
