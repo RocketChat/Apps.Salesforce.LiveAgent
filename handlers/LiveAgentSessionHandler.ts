@@ -1,13 +1,16 @@
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
+import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat/ILivechatRoom';
 import { IMessage } from '@rocket.chat/apps-engine/definition/messages';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
+import { getError } from '../helperFunctions/Log';
 import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { getSalesforceChatAPIEndpoint, sendMessages } from '../helperFunctions/SalesforceAPIHelpers';
+import { HandleEndChatCallback } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/HandleEndChatCallback';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class LiveAgentSession {
@@ -25,10 +28,10 @@ export class LiveAgentSession {
 			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
 
 			if (this.message.text !== 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
-				const lroom: ILivechatRoom = this.message.room as ILivechatRoom;
-				const LcAgent: IUser = lroom.servedBy ? lroom.servedBy : this.message.sender;
+				const livechatRoom: ILivechatRoom = this.message.room as ILivechatRoom;
+				const livechatAgent: IUser = livechatRoom.servedBy ? livechatRoom.servedBy : this.message.sender;
 
-				if (LcAgent.username !== salesforceBotUsername) {
+				if (livechatAgent.username !== salesforceBotUsername) {
 					return;
 				}
 
@@ -37,7 +40,26 @@ export class LiveAgentSession {
 					messageText = this.message.text;
 				}
 				await sendMessages(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, messageText)
-					.then(() => {
+					.then(async (response) => {
+						if (response.statusCode === 403) {
+							console.error('Send Message: Chat session is expired.', getError(response));
+							console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
+							const data: ILivechatEventContext = {
+								agent: livechatAgent,
+								room: livechatRoom,
+							};
+							const handleEndChatCallback = new HandleEndChatCallback(
+								this.app,
+								this.modify,
+								data,
+								this.read,
+								this.persistence,
+								'Chat session is expired',
+								assoc,
+								'');
+							handleEndChatCallback.handleEndChat();
+							return;
+						}
 						console.log(InfoLogs.MESSAGE_SENT_TO_LIVEAGENT);
 					})
 					.catch((error) => {

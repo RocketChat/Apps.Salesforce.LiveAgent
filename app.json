@@ -19,5 +19,6 @@
         "IPostLivechatRoomClosed",
         "IRoomUserTyping",
         "IUIKitLivechatInteractionHandler"
-    ]
+    ],
+    "commitHash": "ea13cdc60939ce2627d3fcba80e591c6921d4ad8"
 }
