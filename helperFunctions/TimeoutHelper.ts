@@ -50,20 +50,20 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				return;
 			}
 
-			if (sessionTimeoutHandler === 'widget') {
-				const user = await read.getUserReader().getByUsername(salesforceBotUsername);
-				const msgExtender = modify.getExtender().extendMessage(message.id, user);
-				(await msgExtender).addCustomField('idleTimeoutConfig', {
-					idleTimeoutAction: 'start',
-					idleTimeoutWarningTime: warningTime,
-					idleTimeoutTimeoutTime: timeoutTime,
-					idleTimeoutMessage: timeoutWarningMessage,
-				});
-				(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
-				modify.getExtender().finish(await msgExtender);
-			} else {
+			if (sessionTimeoutHandler === 'app') {
 				await scheduleTimeOut(message, read, modify, persistence, timeoutTime, app, assoc);
 			}
+
+			const user = await read.getUserReader().getByUsername(salesforceBotUsername);
+			const msgExtender = modify.getExtender().extendMessage(message.id, user);
+			(await msgExtender).addCustomField('idleTimeoutConfig', {
+				idleTimeoutAction: 'start',
+				idleTimeoutWarningTime: warningTime,
+				idleTimeoutTimeoutTime: timeoutTime,
+				idleTimeoutMessage: timeoutWarningMessage,
+			});
+			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
+			modify.getExtender().finish(await msgExtender);
 		} else {
 			// Guest sent message
 
@@ -71,21 +71,20 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 				return;
 			}
 
-			if (sessionTimeoutHandler === 'widget') {
-				const user = await read.getUserReader().getByUsername(salesforceBotUsername);
-				const msgExtender = modify.getExtender().extendMessage(message.id, user);
-				(await msgExtender).addCustomField('idleTimeoutConfig', {
-					idleTimeoutAction: 'stop',
-					idleTimeoutWarningTime: warningTime,
-					idleTimeoutTimeoutTime: timeoutTime,
-					idleTimeoutMessage: timeoutWarningMessage,
-				});
-				(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
-				modify.getExtender().finish(await msgExtender);
-			} else {
+			if (sessionTimeoutHandler === 'app') {
 				await updatePersistentData(read, persistence, assoc, { isIdleSessionTimerScheduled: false, idleSessionTimerId: '' });
 				await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
 			}
+			const user = await read.getUserReader().getByUsername(salesforceBotUsername);
+			const msgExtender = modify.getExtender().extendMessage(message.id, user);
+			(await msgExtender).addCustomField('idleTimeoutConfig', {
+				idleTimeoutAction: 'stop',
+				idleTimeoutWarningTime: warningTime,
+				idleTimeoutTimeoutTime: timeoutTime,
+				idleTimeoutMessage: timeoutWarningMessage,
+			});
+			(await msgExtender).addCustomField('sneakPeekEnabled', sneakPeekEnabled);
+			modify.getExtender().finish(await msgExtender);
 		}
 	} else {
 		if (!message.id) {
