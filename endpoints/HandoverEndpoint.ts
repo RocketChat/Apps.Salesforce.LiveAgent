@@ -36,7 +36,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 
 			const targetDeptName: string = await getAppSettingValue(read, AppSettingId.SF_HANDOVER_DEPARTMENT_NAME);
 			if (request.content.targetDepartmentName === targetDeptName && request.content.buttonId) {
-				updateRoomCustomFields(request.content.roomId, { reqButtonId: request.content.buttonId }, read, modify);
+				await updateRoomCustomFields(request.content.roomId, { reqButtonId: request.content.buttonId }, read, modify);
 			}
 
 			await performHandover(modify, read, request.content.roomId, request.content.targetDepartmentName);

@@ -24,9 +24,9 @@ export class CheckAgentStatusCallback {
 		const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
 
 		if (error === NoLiveagentAvailableMessage) {
-			updateRoomCustomFields(this.data.room.id, { agentUnavailable: true }, this.read, this.modify);
+			await updateRoomCustomFields(this.data.room.id, { agentUnavailable: true }, this.read, this.modify);
 		} else {
-			updateRoomCustomFields(this.data.room.id, { errorSession: true }, this.read, this.modify);
+			await updateRoomCustomFields(this.data.room.id, { errorSession: true }, this.read, this.modify);
 		}
 
 		const handleEndChatCallback = new HandleEndChatCallback(

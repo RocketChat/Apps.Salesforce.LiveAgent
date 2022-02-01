@@ -61,7 +61,7 @@ export class SubscribeToLiveAgent {
 
 					if (isEndChat === true) {
 						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-						updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
+						await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
 						await handleEndChatCallback.handleEndChat();
 					} else {
 						await messageFilter(this.app, this.modify, this.read, this.data.room, this.data.agent, messageArray);
