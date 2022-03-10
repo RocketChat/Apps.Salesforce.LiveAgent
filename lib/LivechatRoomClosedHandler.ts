@@ -43,11 +43,7 @@ export class LivechatRoomClosedClass {
 	public async exec() {
 		await this.closeChatFromSalesforce();
 
-		// TODO: Remove these log points after the issue is resolved
-		const {id: rid} = this.room;
-
 		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_ENABLE_END_EVENT);
-		console.error('LivechatRoomClosedHandler', JSON.stringify({rid, isDialogflowEndEventEnabled}));
 
 		if (isDialogflowEndEventEnabled === false) {
 			console.log(InfoLogs.ENDCHAT_EVENT_NOT_ENABLED);
@@ -78,18 +74,6 @@ export class LivechatRoomClosedClass {
 
 		const isHandedOverFromDialogFlow = (customFields && customFields.isHandedOverFromDialogFlow === true) || false;
 
-		console.error('LivechatRoomClosedHandler', JSON.stringify({
-			rid,
-			customFields: {...customFields, accessToken: '***', customDetail: '***'},
-			servedBy: lroom.servedBy,
-			isHandedOverFromDialogFlow,
-			dialogflowEndChatEventLCode,
-			dialogflowEndChatEventName,
-			dialogflowCustomerEndChatEventName,
-			dialogflowAgentUnavailableEventName,
-			dialogflowCustomerIdleTimeoutEventName,
-			dialogflowSessionErrorEventName,
-		}));
 		if (lroom.servedBy) {
 			if (isHandedOverFromDialogFlow && dialogflowEndChatEventLCode) {
 				const eventParams = {
@@ -124,8 +108,6 @@ export class LivechatRoomClosedClass {
 						},
 					},
 				};
-
-				console.error('LivechatRoomClosedHandler', JSON.stringify({rid, appEventEndpointHttpRequest}));
 
 				try {
 					await this.http.post(appEventEndpoint, appEventEndpointHttpRequest);
