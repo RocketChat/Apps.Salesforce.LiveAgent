@@ -100,6 +100,13 @@ export class InitiateSalesforceSession {
 					customDetail = undefined;
 				}
 
+				let prechatDetails: string | undefined;
+				if (this.data.room.customFields && this.data.room.customFields.prechatDetails) {
+					prechatDetails = this.data.room.customFields.prechatDetails;
+				} else {
+					prechatDetails = undefined;
+				}
+
 				const logHandoverFailure = (errorMessage, error?) => {
 					const handoverFailure = {
 						errorMessage,
@@ -127,6 +134,7 @@ export class InitiateSalesforceSession {
 					LcVisitorEmail,
 					salesforceId,
 					customDetail,
+					prechatDetails,
 				)
 					.then(async (sendChatRequestres) => {
 						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);
