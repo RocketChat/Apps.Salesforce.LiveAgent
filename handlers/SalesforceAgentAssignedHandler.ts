@@ -35,7 +35,7 @@ export class SalesforceAgentAssigned {
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendLCMessage(this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
+			await sendLCMessage(this.read, this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
 			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
 			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
@@ -43,7 +43,7 @@ export class SalesforceAgentAssigned {
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
 		const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`;
-		await sendLCMessage(this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
+		await sendLCMessage(this.read, this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.

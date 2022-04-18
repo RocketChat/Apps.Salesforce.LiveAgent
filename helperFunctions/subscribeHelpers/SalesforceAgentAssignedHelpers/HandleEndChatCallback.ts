@@ -28,13 +28,13 @@ export class HandleEndChatCallback {
 		const CBHandoverDepartmentName: string = await getAppSettingValue(this.read, AppSettingId.CB_HANDOVER_DEPARTMENT_NAME);
 
 		if (CBHandoverDepartmentName) {
-			await sendLCMessage(this.modify, this.data.room, this.endChatReason, this.data.agent);
+			await sendLCMessage(this.read, this.modify, this.data.room, this.endChatReason, this.data.agent);
 
 			try {
 				await performHandover(this.modify, this.read, this.data.room.id, CBHandoverDepartmentName);
 			} catch (error) {
 				console.error(ErrorLogs.HANDOVER_REQUEST_FAILED, error);
-				await sendLCMessage(this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
+				await sendLCMessage(this.read, this.modify, this.data.room, this.technicalDifficultyMessage, this.data.agent);
 				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.HANDOVER_REQUEST_FAILED}: ${error}`, this.data.agent);
 			}
 		} else {

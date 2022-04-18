@@ -7,8 +7,9 @@ import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getError } from '../helperFunctions/Log';
 import { getRoomAssoc } from '../helperFunctions/PersistenceHelpers';
+import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFunctions/SalesforceAPIHelpers';
-import { checkForEvent, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
+import { checkForEvent, checkForPostChatUrl, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
 import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
 import { getAppSettingValue } from '../lib/Settings';
@@ -146,17 +147,21 @@ export class InitiateSalesforceSession {
 								const isChatRequestSuccess = checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
 								const hasQueueUpdateMessage = checkForEvent(pullMessagesMessageArray, 'QueueUpdate');
 
+								const postChatUrl = checkForPostChatUrl(pullMessagesMessageArray);
+
+								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
+
 								if ( hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
 									const queueMessage = hasQueueUpdateMessage ? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message : getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
 									const queuePosition = hasQueueUpdateMessage ? queueMessage.position : queueMessage.queuePosition;
 									if (queuePosition === 0) {
 										// User Queue Position = 0
 										const queuePosMessage = LANoQueueMessage.replace(/%s/g, queuePosition);
-										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent, true);
+										await sendLCMessage(this.read, this.modify, this.data.room, queuePosMessage, this.data.agent, true);
 									} else if (queuePosition > 0) {
 										// User Queue Position > 1
 										const queuePosMessage = LAQueuePositionMessage.replace(/%s/g, queuePosition);
-										await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent, true);
+										await sendLCMessage(this.read, this.modify, this.data.room, queuePosMessage, this.data.agent, true);
 									}
 								}
 

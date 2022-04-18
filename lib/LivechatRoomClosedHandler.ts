@@ -59,7 +59,7 @@ export class LivechatRoomClosedClass {
 			serverUrl = serverUrl.replace(/\/?$/, '/');
 		} catch (error) {
 			const user = await this.read.getUserReader().getByUsername(salesforceBotUsername);
-			await sendLCMessage(this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
+			await sendLCMessage(this.read, this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
 			await sendDebugLCMessage(this.read, this.modify, this.room, ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND, user);
 			console.error(ErrorLogs.ROCKETCHAT_SERVERURL_NOT_FOUND);
 			return;
