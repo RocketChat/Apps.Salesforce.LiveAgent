@@ -15,7 +15,7 @@ export async function messageFilter(app: IApp, modify: IModify, read: IRead, mes
 			switch (type) {
 				case 'ChatMessage':
 					const messageText = i.message.text;
-					await sendLCMessage(modify, messageRoom, messageText, LcAgent);
+					await sendLCMessage(read, modify, messageRoom, messageText, LcAgent);
 					break;
 
 				case 'AgentTyping':
@@ -65,4 +65,15 @@ export function getForEvent(messageArray: any, eventToCheck: string) {
 	} catch (error) {
 		throw new Error(error);
 	}
+}
+
+export function checkForPostChatUrl(messageArray: any) {
+	if (messageArray && messageArray.length > 0) {
+		for (let i = 0; i < messageArray.length; i++) {
+			if (messageArray[i]?.message.postChatUrl) {
+				return messageArray[i]?.message.postChatUrl;
+			}
+		}
+	}
+	return null;
 }

@@ -69,10 +69,10 @@ export class CheckChatStatus {
 						const queueUpdatePosition = queueUpdateMessages.position;
 						if (queueUpdatePosition === 0) {
 							const noQueueMessage = this.LANoQueueMessage.replace(/%s/g, queueUpdatePosition);
-							await sendLCMessage(this.modify, this.data.room, noQueueMessage, this.data.agent, true);
+							await sendLCMessage(this.read, this.modify, this.data.room, noQueueMessage, this.data.agent, true);
 						} else if (queueUpdatePosition > 0) {
 							const queuePosMessage = this.LAQueuePositionMessage.replace(/%s/g, queueUpdatePosition);
-							await sendLCMessage(this.modify, this.data.room, queuePosMessage, this.data.agent, true);
+							await sendLCMessage(this.read, this.modify, this.data.room, queuePosMessage, this.data.agent, true);
 						}
 					}
 
@@ -94,6 +94,7 @@ export class CheckChatStatus {
 					} else if (isChatAccepted === false) {
 						const isChatRequestFail = checkForEvent(messageArray, 'ChatRequestFail');
 						const isChatEnded = checkForEvent(messageArray, 'ChatEnded');
+						console.error(JSON.stringify(messageArray));
 						if (isChatRequestFail === true) {
 							console.error(getError(contentParsed));
 							if (messageArray[0].message.reason === 'Unavailable') {
