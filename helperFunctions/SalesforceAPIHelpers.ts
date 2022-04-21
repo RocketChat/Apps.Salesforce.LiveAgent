@@ -58,7 +58,7 @@ export async function sendChatRequest(
 	salesforceId?: string,
 	customDetail?: string,
 ) {
-	let customDetailJSON: object | undefined;
+	let customDetailJSON: any;
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
 
 	if (customDetail) {
@@ -124,7 +124,11 @@ export async function sendChatRequest(
 	};
 
 	if (customDetailJSON) {
-		sendChatRequestHttpRequest.data.prechatDetails.push(customDetailJSON);
+		if (Array.isArray(customDetailJSON)) {
+			sendChatRequestHttpRequest.data.prechatDetails.push(...customDetailJSON);
+		} else {
+			sendChatRequestHttpRequest.data.prechatDetails.push(customDetailJSON);
+		}
 	}
 
 	try {
