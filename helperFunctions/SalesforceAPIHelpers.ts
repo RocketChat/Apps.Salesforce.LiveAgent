@@ -57,6 +57,7 @@ export async function sendChatRequest(
 	LcVisitorEmail?: string,
 	salesforceId?: string,
 	customDetail?: string,
+	prechatDetails?: string,
 ) {
 	let customDetailJSON: object | undefined;
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
@@ -85,38 +86,7 @@ export async function sendChatRequest(
 			language: 'en-US',
 			screenResolution: '1900x1080',
 			visitorName: LcVisitorName || 'Live Chat Visitor',
-			prechatDetails: [
-				{
-					label: 'E-mail Address',
-					value: LcVisitorEmail,
-					entityFieldMaps: [
-						{
-							entityName: 'Contact',
-							fieldName: 'Email',
-							isFastFillable: false,
-							isAutoQueryable: true,
-							isExactMatchable: true,
-						},
-					],
-					transcriptFields: ['c__EmailAddress'],
-					displayToAgent: true,
-				},
-				{
-					label: 'Case Id',
-					value: salesforceId,
-					entityMaps: [
-						{
-							entityName: 'Case',
-							fieldName: 'ID',
-						},
-					],
-					transcriptFields: [
-						'CaseID',
-					],
-					displayToAgent: true,
-
-				},
-			],
+			prechatDetails: [],
 			prechatEntities: [],
 			receiveQueueUpdates: true,
 			isPost: true,
@@ -125,6 +95,40 @@ export async function sendChatRequest(
 
 	if (customDetailJSON) {
 		sendChatRequestHttpRequest.data.prechatDetails.push(customDetailJSON);
+	}
+
+	if (prechatDetails) {
+		sendChatRequestHttpRequest.data.prechatDetails.push(JSON.parse(prechatDetails));
+	} else {
+		sendChatRequestHttpRequest.data.prechatDetails.push({
+			label: 'E-mail Address',
+			value: LcVisitorEmail,
+			entityFieldMaps: [
+				{
+					entityName: 'Contact',
+					fieldName: 'Email',
+					isFastFillable: false,
+					isAutoQueryable: true,
+					isExactMatchable: true,
+				},
+			],
+			transcriptFields: ['c__EmailAddress'],
+			displayToAgent: true,
+		},
+		{
+			label: 'Case Id',
+			value: salesforceId,
+			entityMaps: [
+				{
+					entityName: 'Case',
+					fieldName: 'ID',
+				},
+			],
+			transcriptFields: [
+				'CaseID',
+			],
+			displayToAgent: true,
+		});
 	}
 
 	try {

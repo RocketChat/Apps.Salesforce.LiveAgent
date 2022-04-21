@@ -80,26 +80,13 @@ export class InitiateSalesforceSession {
 				await this.persistence.createWithAssociation(sessionTokens, assoc);
 				this.delay(3000);
 
-				let buttonId: string | undefined;
-				if (this.data.room.customFields && this.data.room.customFields.reqButtonId) {
-					buttonId = this.data.room.customFields.reqButtonId;
-				} else {
-					buttonId = undefined;
-				}
+				const buttonId = this.data.room.customFields?.reqButtonId;
 
-				let salesforceId: string | undefined;
-				if (this.data.room.customFields && this.data.room.customFields.salesforceId) {
-					salesforceId = this.data.room.customFields.salesforceId;
-				} else {
-					salesforceId = undefined;
-				}
+				const salesforceId = this.data.room.customFields?.salesforceId;
 
-				let customDetail: string | undefined;
-				if (this.data.room.customFields && this.data.room.customFields.customDetail) {
-					customDetail = this.data.room.customFields.customDetail;
-				} else {
-					customDetail = undefined;
-				}
+				const customDetail = this.data.room.customFields?.customDetail;
+
+				const prechatDetails = this.data.room.customFields?.prechatDetails;
 
 				const logHandoverFailure = (errorMessage, error?) => {
 					const handoverFailure = {
@@ -128,6 +115,7 @@ export class InitiateSalesforceSession {
 					LcVisitorEmail,
 					salesforceId,
 					customDetail,
+					prechatDetails,
 				)
 					.then(async (sendChatRequestres) => {
 						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);
