@@ -102,7 +102,7 @@ export async function sendChatRequest(
 	}
 
 	if (prechatDetails) {
-		sendChatRequestHttpRequest.data.prechatDetails.push(JSON.parse(prechatDetails));
+		sendChatRequestHttpRequest.data.prechatDetails.push(...JSON.parse(prechatDetails));
 	} else {
 		sendChatRequestHttpRequest.data.prechatDetails.push({
 			label: 'E-mail Address',
