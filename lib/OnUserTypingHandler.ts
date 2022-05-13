@@ -18,7 +18,6 @@ export class OnUserTypingHandler {
 	) {}
 
 	public async exec() {
-
 		if (!this.data.roomId || !this.data.username) {
 			return;
 		}
@@ -36,7 +35,10 @@ export class OnUserTypingHandler {
 			return;
 		}
 
-		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.SALESFORCE_CHAT_API_ENDPOINT,
+		);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -47,25 +49,46 @@ export class OnUserTypingHandler {
 		const { persisantAffinity, persistantKey, sneakPeekEnabled } = await retrievePersistentData(this.read, assoc);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
+			const requestPromises: Array<Promise<any>> = [];
+
 			if (sneakPeekEnabled) {
 				if (this.data.data.text || this.data.data.text === '') {
-					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.data.text)
-					.then(async () => {
-						// ChasitorSneakPeak API Success
-					})
-					.catch((error) => {
-						console.error(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
-					});
+					const sneakPeekPromise = chasitorSneakPeak(
+						this.http,
+						salesforceChatApiEndpoint,
+						persisantAffinity,
+						persistantKey,
+						this.data.data.text,
+					)
+						.then(async resp => {
+							this.app.getLogger().log(resp);
+						})
+						.catch(error => {
+							this.app.getLogger().log(error);
+							console.error(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
+						});
+
+					requestPromises.push(sneakPeekPromise);
 				}
-			} else {
-				await chasitorTyping(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.typing)
-				.then(async () => {
-					// ChasitorTyping/ChasitorNotTyping API Success
+			}
+
+			const typingPromise = chasitorTyping(
+				this.http,
+				salesforceChatApiEndpoint,
+				persisantAffinity,
+				persistantKey,
+				this.data.typing,
+			)
+				.then(async resp => {
+					this.app.getLogger().log(resp);
 				})
-				.catch((error) => {
+				.catch(error => {
+					this.app.getLogger().log(error);
 					console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
 				});
-			}
+
+			requestPromises.push(typingPromise);
+			await Promise.all(requestPromises);
 		}
 	}
 }
