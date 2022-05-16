@@ -56,7 +56,7 @@ export class InitiateSalesforceSession {
 		const LcVisitor: IVisitor = this.data.room.visitor;
 		const LcVisitorName = LcVisitor.name;
 		const LcVisitorEmailsArr = LcVisitor.visitorEmails;
-		let LcVisitorEmail: string = 'No email provided';
+		let LcVisitorEmail = 'No email provided';
 		if (LcVisitorEmailsArr) {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
