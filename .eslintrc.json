@@ -4,21 +4,13 @@
   "plugins": ["@typescript-eslint"],
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
   "rules": {
-    "array-type": [2, "generic"],
-    "indent": [2, "tabs", 4],
-    "member-access": 2,
+    "indent": 0,
+    "@typescript-eslint/indent": [2, "tab"],
     "no-console": 0,
-    "no-duplicate-variable": 2,
     "object-literal-sort-keys": 0,
-    "quotemark": [2, "single"],
     "linebreak-style": 0,
     "prefer-for-of": 0,
-    "max-line-length": [
-      2,
-      {
-        "limit": 160,
-        "ignore-pattern": "^import | *export .*? {"
-      }
-    ]
+    "no-case-declarations": 0,
+    "@typescript-eslint/no-case-declarations": 0
   }
 }
