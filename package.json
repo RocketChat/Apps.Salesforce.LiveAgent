@@ -1,17 +1,17 @@
 {
-	"devDependencies": {
-		"@rocket.chat/apps-engine": "WideChat/Rocket.Chat.Apps-engine.git#v1.29.2",
-		"@types/node": "^10.17.24",
-		"@typescript-eslint/eslint-plugin": "^5.24.0",
-		"@typescript-eslint/parser": "^5.24.0",
-		"eslint": "^8.15.0",
-		"eslint-config-prettier": "^8.5.0",
-		"prettier": "^2.0.5",
-		"typescript": "^4.6.4"
-	},
-	"scripts": {
-		"lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-		"lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
-		"format": "prettier -w ./*.json ./**/*.ts"
-	}
+    "devDependencies": {
+        "@rocket.chat/apps-engine": "WideChat/Rocket.Chat.Apps-engine.git#v1.29.2",
+        "@types/node": "^10.17.24",
+        "@typescript-eslint/eslint-plugin": "^5.24.0",
+        "@typescript-eslint/parser": "^5.24.0",
+        "eslint": "^8.15.0",
+        "eslint-config-prettier": "^8.5.0",
+        "prettier": "^2.0.5",
+        "typescript": "^4.6.4"
+    },
+    "scripts": {
+        "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+        "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
+        "format": "prettier -w ./**/*.ts"
+    }
 }
