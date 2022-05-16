@@ -38,7 +38,7 @@ export class SubscribeToLiveAgent {
 			this.technicalDifficultyMessage,
 		);
 		await pullMessages(this.http, this.salesforceChatApiEndpoint, this.persisantAffinity, this.persistantKey)
-			.then(async (response) => {
+			.then(async response => {
 				if (response.statusCode === 403) {
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await handleEndChatCallback.handleEndChat();
@@ -64,7 +64,16 @@ export class SubscribeToLiveAgent {
 						await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
 						await handleEndChatCallback.handleEndChat();
 					} else {
-						await messageFilter(this.app, this.modify, this.read, this.data.room, this.data.agent, messageArray);
+						await messageFilter(
+							this.app,
+							this.modify,
+							this.read,
+							this.data.room,
+							this.data.agent,
+							messageArray,
+							this.assoc,
+							this.persistence,
+						);
 						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
 						if (persisantAffinity !== null && persistantKey !== null) {
 							await this.subscribeToLiveAgent();
@@ -76,7 +85,7 @@ export class SubscribeToLiveAgent {
 					}
 				}
 			})
-			.catch(async (error) => {
+			.catch(async error => {
 				console.error(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await handleEndChatCallback.handleEndChat();
 				return;

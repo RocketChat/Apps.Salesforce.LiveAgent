@@ -7,6 +7,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { getAppSettingValue } from '../lib/Settings';
 import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHelper';
 import { sendLCMessage } from './LivechatMessageHelpers';
+import { retrievePersistentTokens } from './PersistenceHelpers';
 
 export async function messageFilter(
 	app: IApp,
@@ -15,6 +16,8 @@ export async function messageFilter(
 	messageRoom: IRoom,
 	LcAgent: IUser,
 	messageArray: any,
+	assoc,
+	persistence,
 ) {
 	try {
 		messageArray.forEach(async i => {
