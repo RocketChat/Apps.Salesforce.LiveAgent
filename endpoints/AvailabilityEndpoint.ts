@@ -24,11 +24,7 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 			}
 		} catch (error) {
 			console.error(ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR, error);
-			return createHttpResponse(
-				HttpStatusCode.INTERNAL_SERVER_ERROR,
-				{ 'Content-Type': 'application/json' },
-				{ error: `${ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR} ${error}` }
-			);
+			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: `${ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR} ${error}` });
 		}
 	}
 

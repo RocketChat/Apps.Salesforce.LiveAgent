@@ -113,9 +113,7 @@ export class InitiateSalesforceSession {
 								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
 
 								if (hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
-									const queueMessage = hasQueueUpdateMessage
-										? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message
-										: getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
+									const queueMessage = hasQueueUpdateMessage ? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message : getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
 									const queuePosition = hasQueueUpdateMessage ? queueMessage.position : queueMessage.queuePosition;
 									if (queuePosition === 0) {
 										// User Queue Position = 0
