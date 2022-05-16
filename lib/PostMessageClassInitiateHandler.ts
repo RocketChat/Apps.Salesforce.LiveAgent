@@ -10,14 +10,7 @@ import { handleTimeout } from '../helperFunctions/TimeoutHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class PostMessageClassInitiate {
-	constructor(
-		private app: IApp,
-		private message: IMessage,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-		private modify: IModify,
-	) {}
+	constructor(private app: IApp, private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async exec() {
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
@@ -27,10 +20,10 @@ export class PostMessageClassInitiate {
 
 		const assoc = getRoomAssoc(this.message.room.id);
 
-		if (text === 'customer_idle_timeout' ) {
+		if (text === 'customer_idle_timeout') {
 			if (roomCustomFields && roomCustomFields.isHandedOverFromDialogFlow === true) {
 				await this.modify.getUpdater().getLivechatUpdater().closeRoom(this.message.room, 'Chat closed due to timeout');
-				await updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
+				await updateRoomCustomFields(this.message.room.id, { customerIdleTimeout: true }, this.read, this.modify);
 			}
 		}
 

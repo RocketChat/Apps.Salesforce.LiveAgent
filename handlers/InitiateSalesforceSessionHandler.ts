@@ -15,14 +15,7 @@ import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSal
 import { getAppSettingValue } from '../lib/Settings';
 
 export class InitiateSalesforceSession {
-	constructor(
-		private app: IApp,
-		private data: ILivechatEventContext,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-		private modify: IModify,
-	) {}
+	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async exec() {
 		const salesforceOrganisationId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_ORGANISATION_ID);
@@ -30,15 +23,7 @@ export class InitiateSalesforceSession {
 		const salesforceButtonId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BUTTON_ID);
 		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
 
-		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
-			this.app,
-			this.http,
-			this.modify,
-			this.persistence,
-			this.data,
-			this.read,
-			technicalDifficultyMessage,
-		);
+		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(this.app, this.http, this.modify, this.persistence, this.data, this.read, technicalDifficultyMessage);
 
 		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 		try {
@@ -67,13 +52,7 @@ export class InitiateSalesforceSession {
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
 			.then(async (res) => {
 				console.log(InfoLogs.LIVEAGENT_SESSION_ID_GENERATED);
-				await sendDebugLCMessage(
-					this.read,
-					this.modify,
-					this.data.room,
-					`${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`,
-					this.data.agent,
-				);
+				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${InfoLogs.LIVEAGENT_SESSION_INITIATED} ${JSON.stringify(res)}`, this.data.agent);
 				const { id, affinityToken, key } = res;
 
 				const sessionTokens = { id, affinityToken, key };
@@ -115,17 +94,11 @@ export class InitiateSalesforceSession {
 					LcVisitorEmail,
 					salesforceId,
 					customDetail,
-					prechatDetails,
+					prechatDetails
 				)
 					.then(async (sendChatRequestres) => {
 						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);
-						await sendDebugLCMessage(
-							this.read,
-							this.modify,
-							this.data.room,
-							`${InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`,
-							this.data.agent,
-						);
+						await sendDebugLCMessage(this.read, this.modify, this.data.room, `${InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT} ${JSON.stringify(sendChatRequestres)}`, this.data.agent);
 						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
 								console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
@@ -139,8 +112,10 @@ export class InitiateSalesforceSession {
 
 								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
 
-								if ( hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
-									const queueMessage = hasQueueUpdateMessage ? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message : getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
+								if (hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
+									const queueMessage = hasQueueUpdateMessage
+										? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message
+										: getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
 									const queuePosition = hasQueueUpdateMessage ? queueMessage.position : queueMessage.queuePosition;
 									if (queuePosition === 0) {
 										// User Queue Position = 0
@@ -166,39 +141,21 @@ export class InitiateSalesforceSession {
 										case 'NoPost':
 											logHandoverFailure(ErrorLogs.APP_CONFIGURATION_INVALID);
 											await this.persistence.removeByAssociation(assoc);
-											await sendDebugLCMessage(
-												this.read,
-												this.modify,
-												this.data.room,
-												ErrorLogs.APP_CONFIGURATION_INVALID,
-												this.data.agent,
-											);
+											await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.APP_CONFIGURATION_INVALID, this.data.agent);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 											break;
 
 										case 'InternalFailure':
 											logHandoverFailure(ErrorLogs.SALESFORCE_INTERNAL_FAILURE);
 											await this.persistence.removeByAssociation(assoc);
-											await sendDebugLCMessage(
-												this.read,
-												this.modify,
-												this.data.room,
-												ErrorLogs.SALESFORCE_INTERNAL_FAILURE,
-												this.data.agent,
-											);
+											await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_INTERNAL_FAILURE, this.data.agent);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 											break;
 
 										default:
 											logHandoverFailure(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE);
 											await this.persistence.removeByAssociation(assoc);
-											await sendDebugLCMessage(
-												this.read,
-												this.modify,
-												this.data.room,
-												ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE,
-												this.data.agent,
-											);
+											await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, this.data.agent);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 											break;
 									}
@@ -217,7 +174,7 @@ export class InitiateSalesforceSession {
 										LANoQueueMessage,
 										LAQueuePositionMessage,
 										technicalDifficultyMessage,
-										assoc,
+										assoc
 									);
 									await checkChatStatusDirect.checkCurrentChatStatus();
 								}
@@ -225,39 +182,21 @@ export class InitiateSalesforceSession {
 							.catch(async (error) => {
 								logHandoverFailure(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
 								await this.persistence.removeByAssociation(assoc);
-								await sendDebugLCMessage(
-									this.read,
-									this.modify,
-									this.data.room,
-									`${ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR}: ${error}`,
-									this.data.agent,
-								);
+								await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR}: ${error}`, this.data.agent);
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 							});
 					})
 					.catch(async (error) => {
 						logHandoverFailure(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
 						await this.persistence.removeByAssociation(assoc);
-						await sendDebugLCMessage(
-							this.read,
-							this.modify,
-							this.data.room,
-							`${ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR}: ${error}`,
-							this.data.agent,
-						);
+						await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR}: ${error}`, this.data.agent);
 						await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 					});
 			})
 			.catch(async (error) => {
 				console.error(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
 				await this.persistence.removeByAssociation(assoc);
-				await sendDebugLCMessage(
-					this.read,
-					this.modify,
-					this.data.room,
-					`${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`,
-					this.data.agent,
-				);
+				await sendDebugLCMessage(this.read, this.modify, this.data.room, `${ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR}: ${error}`, this.data.agent);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			});
 	}

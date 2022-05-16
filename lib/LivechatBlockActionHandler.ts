@@ -12,7 +12,7 @@ export class LivechatBlockActionClassInitiate {
 		private read: IRead,
 		private http: IHttp,
 		private persistence: IPersistence,
-		private modify: IModify,
+		private modify: IModify
 	) {}
 
 	public async exec() {

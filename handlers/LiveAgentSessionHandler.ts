@@ -48,15 +48,7 @@ export class LiveAgentSession {
 								agent: livechatAgent,
 								room: livechatRoom,
 							};
-							const handleEndChatCallback = new HandleEndChatCallback(
-								this.app,
-								this.modify,
-								data,
-								this.read,
-								this.persistence,
-								'Chat session is expired',
-								assoc,
-								'');
+							const handleEndChatCallback = new HandleEndChatCallback(this.app, this.modify, data, this.read, this.persistence, 'Chat session is expired', assoc, '');
 							handleEndChatCallback.handleEndChat();
 							return;
 						}

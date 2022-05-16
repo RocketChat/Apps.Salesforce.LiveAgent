@@ -6,8 +6,7 @@ import { AppSettingId } from '../enum/AppSettingId';
 import { getRoomAssoc, retrievePersistentData, updatePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { getAppSettingValue } from '../lib/Settings';
 
-export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify ) => {
-
+export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) => {
 	if (message.room.type !== 'l' || (message.customFields && message.customFields.idleTimeoutConfig)) {
 		return;
 	}
@@ -17,7 +16,6 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 	const { chasitorIdleTimeout, sneakPeekEnabled } = await retrievePersistentData(read, assoc);
 
 	if (chasitorIdleTimeout && chasitorIdleTimeout.isEnabled) {
-
 		/**
 		 * Sets the amount of time that a customer has to respond to an agent message before a warning appears and a timer begins a countdown.
 		 * The warning disappears (and the timer stops) each time the customer sends a message.
@@ -73,7 +71,7 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 
 			if (sessionTimeoutHandler === 'app') {
 				await updatePersistentData(read, persistence, assoc, { isIdleSessionTimerScheduled: false, idleSessionTimerId: '' });
-				await modify.getScheduler().cancelJobByDataQuery({rid: message.room.id, taskType: 'sessionTimeout'});
+				await modify.getScheduler().cancelJobByDataQuery({ rid: message.room.id, taskType: 'sessionTimeout' });
 			}
 			const user = await read.getUserReader().getByUsername(salesforceBotUsername);
 			const msgExtender = modify.getExtender().extendMessage(message.id, user);

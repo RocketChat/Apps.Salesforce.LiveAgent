@@ -10,14 +10,7 @@ import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/Salesf
 import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssigned {
-	constructor(
-		private app: IApp,
-		private data: ILivechatEventContext,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-		private modify: IModify,
-	) {}
+	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async exec() {
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
@@ -42,7 +35,7 @@ export class SalesforceAgentAssigned {
 		}
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
-		const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`;
+		const connectedToAgentMessage = `${InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT} ${salesforceAgentName}.`;
 		await sendLCMessage(this.read, this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
@@ -59,7 +52,7 @@ export class SalesforceAgentAssigned {
 				LAChatEndedMessage,
 				technicalDifficultyMessage,
 				persisantAffinity,
-				persistantKey,
+				persistantKey
 			);
 			await subscribeLiveAgentClass.subscribeToLiveAgent();
 		}

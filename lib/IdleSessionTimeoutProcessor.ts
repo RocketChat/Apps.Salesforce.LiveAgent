@@ -13,12 +13,11 @@ export class IdleSessionTimeoutProcessor implements IProcessor {
 	}
 
 	public async processor(jobContext: IJobContext, read: IRead, modify: IModify, http: IHttp, persis: IPersistence): Promise<void> {
-
 		const assoc = getRoomAssoc(jobContext.rid);
 		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
 
 		if (persisantAffinity !== null && persistantKey !== null) {
-			const room = await read.getRoomReader().getById(jobContext.rid) as ILivechatRoom;
+			const room = (await read.getRoomReader().getById(jobContext.rid)) as ILivechatRoom;
 			if (!room) {
 				throw new Error(`${ErrorLogs.INVALID_ROOM_ID} ${jobContext.rid}`);
 			}
@@ -26,7 +25,7 @@ export class IdleSessionTimeoutProcessor implements IProcessor {
 				return;
 			}
 			await modify.getUpdater().getLivechatUpdater().closeRoom(room, 'Chat closed due to timeout');
-			await updateRoomCustomFields(jobContext.rid , {customerIdleTimeout: true}, read, modify);
+			await updateRoomCustomFields(jobContext.rid, { customerIdleTimeout: true }, read, modify);
 		}
 	}
 }

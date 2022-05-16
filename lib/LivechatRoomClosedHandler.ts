@@ -10,14 +10,7 @@ import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/Sale
 import { getAppSettingValue } from '../lib/Settings';
 
 export class LivechatRoomClosedClass {
-	constructor(
-		private app: IApp,
-		private room: ILivechatRoom,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-		private modify: IModify,
-	) { }
+	constructor(private app: IApp, private room: ILivechatRoom, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async closeChatFromSalesforce() {
 		const { customFields, id: rid } = this.room;
@@ -28,15 +21,16 @@ export class LivechatRoomClosedClass {
 			let reason = '';
 			if (customFields && customFields.customerIdleTimeout === true) {
 				reason = 'clientIdleTimeout';
-
 			}
-			await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason).then(async () => {
-				console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-				await this.persistence.removeByAssociation(getRoomAssoc(rid));
-				await this.modify.getScheduler().cancelJobByDataQuery({rid, taskType: 'sessionTimeout'});
-			}).catch((error) => {
-				console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
-			});
+			await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason)
+				.then(async () => {
+					console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
+					await this.persistence.removeByAssociation(getRoomAssoc(rid));
+					await this.modify.getScheduler().cancelJobByDataQuery({ rid, taskType: 'sessionTimeout' });
+				})
+				.catch((error) => {
+					console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
+				});
 		}
 	}
 

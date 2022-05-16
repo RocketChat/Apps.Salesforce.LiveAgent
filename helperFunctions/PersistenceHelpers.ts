@@ -61,7 +61,7 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 	}
 }
 
-export async function updatePersistentData(read: IRead, persistence: IPersistence,  assoc: RocketChatAssociationRecord, data: object) {
+export async function updatePersistentData(read: IRead, persistence: IPersistence, assoc: RocketChatAssociationRecord, data: object) {
 	try {
 		const persistentData = await retrievePersistentData(read, assoc);
 		const { persisantAffinity, persistantKey } = persistentData;

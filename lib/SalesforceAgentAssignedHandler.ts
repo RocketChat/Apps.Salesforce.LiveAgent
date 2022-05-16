@@ -9,14 +9,7 @@ import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/Persi
 import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssignedClass {
-	constructor(
-		private app: IApp,
-		private data: ILivechatEventContext,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-		private modify: IModify,
-	) {}
+	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async exec() {
 		const assoc = getRoomAssoc(this.data.room.id);

@@ -8,14 +8,7 @@ import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMe
 import { getAppSettingValue } from '../lib/Settings';
 
 export class DialogflowAgentAssignedClass {
-	constructor(
-		private app: IApp,
-		private data: ILivechatEventContext,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-		private modify: IModify,
-	) {}
+	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
 
 	public async exec() {
 		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_ENABLE_END_EVENT);

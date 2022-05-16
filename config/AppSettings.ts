@@ -88,7 +88,8 @@ export const AppSettings: Array<ISetting> = [
 			{
 				key: 'widget',
 				i18nLabel: 'Widget',
-			}, {
+			},
+			{
 				key: 'app',
 				i18nLabel: 'App',
 			},
@@ -103,7 +104,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.BOOLEAN,
 		packageValue: true,
 		i18nLabel: 'Enable Dialogflow Events (Optional)',
-		i18nDescription: 'Enabling this setting will automatically trigger a Dialogflow event based after the chat is ended with the agent. Please enter event name you want to cofigure in the following field(s).',
+		i18nDescription:
+			'Enabling this setting will automatically trigger a Dialogflow event based after the chat is ended with the agent. Please enter event name you want to cofigure in the following field(s).',
 		required: false,
 	},
 	{
@@ -193,7 +195,7 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'An agent will be with you shortly. Your queue position is: %s',
 		i18nLabel: 'Live Agent Queue Position Message',
-		i18nDescription: 'Enter message to show user his/her current position in the queue. %s wil be replaced by the user\'s queue position',
+		i18nDescription: "Enter message to show user his/her current position in the queue. %s wil be replaced by the user's queue position",
 		required: true,
 	},
 	{
@@ -242,10 +244,12 @@ export const AppSettings: Array<ISetting> = [
 			{
 				key: '0',
 				i18nLabel: '0_Errors_Only',
-			}, {
+			},
+			{
 				key: '1',
 				i18nLabel: '1_Errors_and_Information',
-			}, {
+			},
+			{
 				key: '2',
 				i18nLabel: '2_Erros_Information_and_Debug',
 			},

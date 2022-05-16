@@ -9,16 +9,9 @@ import { chasitorSneakPeak, chasitorTyping } from '../helperFunctions/Salesforce
 import { getAppSettingValue } from '../lib/Settings';
 
 export class OnUserTypingHandler {
-	constructor(
-		private app: IApp,
-		private data: IRoomUserTypingContext,
-		private read: IRead,
-		private http: IHttp,
-		private persistence: IPersistence,
-	) {}
+	constructor(private app: IApp, private data: IRoomUserTypingContext, private read: IRead, private http: IHttp, private persistence: IPersistence) {}
 
 	public async exec() {
-
 		if (!this.data.roomId || !this.data.username) {
 			return;
 		}
@@ -51,7 +44,7 @@ export class OnUserTypingHandler {
 				if (this.data.data.text || this.data.data.text === '') {
 					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.data.text)
 						.then(async () => {
-						// ChasitorSneakPeak API Success
+							// ChasitorSneakPeak API Success
 						})
 						.catch((error) => {
 							console.error(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
@@ -60,7 +53,7 @@ export class OnUserTypingHandler {
 			} else {
 				await chasitorTyping(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.typing)
 					.then(async () => {
-					// ChasitorTyping/ChasitorNotTyping API Success
+						// ChasitorTyping/ChasitorNotTyping API Success
 					})
 					.catch((error) => {
 						console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
