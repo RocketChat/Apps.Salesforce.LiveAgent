@@ -1,7 +1,8 @@
 import { IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 
-export const getRoomAssoc = (rid: string) => new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${rid}`);
+export const getRoomAssoc = (rid: string) =>
+	new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${rid}`);
 
 export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAssociationRecord) {
 	try {
@@ -12,15 +13,15 @@ export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAss
 
 			return {
 				id: contentParsed.id,
-				persisantAffinity: contentParsed.affinityToken as string,
-				persistantKey: contentParsed.key as string,
+				persistentAffinity: contentParsed.affinityToken as string,
+				persistentKey: contentParsed.key as string,
 			};
 		}
 
 		return {
 			id: null,
-			persisantAffinity: null,
-			persistantKey: null,
+			persistentAffinity: null,
+			persistentKey: null,
 		};
 	} catch (error) {
 		throw new Error(error);
@@ -37,8 +38,8 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 			return {
 				id: contentParsed.id,
 				chasitorIdleTimeout: contentParsed.chasitorIdleTimeout,
-				persisantAffinity: contentParsed.affinityToken as string,
-				persistantKey: contentParsed.key as string,
+				persistentAffinity: contentParsed.affinityToken as string,
+				persistentKey: contentParsed.key as string,
 				sneakPeekEnabled: contentParsed.sneakPeekEnabled as boolean,
 				salesforceAgentName: contentParsed.salesforceAgentName as string,
 				isIdleSessionTimerScheduled: contentParsed.isIdleSessionTimerScheduled as boolean,
@@ -49,8 +50,8 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 		return {
 			id: null,
 			chasitorIdleTimeout: null,
-			persisantAffinity: null,
-			persistantKey: null,
+			persistentAffinity: null,
+			persistentKey: null,
 			sneakPeekEnabled: null,
 			salesforceAgentName: null,
 			isIdleSessionTimerScheduled: null,
@@ -61,14 +62,19 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 	}
 }
 
-export async function updatePersistentData(read: IRead, persistence: IPersistence,  assoc: RocketChatAssociationRecord, data: object) {
+export async function updatePersistentData(
+	read: IRead,
+	persistence: IPersistence,
+	assoc: RocketChatAssociationRecord,
+	data: object,
+) {
 	try {
 		const persistentData = await retrievePersistentData(read, assoc);
-		const { persisantAffinity, persistantKey } = persistentData;
+		const { persistentAffinity, persistentKey } = persistentData;
 		const updatedData = {
 			...persistentData,
-			affinityToken: persisantAffinity,
-			key: persistantKey,
+			affinityToken: persistentAffinity,
+			key: persistentKey,
 			...data,
 		};
 		await persistence.updateByAssociation(assoc, updatedData, true);

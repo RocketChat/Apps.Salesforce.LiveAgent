@@ -26,26 +26,38 @@ export class SalesforceAgentAssigned {
 		}
 
 		const assoc = getRoomAssoc(this.data.room.id);
-		const persitedData = await retrievePersistentTokens(this.read, assoc);
-		const { persisantAffinity, persistantKey } = persitedData;
+		const persistedData = await retrievePersistentTokens(this.read, assoc);
+		const { persistentAffinity, persistentKey } = persistedData;
 		const salesforceAgentName = (await retrievePersistentData(this.read, assoc)).salesforceAgentName;
-		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
+		const technicalDifficultyMessage: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE,
+		);
 
-		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.SALESFORCE_CHAT_API_ENDPOINT,
+		);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.read, this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
+			await sendDebugLCMessage(
+				this.read,
+				this.modify,
+				this.data.room,
+				ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND,
+				this.data.agent,
+			);
 			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
 		}
 		const LAChatEndedMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_CHAT_ENDED_MESSAGE);
 
-		const connectedToAgentMessage = `${ InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT } ${ salesforceAgentName }.`;
+		const connectedToAgentMessage = `${InfoLogs.CONNECTING_TO_SALESFORCE_LIVEAGENT} ${salesforceAgentName}.`;
 		await sendLCMessage(this.read, this.modify, this.data.room, connectedToAgentMessage, this.data.agent);
 
-		if (persisantAffinity !== null && persistantKey !== null) {
+		if (persistentAffinity !== null && persistentKey !== null) {
 			// Executing subscribe function to listen to Liveagent messages.
 			const subscribeLiveAgentClass = new SubscribeToLiveAgent(
 				this.app,
@@ -58,8 +70,8 @@ export class SalesforceAgentAssigned {
 				salesforceChatApiEndpoint,
 				LAChatEndedMessage,
 				technicalDifficultyMessage,
-				persisantAffinity,
-				persistantKey,
+				persistentAffinity,
+				persistentKey,
 			);
 			await subscribeLiveAgentClass.subscribeToLiveAgent();
 		}

@@ -25,10 +25,16 @@ export class InitiateSalesforceSession {
 	) {}
 
 	public async exec() {
-		const salesforceOrganisationId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_ORGANISATION_ID);
+		const salesforceOrganisationId: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.SALESFORCE_ORGANISATION_ID,
+		);
 		const salesforceDeploymentId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_DEPLOYMENT_ID);
 		const salesforceButtonId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BUTTON_ID);
-		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
+		const technicalDifficultyMessage: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE,
+		);
 
 		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
 			this.app,
@@ -40,17 +46,29 @@ export class InitiateSalesforceSession {
 			technicalDifficultyMessage,
 		);
 
-		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.SALESFORCE_CHAT_API_ENDPOINT,
+		);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
-			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
+			await sendDebugLCMessage(
+				this.read,
+				this.modify,
+				this.data.room,
+				ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND,
+				this.data.agent,
+			);
 			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 			return;
 		}
 
-		const LAQueuePositionMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE);
+		const LAQueuePositionMessage: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.LIVEAGENT_QUEUE_POSITION_MESSAGE,
+		);
 		const LANoQueueMessage: string = await getAppSettingValue(this.read, AppSettingId.LIVEAGENT_NO_QUEUE_MESSAGE);
 
 		const LcVisitor: IVisitor = this.data.room.visitor;
@@ -63,9 +81,15 @@ export class InitiateSalesforceSession {
 
 		const assoc = getRoomAssoc(this.data.room.id);
 
-		await sendDebugLCMessage(this.read, this.modify, this.data.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
+		await sendDebugLCMessage(
+			this.read,
+			this.modify,
+			this.data.room,
+			InfoLogs.INITIATING_LIVEAGENT_SESSION,
+			this.data.agent,
+		);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
-			.then(async (res) => {
+			.then(async res => {
 				console.log(InfoLogs.LIVEAGENT_SESSION_ID_GENERATED);
 				await sendDebugLCMessage(
 					this.read,
@@ -98,7 +122,9 @@ export class InitiateSalesforceSession {
 						salesforce_OrganizationID: salesforceOrganisationId,
 						salesforce_ButtonID: buttonId ? buttonId : salesforceButtonId,
 					};
-					Object.keys(handoverFailure).forEach((prop) => handoverFailure[prop] === undefined && delete handoverFailure[prop]);
+					Object.keys(handoverFailure).forEach(
+						prop => handoverFailure[prop] === undefined && delete handoverFailure[prop],
+					);
 					console.error('Failed to handover', JSON.stringify(handoverFailure));
 				};
 
@@ -117,7 +143,7 @@ export class InitiateSalesforceSession {
 					customDetail,
 					prechatDetails,
 				)
-					.then(async (sendChatRequestres) => {
+					.then(async sendChatRequestres => {
 						console.log(InfoLogs.LIVEAGENT_CHAT_REQUEST_SENT);
 						await sendDebugLCMessage(
 							this.read,
@@ -127,8 +153,8 @@ export class InitiateSalesforceSession {
 							this.data.agent,
 						);
 						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
-							.then(async (pullMessagesres) => {
-								console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
+							.then(async pullMessagesres => {
+								console.log(InfoLogs.SUCCESSFULLY_RECEIVED_LIVEAGENT_RESPONSE);
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;
@@ -139,8 +165,10 @@ export class InitiateSalesforceSession {
 
 								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
 
-								if ( hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
-									const queueMessage = hasQueueUpdateMessage ? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message : getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
+								if (hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
+									const queueMessage = hasQueueUpdateMessage
+										? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message
+										: getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
 									const queuePosition = hasQueueUpdateMessage ? queueMessage.position : queueMessage.queuePosition;
 									if (queuePosition === 0) {
 										// User Queue Position = 0
@@ -159,7 +187,10 @@ export class InitiateSalesforceSession {
 										case 'Unavailable':
 											logHandoverFailure(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
 											await this.persistence.removeByAssociation(assoc);
-											const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
+											const NoLiveagentAvailableMessage: string = await getAppSettingValue(
+												this.read,
+												AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
+											);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 											break;
 
@@ -222,7 +253,7 @@ export class InitiateSalesforceSession {
 									await checkChatStatusDirect.checkCurrentChatStatus();
 								}
 							})
-							.catch(async (error) => {
+							.catch(async error => {
 								logHandoverFailure(ErrorLogs.GETTING_LIVEAGENT_RESPONSE_ERROR, error);
 								await this.persistence.removeByAssociation(assoc);
 								await sendDebugLCMessage(
@@ -235,7 +266,7 @@ export class InitiateSalesforceSession {
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 							});
 					})
-					.catch(async (error) => {
+					.catch(async error => {
 						logHandoverFailure(ErrorLogs.SENDING_LIVEAGENT_CHAT_REQUEST_ERROR, error);
 						await this.persistence.removeByAssociation(assoc);
 						await sendDebugLCMessage(
@@ -248,7 +279,7 @@ export class InitiateSalesforceSession {
 						await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(technicalDifficultyMessage);
 					});
 			})
-			.catch(async (error) => {
+			.catch(async error => {
 				console.error(ErrorLogs.GENERATING_LIVEAGENT_SESSION_ID_ERROR, error);
 				await this.persistence.removeByAssociation(assoc);
 				await sendDebugLCMessage(

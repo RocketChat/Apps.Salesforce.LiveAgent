@@ -5,7 +5,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { performHandover } from '../helperFunctions/HandoverHelpers';
 import { createHttpResponse } from '../helperFunctions/HttpHelpers';
-import { getRoomAssoc, retrievePersistentTokens  } from '../helperFunctions/PersistenceHelpers';
+import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
 import { updateRoomCustomFields } from '../helperFunctions/RoomCustomFieldsHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
@@ -23,9 +23,9 @@ export class HandoverEndpoint extends ApiEndpoint {
 		console.log(InfoLogs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {
 			const assoc = getRoomAssoc(request.content.roomId);
-			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
+			const { persistentAffinity, persistentKey } = await retrievePersistentTokens(read, assoc);
 
-			if (persisantAffinity !== null && persistantKey !== null) {
+			if (persistentAffinity !== null && persistentKey !== null) {
 				console.log(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED);
 				return createHttpResponse(
 					HttpStatusCode.NOT_ACCEPTABLE,
@@ -40,10 +40,18 @@ export class HandoverEndpoint extends ApiEndpoint {
 			}
 
 			await performHandover(modify, read, request.content.roomId, request.content.targetDepartmentName);
-			return createHttpResponse(HttpStatusCode.OK, { 'Content-Type': 'application/json' }, { result: 'Handover request completed successfully' });
+			return createHttpResponse(
+				HttpStatusCode.OK,
+				{ 'Content-Type': 'application/json' },
+				{ result: 'Handover request completed successfully' },
+			);
 		} catch (error) {
 			console.error(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED, error);
-			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: error.message });
+			return createHttpResponse(
+				HttpStatusCode.INTERNAL_SERVER_ERROR,
+				{ 'Content-Type': 'application/json' },
+				{ error: error.message },
+			);
 		}
 	}
 }

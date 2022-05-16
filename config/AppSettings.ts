@@ -88,7 +88,8 @@ export const AppSettings: Array<ISetting> = [
 			{
 				key: 'widget',
 				i18nLabel: 'Widget',
-			}, {
+			},
+			{
 				key: 'app',
 				i18nLabel: 'App',
 			},
@@ -103,7 +104,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.BOOLEAN,
 		packageValue: true,
 		i18nLabel: 'Enable Dialogflow Events (Optional)',
-		i18nDescription: 'Enabling this setting will automatically trigger a Dialogflow event based after the chat is ended with the agent. Please enter event name you want to cofigure in the following field(s).',
+		i18nDescription:
+			'Enabling this setting will automatically trigger a Dialogflow event based after the chat is ended with the agent. Please enter event name you want to configure in the following field(s).',
 		required: false,
 	},
 	{
@@ -112,7 +114,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'end_live_chat',
 		i18nLabel: 'Dialogflow Agent Ended Chat Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is sucessfully ended by agent.',
+		i18nDescription:
+			'Enter the Dialogflow event name you want app to trigger as soon as the chat is successfully ended by agent.',
 		required: false,
 	},
 	{
@@ -121,7 +124,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'end_live_chat',
 		i18nLabel: 'Dialogflow Customer Ended Chat Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is sucessfully ended by customer.',
+		i18nDescription:
+			'Enter the Dialogflow event name you want app to trigger as soon as the chat is successfully ended by customer.',
 		required: false,
 	},
 	{
@@ -130,7 +134,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'neuraflash_escalate_unavailable',
 		i18nLabel: 'Dialogflow Agent Unavailable Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger when the agent is not available for chat.',
+		i18nDescription:
+			'Enter the Dialogflow event name you want app to trigger when the agent is not available for chat.',
 		required: false,
 	},
 	{
@@ -139,7 +144,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'end_session',
 		i18nLabel: 'Dialogflow Customer Idle Timeout Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger when the customer idle timeout is triggered.',
+		i18nDescription:
+			'Enter the Dialogflow event name you want app to trigger when the customer idle timeout is triggered.',
 		required: false,
 	},
 	{
@@ -148,7 +154,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'neuraflash_escalate_error',
 		i18nLabel: 'Dialogflow Session Error Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger when there is some issue connecting to Salesforce Liveagent.',
+		i18nDescription:
+			'Enter the Dialogflow event name you want app to trigger when there is some issue connecting to Salesforce Liveagent.',
 		required: false,
 	},
 	{
@@ -157,7 +164,8 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'en',
 		i18nLabel: 'Dialogflow End Chat Event Language Code (Optional)',
-		i18nDescription: 'Enter the Dialogflow event language code you want app to trigger as soon as the chat is ended with agent.',
+		i18nDescription:
+			'Enter the Dialogflow event language code you want app to trigger as soon as the chat is ended with agent.',
 		required: false,
 	},
 	{
@@ -193,14 +201,16 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'An agent will be with you shortly. Your queue position is: %s',
 		i18nLabel: 'Live Agent Queue Position Message',
-		i18nDescription: 'Enter message to show user his/her current position in the queue. %s wil be replaced by the user\'s queue position',
+		i18nDescription:
+			"Enter message to show user his/her current position in the queue. %s wil be replaced by the user's queue position",
 		required: true,
 	},
 	{
 		id: AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
 		public: true,
 		type: SettingType.STRING,
-		packageValue: 'There are no agents currently available. Our Customer Care team is available by phone 24/7 at 1-855-463-9333.',
+		packageValue:
+			'There are no agents currently available. Our Customer Care team is available by phone 24/7 at 1-855-463-9333.',
 		i18nLabel: 'No Live Agent Available Message',
 		i18nDescription: 'Enter message to show when there is no liveagent available to accept user request.',
 		required: true,
@@ -211,7 +221,7 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'Sorry we are unable to complete your request right now.',
 		i18nLabel: 'Technical Difficulty Message',
-		i18nDescription: 'Enter message to show to user when there is some tehnical error.',
+		i18nDescription: 'Enter message to show to user when there is some technical error.',
 		required: true,
 	},
 	{
@@ -242,12 +252,14 @@ export const AppSettings: Array<ISetting> = [
 			{
 				key: '0',
 				i18nLabel: '0_Errors_Only',
-			}, {
+			},
+			{
 				key: '1',
 				i18nLabel: '1_Errors_and_Information',
-			}, {
+			},
+			{
 				key: '2',
-				i18nLabel: '2_Erros_Information_and_Debug',
+				i18nLabel: '2_Errors_Information_and_Debug',
 			},
 		],
 		i18nLabel: 'Salesforce App Log Level',
