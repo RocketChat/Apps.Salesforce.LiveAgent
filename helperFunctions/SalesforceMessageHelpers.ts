@@ -9,18 +9,9 @@ import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHel
 import { sendLCMessage } from './LivechatMessageHelpers';
 import { retrievePersistentTokens } from './PersistenceHelpers';
 
-export async function messageFilter(
-	app: IApp,
-	modify: IModify,
-	read: IRead,
-	messageRoom: IRoom,
-	LcAgent: IUser,
-	messageArray: any,
-	assoc,
-	persistence,
-) {
+export async function messageFilter(app: IApp, modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any, assoc, persistence) {
 	try {
-		messageArray.forEach(async i => {
+		messageArray.forEach(async (i) => {
 			const type = i.type;
 			switch (type) {
 				case 'ChatTransferred':
@@ -51,10 +42,7 @@ export async function messageFilter(
 
 				case 'AgentTyping':
 					const salesforceBotUsername: string = await getAppSettingValue(read, AppSettingId.SALESFORCE_BOT_USERNAME);
-					await agentTypingListener(
-						messageRoom.id,
-						modify.getNotifier().typing({ id: messageRoom.id, username: salesforceBotUsername }),
-					);
+					await agentTypingListener(messageRoom.id, modify.getNotifier().typing({ id: messageRoom.id, username: salesforceBotUsername }));
 					break;
 
 				case 'AgentNotTyping':
