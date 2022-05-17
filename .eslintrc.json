@@ -1,16 +1,43 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
-  "plugins": ["@typescript-eslint"],
-  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+  "plugins": [
+    "@typescript-eslint",
+    "prettier"
+  ],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:prettier/recommended"
+  ],
   "rules": {
     "indent": 0,
-    "@typescript-eslint/indent": [2, "tab"],
+    "@typescript-eslint/indent": [
+      2,
+      "tab"
+    ],
     "no-console": 0,
     "object-literal-sort-keys": 0,
     "linebreak-style": 0,
     "prefer-for-of": 0,
     "no-case-declarations": 0,
-    "@typescript-eslint/no-case-declarations": 0
+    "@typescript-eslint/no-case-declarations": 0,
+    "func-call-spacing": 0,
+    "no-dupe-class-members": 0,
+    "no-spaced-func": 0,
+    "no-unused-vars": 0,
+    "no-useless-constructor": 0,
+    "no-use-before-define": 0,
+    "@typescript-eslint/ban-ts-ignore": 0,
+    "@typescript-eslint/no-dupe-class-members": 2,
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/no-unused-vars": [
+      1,
+      {
+        "argsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "@typescript-eslint/prefer-optional-chain": 1
   }
 }
