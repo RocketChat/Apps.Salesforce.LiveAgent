@@ -1,5 +1,6 @@
-import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
+import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
@@ -7,32 +8,17 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { getAppSettingValue } from '../lib/Settings';
 import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHelper';
 import { sendLCMessage } from './LivechatMessageHelpers';
-import { retrievePersistentTokens } from './PersistenceHelpers';
+import { updatePersistentData } from './PersistenceHelpers';
 
-export async function messageFilter(app: IApp, modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any, assoc, persistence) {
+export async function messageFilter(app: IApp, modify: IModify, read: IRead, persistence: IPersistence, messageRoom: IRoom, LcAgent: IUser, assoc: RocketChatAssociationRecord, messageArray: any) {
 	try {
 		messageArray.forEach(async (i) => {
 			const type = i.type;
 			switch (type) {
 				case 'ChatTransferred':
 					const transferMessage = i.message;
-					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
-					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
-					const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
 					const salesforceAgentName = transferMessage.name;
-
-					await persistence.updateByAssociation(
-						assoc,
-						{
-							id,
-							affinityToken: persisantAffinity,
-							key: persistantKey,
-							chasitorIdleTimeout,
-							sneakPeekEnabled,
-							salesforceAgentName,
-						},
-						true,
-					);
+					await updatePersistentData(read, persistence, assoc, { salesforceAgentName });
 					break;
 
 				case 'ChatMessage':
