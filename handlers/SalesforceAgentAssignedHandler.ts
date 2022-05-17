@@ -10,7 +10,14 @@ import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/Salesf
 import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssigned {
-	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private data: ILivechatEventContext,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
@@ -52,7 +59,7 @@ export class SalesforceAgentAssigned {
 				LAChatEndedMessage,
 				technicalDifficultyMessage,
 				persisantAffinity,
-				persistantKey
+				persistantKey,
 			);
 			await subscribeLiveAgentClass.subscribeToLiveAgent();
 		}

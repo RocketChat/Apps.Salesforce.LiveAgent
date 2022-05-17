@@ -9,7 +9,14 @@ import { getRoomAssoc, retrievePersistentTokens } from '../helperFunctions/Persi
 import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssignedClass {
-	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private data: ILivechatEventContext,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const assoc = getRoomAssoc(this.data.room.id);
@@ -18,7 +25,14 @@ export class SalesforceAgentAssignedClass {
 		const FindingLiveagentMessage: string = await getAppSettingValue(this.read, AppSettingId.FINDING_LIVEAGENT_MESSAGE);
 
 		if (persisantAffinity === null && persistantKey === null && this.data.agent.username === salesforceBotUsername) {
-			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.data, this.read, this.http, this.persistence, this.modify);
+			const initiateSalesforceSession = new InitiateSalesforceSession(
+				this.app,
+				this.data,
+				this.read,
+				this.http,
+				this.persistence,
+				this.modify,
+			);
 			await sendLCMessage(this.read, this.modify, this.data.room, FindingLiveagentMessage, this.data.agent, true);
 			await initiateSalesforceSession.exec();
 		} else {

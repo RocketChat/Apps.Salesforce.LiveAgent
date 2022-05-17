@@ -95,7 +95,15 @@ export const handleTimeout = async (app: IApp, message: IMessage, read: IRead, h
 	}
 };
 
-async function scheduleTimeOut(message: IMessage, read: IRead, modify: IModify, persistence: IPersistence, idleTimeoutTimeoutTime: number, app: IApp, assoc) {
+async function scheduleTimeOut(
+	message: IMessage,
+	read: IRead,
+	modify: IModify,
+	persistence: IPersistence,
+	idleTimeoutTimeoutTime: number,
+	app: IApp,
+	assoc,
+) {
 	const rid = message.room.id;
 	const { isIdleSessionTimerScheduled, idleSessionTimerId } = await retrievePersistentData(read, assoc);
 

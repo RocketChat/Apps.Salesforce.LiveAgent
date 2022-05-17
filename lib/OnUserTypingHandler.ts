@@ -9,7 +9,13 @@ import { chasitorSneakPeak, chasitorTyping } from '../helperFunctions/Salesforce
 import { getAppSettingValue } from '../lib/Settings';
 
 export class OnUserTypingHandler {
-	constructor(private app: IApp, private data: IRoomUserTypingContext, private read: IRead, private http: IHttp, private persistence: IPersistence) {}
+	constructor(
+		private app: IApp,
+		private data: IRoomUserTypingContext,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+	) {}
 
 	public async exec() {
 		if (!this.data.roomId || !this.data.username) {

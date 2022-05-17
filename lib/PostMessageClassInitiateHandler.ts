@@ -10,7 +10,14 @@ import { handleTimeout } from '../helperFunctions/TimeoutHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class PostMessageClassInitiate {
-	constructor(private app: IApp, private message: IMessage, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private message: IMessage,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);

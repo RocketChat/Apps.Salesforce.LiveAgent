@@ -6,7 +6,14 @@ import { ActionId } from '../enum/ActionId';
 import { InfoLogs } from '../enum/InfoLogs';
 
 export class LivechatBlockActionClassInitiate {
-	constructor(private app: IApp, private context: UIKitLivechatBlockInteractionContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private context: UIKitLivechatBlockInteractionContext,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const lmessage: ILivechatMessage = this.context.getInteractionData().message as ILivechatMessage;

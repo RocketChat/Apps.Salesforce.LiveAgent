@@ -9,7 +9,14 @@ import { getAppSettingValue } from '../lib/Settings';
 export class AvailabilityEndpoint extends ApiEndpoint {
 	public path = 'availability';
 
-	public async get(request: IApiRequest, endpoint: IApiEndpointInfo, read: IRead, modify: IModify, http: IHttp, persist: IPersistence): Promise<IApiResponse> {
+	public async get(
+		request: IApiRequest,
+		endpoint: IApiEndpointInfo,
+		read: IRead,
+		modify: IModify,
+		http: IHttp,
+		persist: IPersistence,
+	): Promise<IApiResponse> {
 		try {
 			console.log(InfoLogs.AVAILABILITY_ENDPOINT_REQUEST_RECEIVED);
 			const { button_ids } = request.query;
@@ -24,7 +31,11 @@ export class AvailabilityEndpoint extends ApiEndpoint {
 			}
 		} catch (error) {
 			console.error(ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR, error);
-			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: `${ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR} ${error}` });
+			return createHttpResponse(
+				HttpStatusCode.INTERNAL_SERVER_ERROR,
+				{ 'Content-Type': 'application/json' },
+				{ error: `${ErrorLogs.AVAILABILITY_ENDPOINT_REQUEST_ERROR} ${error}` },
+			);
 		}
 	}
 

@@ -12,7 +12,14 @@ import { getAppSettingValue } from '../lib/Settings';
 export class HandoverEndpoint extends ApiEndpoint {
 	public path = 'handover';
 
-	public async post(request: IApiRequest, endpoint: IApiEndpointInfo, read: IRead, modify: IModify, http: IHttp, persist: IPersistence): Promise<IApiResponse> {
+	public async post(
+		request: IApiRequest,
+		endpoint: IApiEndpointInfo,
+		read: IRead,
+		modify: IModify,
+		http: IHttp,
+		persist: IPersistence,
+	): Promise<IApiResponse> {
 		console.log(InfoLogs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {
 			const assoc = getRoomAssoc(request.content.roomId);
@@ -20,7 +27,11 @@ export class HandoverEndpoint extends ApiEndpoint {
 
 			if (persisantAffinity !== null && persistantKey !== null) {
 				console.log(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED);
-				return createHttpResponse(HttpStatusCode.NOT_ACCEPTABLE, { 'Content-Type': 'application/json' }, { result: 'Cannot perform handover amidst an active Liveagent session.' });
+				return createHttpResponse(
+					HttpStatusCode.NOT_ACCEPTABLE,
+					{ 'Content-Type': 'application/json' },
+					{ result: 'Cannot perform handover amidst an active Liveagent session.' },
+				);
 			}
 
 			const targetDeptName: string = await getAppSettingValue(read, AppSettingId.SF_HANDOVER_DEPARTMENT_NAME);
@@ -29,7 +40,11 @@ export class HandoverEndpoint extends ApiEndpoint {
 			}
 
 			await performHandover(modify, read, request.content.roomId, request.content.targetDepartmentName);
-			return createHttpResponse(HttpStatusCode.OK, { 'Content-Type': 'application/json' }, { result: 'Handover request completed successfully' });
+			return createHttpResponse(
+				HttpStatusCode.OK,
+				{ 'Content-Type': 'application/json' },
+				{ result: 'Handover request completed successfully' },
+			);
 		} catch (error) {
 			console.error(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED, error);
 			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: error.message });

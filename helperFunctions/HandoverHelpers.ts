@@ -16,7 +16,9 @@ export const performHandover = async (modify: IModify, read: IRead, rid: string,
 		throw new Error(ErrorLogs.INVALID_VISITOR_TOKEN);
 	}
 
-	const targetDepartment: IDepartment = (await read.getLivechatReader().getLivechatDepartmentByIdOrName(targetDepartmentName)) as IDepartment;
+	const targetDepartment: IDepartment = (await read
+		.getLivechatReader()
+		.getLivechatDepartmentByIdOrName(targetDepartmentName)) as IDepartment;
 	if (!targetDepartment) {
 		throw new Error(ErrorLogs.INVALID_DEPARTMENT_NAME);
 	}

@@ -14,7 +14,14 @@ import { HandleEndChatCallback } from '../helperFunctions/subscribeHelpers/Sales
 import { getAppSettingValue } from '../lib/Settings';
 
 export class LiveAgentSession {
-	constructor(private app: IApp, private message: IMessage, private read: IRead, private modify: IModify, private http: IHttp, private persistence: IPersistence) {}
+	constructor(
+		private app: IApp,
+		private message: IMessage,
+		private read: IRead,
+		private modify: IModify,
+		private http: IHttp,
+		private persistence: IPersistence,
+	) {}
 
 	public async exec() {
 		try {
@@ -48,7 +55,16 @@ export class LiveAgentSession {
 								agent: livechatAgent,
 								room: livechatRoom,
 							};
-							const handleEndChatCallback = new HandleEndChatCallback(this.app, this.modify, data, this.read, this.persistence, 'Chat session is expired', assoc, '');
+							const handleEndChatCallback = new HandleEndChatCallback(
+								this.app,
+								this.modify,
+								data,
+								this.read,
+								this.persistence,
+								'Chat session is expired',
+								assoc,
+								'',
+							);
 							handleEndChatCallback.handleEndChat();
 							return;
 						}

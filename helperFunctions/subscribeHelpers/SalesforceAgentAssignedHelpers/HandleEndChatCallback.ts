@@ -64,5 +64,5 @@ export class HandleEndChatCallback {
 				throw new Error(error);
 			}
 		}
-	}
+	};
 }

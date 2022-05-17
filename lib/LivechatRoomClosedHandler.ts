@@ -10,7 +10,14 @@ import { closeChat, getSalesforceChatAPIEndpoint } from '../helperFunctions/Sale
 import { getAppSettingValue } from '../lib/Settings';
 
 export class LivechatRoomClosedClass {
-	constructor(private app: IApp, private room: ILivechatRoom, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private room: ILivechatRoom,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async closeChatFromSalesforce() {
 		const { customFields, id: rid } = this.room;
@@ -60,9 +67,18 @@ export class LivechatRoomClosedClass {
 		}
 
 		const dialogflowEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME);
-		const dialogflowCustomerEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME);
-		const dialogflowAgentUnavailableEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME);
-		const dialogflowCustomerIdleTimeoutEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME);
+		const dialogflowCustomerEndChatEventName: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME,
+		);
+		const dialogflowAgentUnavailableEventName: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME,
+		);
+		const dialogflowCustomerIdleTimeoutEventName: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME,
+		);
 		const dialogflowSessionErrorEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME);
 		const dialogflowEndChatEventLCode: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE);
 

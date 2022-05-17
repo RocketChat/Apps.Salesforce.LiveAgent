@@ -57,7 +57,7 @@ export async function sendChatRequest(
 	LcVisitorEmail?: string,
 	salesforceId?: string,
 	customDetail?: string,
-	prechatDetails?: string
+	prechatDetails?: string,
 ) {
 	let customDetailJSON: any;
 	const sendChatRequestEndpoint = liveAgentUrl + 'Chasitor/ChasitorInit';
@@ -130,7 +130,7 @@ export async function sendChatRequest(
 				],
 				transcriptFields: ['CaseID'],
 				displayToAgent: true,
-			}
+			},
 		);
 	}
 

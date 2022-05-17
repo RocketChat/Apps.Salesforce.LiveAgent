@@ -8,7 +8,14 @@ import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMe
 import { getAppSettingValue } from '../lib/Settings';
 
 export class DialogflowAgentAssignedClass {
-	constructor(private app: IApp, private data: ILivechatEventContext, private read: IRead, private http: IHttp, private persistence: IPersistence, private modify: IModify) {}
+	constructor(
+		private app: IApp,
+		private data: ILivechatEventContext,
+		private read: IRead,
+		private http: IHttp,
+		private persistence: IPersistence,
+		private modify: IModify,
+	) {}
 
 	public async exec() {
 		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_ENABLE_END_EVENT);
@@ -34,9 +41,18 @@ export class DialogflowAgentAssignedClass {
 		}
 
 		const dialogflowEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME);
-		const dialogflowCustomerEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME);
-		const dialogflowAgentUnavailableEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME);
-		const dialogflowCustomerIdleTimeoutEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME);
+		const dialogflowCustomerEndChatEventName: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME,
+		);
+		const dialogflowAgentUnavailableEventName: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.DIALOGFLOW_AGENT_UNAVAILABLE_EVENT_NAME,
+		);
+		const dialogflowCustomerIdleTimeoutEventName: string = await getAppSettingValue(
+			this.read,
+			AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME,
+		);
 		const dialogflowSessionErrorEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME);
 		const dialogflowEndChatEventLCode: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE);
 
