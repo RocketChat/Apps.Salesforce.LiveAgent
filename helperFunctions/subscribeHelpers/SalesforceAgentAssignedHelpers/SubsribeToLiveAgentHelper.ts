@@ -64,7 +64,16 @@ export class SubscribeToLiveAgent {
 						await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
 						await handleEndChatCallback.handleEndChat();
 					} else {
-						await messageFilter(this.app, this.modify, this.read, this.data.room, this.data.agent, messageArray, this.assoc, this.persistence);
+						await messageFilter(
+							this.app,
+							this.modify,
+							this.read,
+							this.data.room,
+							this.data.agent,
+							messageArray,
+							this.assoc,
+							this.persistence,
+						);
 						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
 						if (persisantAffinity !== null && persistantKey !== null) {
 							await this.subscribeToLiveAgent();
