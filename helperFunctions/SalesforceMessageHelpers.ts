@@ -17,7 +17,9 @@ export async function messageFilter(modify: IModify, read: IRead, persistence: I
 				case 'ChatTransferred':
 					const transferMessage = i.message;
 					const salesforceAgentName = transferMessage.name;
-					await updatePersistentData(read, persistence, assoc, { salesforceAgentName });
+					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
+					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
+					await updatePersistentData(read, persistence, assoc, { salesforceAgentName, chasitorIdleTimeout, sneakPeekEnabled });
 					break;
 
 				case 'ChatMessage':
