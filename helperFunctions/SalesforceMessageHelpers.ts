@@ -1,5 +1,4 @@
 import { IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
@@ -10,7 +9,7 @@ import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHel
 import { sendLCMessage } from './LivechatMessageHelpers';
 import { updatePersistentData } from './PersistenceHelpers';
 
-export async function messageFilter(app: IApp, modify: IModify, read: IRead, persistence: IPersistence, messageRoom: IRoom, LcAgent: IUser, assoc: RocketChatAssociationRecord, messageArray: any) {
+export async function messageFilter(modify: IModify, read: IRead, persistence: IPersistence, messageRoom: IRoom, LcAgent: IUser, assoc: RocketChatAssociationRecord, messageArray: any) {
 	try {
 		messageArray.forEach(async (i) => {
 			const type = i.type;
