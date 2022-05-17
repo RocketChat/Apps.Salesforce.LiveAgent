@@ -47,11 +47,7 @@ export class HandoverEndpoint extends ApiEndpoint {
 			);
 		} catch (error) {
 			console.error(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED, error);
-			return createHttpResponse(
-				HttpStatusCode.INTERNAL_SERVER_ERROR,
-				{ 'Content-Type': 'application/json' },
-				{ error: error.message },
-			);
+			return createHttpResponse(HttpStatusCode.INTERNAL_SERVER_ERROR, { 'Content-Type': 'application/json' }, { error: error.message });
 		}
 	}
 }

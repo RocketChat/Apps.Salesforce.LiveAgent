@@ -26,10 +26,7 @@ export class LiveAgentSession {
 	public async exec() {
 		try {
 			const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
-			if (
-				this.message.sender.username === salesforceBotUsername ||
-				this.message.text === 'initiate_salesforce_session'
-			) {
+			if (this.message.sender.username === salesforceBotUsername || this.message.text === 'initiate_salesforce_session') {
 				return;
 			}
 
@@ -50,7 +47,7 @@ export class LiveAgentSession {
 					messageText = this.message.text;
 				}
 				await sendMessages(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, messageText)
-					.then(async response => {
+					.then(async (response) => {
 						if (response.statusCode === 403) {
 							console.error('Send Message: Chat session is expired.', getError(response));
 							console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
@@ -73,7 +70,7 @@ export class LiveAgentSession {
 						}
 						console.log(InfoLogs.MESSAGE_SENT_TO_LIVEAGENT);
 					})
-					.catch(error => {
+					.catch((error) => {
 						console.error(ErrorLogs.SENDING_MESSAGE_TO_LIVEAGENT_ERROR, error);
 					});
 			}

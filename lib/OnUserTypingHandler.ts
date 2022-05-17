@@ -35,10 +35,7 @@ export class OnUserTypingHandler {
 			return;
 		}
 
-		let salesforceChatApiEndpoint: string = await getAppSettingValue(
-			this.read,
-			AppSettingId.SALESFORCE_CHAT_API_ENDPOINT,
-		);
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
@@ -51,17 +48,11 @@ export class OnUserTypingHandler {
 		if (persistentAffinity !== null && persistentKey !== null) {
 			if (sneakPeekEnabled) {
 				if (this.data.data.text || this.data.data.text === '') {
-					await chasitorSneakPeak(
-						this.http,
-						salesforceChatApiEndpoint,
-						persistentAffinity,
-						persistentKey,
-						this.data.data.text,
-					)
+					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, this.data.data.text)
 						.then(async () => {
 							// ChasitorSneakPeak API Success
 						})
-						.catch(error => {
+						.catch((error) => {
 							console.error(ErrorLogs.CHASITOR_SNEAKPEEK_API_CALL_FAIL, error);
 						});
 				}
@@ -70,7 +61,7 @@ export class OnUserTypingHandler {
 					.then(async () => {
 						// ChasitorTyping/ChasitorNotTyping API Success
 					})
-					.catch(error => {
+					.catch((error) => {
 						console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
 					});
 			}

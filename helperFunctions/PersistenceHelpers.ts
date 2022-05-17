@@ -1,8 +1,7 @@
 import { IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { RocketChatAssociationModel, RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 
-export const getRoomAssoc = (rid: string) =>
-	new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${rid}`);
+export const getRoomAssoc = (rid: string) => new RocketChatAssociationRecord(RocketChatAssociationModel.MISC, `SFLAIA-${rid}`);
 
 export async function retrievePersistentTokens(read: IRead, assoc: RocketChatAssociationRecord) {
 	try {
@@ -62,12 +61,7 @@ export async function retrievePersistentData(read: IRead, assoc: RocketChatAssoc
 	}
 }
 
-export async function updatePersistentData(
-	read: IRead,
-	persistence: IPersistence,
-	assoc: RocketChatAssociationRecord,
-	data: object,
-) {
+export async function updatePersistentData(read: IRead, persistence: IPersistence, assoc: RocketChatAssociationRecord, data: object) {
 	try {
 		const persistentData = await retrievePersistentData(read, assoc);
 		const { persistentAffinity, persistentKey } = persistentData;

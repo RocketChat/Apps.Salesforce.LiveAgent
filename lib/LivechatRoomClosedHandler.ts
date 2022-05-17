@@ -35,7 +35,7 @@ export class LivechatRoomClosedClass {
 					await this.persistence.removeByAssociation(getRoomAssoc(rid));
 					await this.modify.getScheduler().cancelJobByDataQuery({ rid, taskType: 'sessionTimeout' });
 				})
-				.catch(error => {
+				.catch((error) => {
 					console.error(ErrorLogs.CLOSING_LIVEAGENT_SESSION_ERROR, error);
 				});
 		}
@@ -44,10 +44,7 @@ export class LivechatRoomClosedClass {
 	public async exec() {
 		await this.closeChatFromSalesforce();
 
-		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(
-			this.read,
-			AppSettingId.DIALOGFLOW_ENABLE_END_EVENT,
-		);
+		const isDialogflowEndEventEnabled: boolean = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_ENABLE_END_EVENT);
 
 		if (isDialogflowEndEventEnabled === false) {
 			console.log(InfoLogs.ENDCHAT_EVENT_NOT_ENABLED);
@@ -69,10 +66,7 @@ export class LivechatRoomClosedClass {
 			return;
 		}
 
-		const dialogflowEndChatEventName: string = await getAppSettingValue(
-			this.read,
-			AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME,
-		);
+		const dialogflowEndChatEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_AGENT_ENDED_CHAT_EVENT_NAME);
 		const dialogflowCustomerEndChatEventName: string = await getAppSettingValue(
 			this.read,
 			AppSettingId.DIALOGFLOW_CUSTOMER_ENDED_CHAT_EVENT_NAME,
@@ -85,14 +79,8 @@ export class LivechatRoomClosedClass {
 			this.read,
 			AppSettingId.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT_EVENT_NAME,
 		);
-		const dialogflowSessionErrorEventName: string = await getAppSettingValue(
-			this.read,
-			AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME,
-		);
-		const dialogflowEndChatEventLCode: string = await getAppSettingValue(
-			this.read,
-			AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE,
-		);
+		const dialogflowSessionErrorEventName: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_SESSION_ERROR_EVENT_NAME);
+		const dialogflowEndChatEventLCode: string = await getAppSettingValue(this.read, AppSettingId.DIALOGFLOW_END_EVENT_LANGUAGE_CODE);
 
 		const isHandedOverFromDialogFlow = (customFields && customFields.isHandedOverFromDialogFlow === true) || false;
 
@@ -106,11 +94,7 @@ export class LivechatRoomClosedClass {
 				if (customFields && customFields.agentEndedChat === true && dialogflowEndChatEventName) {
 					console.log(InfoLogs.DIALOGFLOW_AGENT_ENDED_CHAT);
 					eventParams.name = dialogflowEndChatEventName;
-				} else if (
-					customFields &&
-					customFields.customerIdleTimeout === true &&
-					dialogflowCustomerIdleTimeoutEventName
-				) {
+				} else if (customFields && customFields.customerIdleTimeout === true && dialogflowCustomerIdleTimeoutEventName) {
 					console.log(InfoLogs.DIALOGFLOW_CUSTOMER_IDLE_TIMEOUT);
 					eventParams.name = dialogflowCustomerIdleTimeoutEventName;
 				} else if (customFields && customFields.agentUnavailable === true && dialogflowAgentUnavailableEventName) {

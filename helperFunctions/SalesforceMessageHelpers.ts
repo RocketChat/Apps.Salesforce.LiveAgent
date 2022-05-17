@@ -7,12 +7,43 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { getAppSettingValue } from '../lib/Settings';
 import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHelper';
 import { sendLCMessage } from './LivechatMessageHelpers';
+import { retrievePersistentTokens } from './PersistenceHelpers';
 
-export async function messageFilter(app: IApp, modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any) {
+export async function messageFilter(
+	app: IApp,
+	modify: IModify,
+	read: IRead,
+	messageRoom: IRoom,
+	LcAgent: IUser,
+	messageArray: any,
+	assoc,
+	persistence,
+) {
 	try {
 		messageArray.forEach(async (i) => {
 			const type = i.type;
 			switch (type) {
+				case 'ChatTransferred':
+					const transferMessage = i.message;
+					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
+					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
+					const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
+					const salesforceAgentName = transferMessage.name;
+
+					await persistence.updateByAssociation(
+						assoc,
+						{
+							id,
+							affinityToken: persisantAffinity,
+							key: persistantKey,
+							chasitorIdleTimeout,
+							sneakPeekEnabled,
+							salesforceAgentName,
+						},
+						true,
+					);
+					break;
+
 				case 'ChatMessage':
 					const messageText = i.message.text;
 					await sendLCMessage(read, modify, messageRoom, messageText, LcAgent);

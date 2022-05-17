@@ -36,14 +36,7 @@ export class SalesforceAgentAssignedClass {
 			await sendLCMessage(this.read, this.modify, this.data.room, FindingLiveagentMessage, this.data.agent, true);
 			await initiateSalesforceSession.exec();
 		} else {
-			const salesforceAgentAssigned = new SalesforceAgentAssigned(
-				this.app,
-				this.data,
-				this.read,
-				this.http,
-				this.persistence,
-				this.modify,
-			);
+			const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
 			await salesforceAgentAssigned.exec();
 		}
 	}

@@ -42,7 +42,7 @@ export class CheckChatStatus {
 			this.technicalDifficultyMessage,
 		);
 		pullMessages(this.http, this.salesforceChatApiEndpoint, this.affinityToken, this.key)
-			.then(async response => {
+			.then(async (response) => {
 				if (response.statusCode === 403) {
 					console.error('pullMessages: Chat session is expired.', getError(response));
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
@@ -148,7 +148,7 @@ export class CheckChatStatus {
 					}
 				}
 			})
-			.catch(async error => {
+			.catch(async (error) => {
 				console.error(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, error);
 				await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 				return;

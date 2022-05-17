@@ -29,26 +29,14 @@ export class SalesforceAgentAssigned {
 		const persistedData = await retrievePersistentTokens(this.read, assoc);
 		const { persistentAffinity, persistentKey } = persistedData;
 		const salesforceAgentName = (await retrievePersistentData(this.read, assoc)).salesforceAgentName;
-		const technicalDifficultyMessage: string = await getAppSettingValue(
-			this.read,
-			AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE,
-		);
+		const technicalDifficultyMessage: string = await getAppSettingValue(this.read, AppSettingId.TECHNICAL_DIFFICULTY_MESSAGE);
 
-		let salesforceChatApiEndpoint: string = await getAppSettingValue(
-			this.read,
-			AppSettingId.SALESFORCE_CHAT_API_ENDPOINT,
-		);
+		let salesforceChatApiEndpoint: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_CHAT_API_ENDPOINT);
 		try {
 			salesforceChatApiEndpoint = salesforceChatApiEndpoint.replace(/\/?$/, '/');
 		} catch (error) {
 			await sendLCMessage(this.read, this.modify, this.data.room, technicalDifficultyMessage, this.data.agent);
-			await sendDebugLCMessage(
-				this.read,
-				this.modify,
-				this.data.room,
-				ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND,
-				this.data.agent,
-			);
+			await sendDebugLCMessage(this.read, this.modify, this.data.room, ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, this.data.agent);
 			console.error(ErrorLogs.SALESFORCE_CHAT_API_NOT_FOUND, error);
 			return;
 		}

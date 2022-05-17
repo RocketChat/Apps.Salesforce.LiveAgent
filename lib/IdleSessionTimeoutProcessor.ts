@@ -12,13 +12,7 @@ export class IdleSessionTimeoutProcessor implements IProcessor {
 		this.id = id;
 	}
 
-	public async processor(
-		jobContext: IJobContext,
-		read: IRead,
-		modify: IModify,
-		http: IHttp,
-		persis: IPersistence,
-	): Promise<void> {
+	public async processor(jobContext: IJobContext, read: IRead, modify: IModify, http: IHttp, persis: IPersistence): Promise<void> {
 		const assoc = getRoomAssoc(jobContext.rid);
 		const { persistentAffinity, persistentKey } = await retrievePersistentTokens(read, assoc);
 

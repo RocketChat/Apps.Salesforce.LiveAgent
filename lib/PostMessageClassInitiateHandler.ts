@@ -27,10 +27,10 @@ export class PostMessageClassInitiate {
 
 		const assoc = getRoomAssoc(this.message.room.id);
 
-		if (text === 'customer_idle_timeout' ) {
+		if (text === 'customer_idle_timeout') {
 			if (roomCustomFields && roomCustomFields.isHandedOverFromDialogFlow === true) {
 				await this.modify.getUpdater().getLivechatUpdater().closeRoom(this.message.room, 'Chat closed due to timeout');
-				await updateRoomCustomFields(this.message.room.id, {customerIdleTimeout: true}, this.read, this.modify);
+				await updateRoomCustomFields(this.message.room.id, { customerIdleTimeout: true }, this.read, this.modify);
 			}
 		}
 
