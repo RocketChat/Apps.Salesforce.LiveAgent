@@ -10,11 +10,21 @@ import {
 } from '@rocket.chat/apps-engine/definition/accessors';
 import { ApiSecurity, ApiVisibility } from '@rocket.chat/apps-engine/definition/api';
 import { App } from '@rocket.chat/apps-engine/definition/App';
-import { ILivechatEventContext, ILivechatRoom, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned, IPostLivechatRoomClosed } from '@rocket.chat/apps-engine/definition/livechat';
+import {
+	ILivechatEventContext,
+	ILivechatRoom,
+	IPostLivechatAgentAssigned,
+	IPostLivechatAgentUnassigned,
+	IPostLivechatRoomClosed,
+} from '@rocket.chat/apps-engine/definition/livechat';
 import { IMessage, IPostMessageSent } from '@rocket.chat/apps-engine/definition/messages';
 import { IAppInfo } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoomUserTyping, IRoomUserTypingContext } from '@rocket.chat/apps-engine/definition/rooms';
-import { IUIKitLivechatInteractionHandler, IUIKitResponse, UIKitLivechatBlockInteractionContext } from '@rocket.chat/apps-engine/definition/uikit';
+import {
+	IUIKitLivechatInteractionHandler,
+	IUIKitResponse,
+	UIKitLivechatBlockInteractionContext,
+} from '@rocket.chat/apps-engine/definition/uikit';
 import { AppSettings } from './config/AppSettings';
 import { AvailabilityEndpoint } from './endpoints/AvailabilityEndpoint';
 import { HandoverEndpoint } from './endpoints/HandoverEndpoint';
@@ -28,8 +38,14 @@ import { SalesforceAgentAssignedClass } from './lib/SalesforceAgentAssignedHandl
 
 export class SalesforceLiveAgentApp
 	extends App
-	implements IPostMessageSent, IPostLivechatAgentAssigned, IPostLivechatAgentUnassigned, IPostLivechatRoomClosed, IRoomUserTyping,
-	IUIKitLivechatInteractionHandler {
+	implements
+		IPostMessageSent,
+		IPostLivechatAgentAssigned,
+		IPostLivechatAgentUnassigned,
+		IPostLivechatRoomClosed,
+		IRoomUserTyping,
+		IUIKitLivechatInteractionHandler
+{
 	constructor(info: IAppInfo, logger: ILogger, accessors: IAppAccessors) {
 		super(info, logger, accessors);
 	}
@@ -51,22 +67,46 @@ export class SalesforceLiveAgentApp
 		return context.getInteractionResponder().successResponse();
 	}
 
-	public async executePostLivechatAgentAssigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
+	public async executePostLivechatAgentAssigned(
+		data: ILivechatEventContext,
+		read: IRead,
+		http: IHttp,
+		persistence: IPersistence,
+		modify: IModify,
+	) {
 		const salesforceAgentAssigned = new SalesforceAgentAssignedClass(this, data, read, http, persistence, modify);
 		await salesforceAgentAssigned.exec();
 	}
 
-	public async executePostLivechatAgentUnassigned(data: ILivechatEventContext, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify) {
+	public async executePostLivechatAgentUnassigned(
+		data: ILivechatEventContext,
+		read: IRead,
+		http: IHttp,
+		persistence: IPersistence,
+		modify: IModify,
+	) {
 		const dialogflowAgentAssigned = new DialogflowAgentAssignedClass(this, data, read, http, persistence, modify);
 		await dialogflowAgentAssigned.exec();
 	}
 
-	public async executePostLivechatRoomClosed(room: ILivechatRoom, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
+	public async executePostLivechatRoomClosed(
+		room: ILivechatRoom,
+		read: IRead,
+		http: IHttp,
+		persistence: IPersistence,
+		modify: IModify,
+	): Promise<void> {
 		const livechatRoomClosedClass = new LivechatRoomClosedClass(this, room, read, http, persistence, modify);
 		await livechatRoomClosedClass.exec();
 	}
 
-	public async executePostMessageSent(message: IMessage, read: IRead, http: IHttp, persistence: IPersistence, modify: IModify): Promise<void> {
+	public async executePostMessageSent(
+		message: IMessage,
+		read: IRead,
+		http: IHttp,
+		persistence: IPersistence,
+		modify: IModify,
+	): Promise<void> {
 		const postMessageClassInitiate = new PostMessageClassInitiate(this, message, read, http, persistence, modify);
 		await postMessageClassInitiate.exec();
 	}
@@ -83,9 +123,7 @@ export class SalesforceLiveAgentApp
 			endpoints: [new HandoverEndpoint(this), new AvailabilityEndpoint(this)],
 		});
 
-		await configuration.scheduler.registerProcessors([
-			new IdleSessionTimeoutProcessor('idle-session-timeout'),
-		]);
+		await configuration.scheduler.registerProcessors([new IdleSessionTimeoutProcessor('idle-session-timeout')]);
 
 		AppSettings.forEach((setting) => configuration.settings.provideSetting(setting));
 	}

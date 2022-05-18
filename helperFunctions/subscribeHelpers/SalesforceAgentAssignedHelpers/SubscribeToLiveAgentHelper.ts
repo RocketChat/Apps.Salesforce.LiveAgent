@@ -22,8 +22,8 @@ export class SubscribeToLiveAgent {
 		private salesforceChatApiEndpoint: string,
 		private LAChatEndedMessage: string,
 		private technicalDifficultyMessage: string,
-		private persisantAffinity: string,
-		private persistantKey: string,
+		private persistentAffinity: string,
+		private persistentKey: string,
 	) {}
 
 	public async subscribeToLiveAgent() {
@@ -37,15 +37,15 @@ export class SubscribeToLiveAgent {
 			this.assoc,
 			this.technicalDifficultyMessage,
 		);
-		await pullMessages(this.http, this.salesforceChatApiEndpoint, this.persisantAffinity, this.persistantKey)
+		await pullMessages(this.http, this.salesforceChatApiEndpoint, this.persistentAffinity, this.persistentKey)
 			.then(async (response) => {
 				if (response.statusCode === 403) {
 					console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
 					await handleEndChatCallback.handleEndChat();
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
-					const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
-					if (persisantAffinity !== null && persistantKey !== null) {
+					const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, this.assoc);
+					if (persistentAffinity !== null && persistentKey !== null) {
 						await this.subscribeToLiveAgent();
 					} else {
 						console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
@@ -53,7 +53,7 @@ export class SubscribeToLiveAgent {
 						return;
 					}
 				} else {
-					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
+					console.log(InfoLogs.SUCCESSFULLY_RECEIVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
 					const contentParsed = JSON.parse(content || '{}');
 					const messageArray = contentParsed.messages;
@@ -65,8 +65,8 @@ export class SubscribeToLiveAgent {
 						await handleEndChatCallback.handleEndChat();
 					} else {
 						await messageFilter(this.modify, this.read, this.persistence, this.data.room, this.data.agent, this.assoc, messageArray);
-						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
-						if (persisantAffinity !== null && persistantKey !== null) {
+						const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, this.assoc);
+						if (persistentAffinity !== null && persistentKey !== null) {
 							await this.subscribeToLiveAgent();
 						} else {
 							console.log(ErrorLogs.LIVEAGENT_SESSION_EXPIRED);
