@@ -128,7 +128,7 @@ export class InitiateSalesforceSession {
 						);
 						await pullMessages(this.http, salesforceChatApiEndpoint, affinityToken, key)
 							.then(async (pullMessagesres) => {
-								console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE);
+								console.log(InfoLogs.SUCCESSFULLY_RECEIVED_LIVEAGENT_RESPONSE);
 								const pullMessagesContent = pullMessagesres.content;
 								const pullMessagesContentParsed = JSON.parse(pullMessagesContent || '{}');
 								const pullMessagesMessageArray = pullMessagesContentParsed.messages;

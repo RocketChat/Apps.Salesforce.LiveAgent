@@ -21,15 +21,15 @@ export class LivechatRoomClosedClass {
 
 	public async closeChatFromSalesforce() {
 		const { customFields, id: rid } = this.room;
-		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, getRoomAssoc(rid));
+		const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, getRoomAssoc(rid));
 		const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
 
-		if (persisantAffinity !== null && persistantKey !== null) {
+		if (persistentAffinity !== null && persistentKey !== null) {
 			let reason = '';
 			if (customFields && customFields.customerIdleTimeout === true) {
 				reason = 'clientIdleTimeout';
 			}
-			await closeChat(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, reason)
+			await closeChat(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, reason)
 				.then(async () => {
 					console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
 					await this.persistence.removeByAssociation(getRoomAssoc(rid));

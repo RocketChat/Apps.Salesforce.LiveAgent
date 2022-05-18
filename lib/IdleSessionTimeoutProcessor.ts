@@ -14,9 +14,9 @@ export class IdleSessionTimeoutProcessor implements IProcessor {
 
 	public async processor(jobContext: IJobContext, read: IRead, modify: IModify, http: IHttp, persis: IPersistence): Promise<void> {
 		const assoc = getRoomAssoc(jobContext.rid);
-		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
+		const { persistentAffinity, persistentKey } = await retrievePersistentTokens(read, assoc);
 
-		if (persisantAffinity !== null && persistantKey !== null) {
+		if (persistentAffinity !== null && persistentKey !== null) {
 			const room = (await read.getRoomReader().getById(jobContext.rid)) as ILivechatRoom;
 			if (!room) {
 				throw new Error(`${ErrorLogs.INVALID_ROOM_ID} ${jobContext.rid}`);

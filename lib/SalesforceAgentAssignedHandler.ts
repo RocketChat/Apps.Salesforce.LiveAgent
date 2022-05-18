@@ -21,10 +21,10 @@ export class SalesforceAgentAssignedClass {
 	public async exec() {
 		const assoc = getRoomAssoc(this.data.room.id);
 		const salesforceBotUsername: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BOT_USERNAME);
-		const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
+		const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, assoc);
 		const FindingLiveagentMessage: string = await getAppSettingValue(this.read, AppSettingId.FINDING_LIVEAGENT_MESSAGE);
 
-		if (persisantAffinity === null && persistantKey === null && this.data.agent.username === salesforceBotUsername) {
+		if (persistentAffinity === null && persistentKey === null && this.data.agent.username === salesforceBotUsername) {
 			const initiateSalesforceSession = new InitiateSalesforceSession(
 				this.app,
 				this.data,

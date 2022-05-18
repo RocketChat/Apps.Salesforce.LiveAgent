@@ -50,15 +50,15 @@ export class CheckChatStatus {
 					return;
 				} else if (response.statusCode === 204 || response.statusCode === 409) {
 					// Empty Response from Liveagent
-					const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
-					if (persisantAffinity !== null && persistantKey !== null) {
+					const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, this.assoc);
+					if (persistentAffinity !== null && persistentKey !== null) {
 						await this.checkCurrentChatStatus();
 					} else {
 						await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 						return;
 					}
 				} else {
-					console.log(InfoLogs.SUCCESSFULLY_RECIEVED_LIVEAGENT_RESPONSE, response);
+					console.log(InfoLogs.SUCCESSFULLY_RECEIVED_LIVEAGENT_RESPONSE, response);
 					const { content } = response;
 					const contentParsed = JSON.parse(content || '{}');
 					const messageArray = contentParsed.messages;
@@ -82,12 +82,19 @@ export class CheckChatStatus {
 						const chatEstablishedMessage = messageArray[0].message;
 						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout || false;
 						const sneakPeekEnabled = chatEstablishedMessage.sneakPeekEnabled;
-						const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
+						const { id, persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, this.assoc);
 						const salesforceAgentName = chatEstablishedMessage.name;
 
 						await this.persistence.updateByAssociation(
 							this.assoc,
-							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName },
+							{
+								id,
+								affinityToken: persistentAffinity,
+								key: persistentKey,
+								chasitorIdleTimeout,
+								sneakPeekEnabled,
+								salesforceAgentName,
+							},
 							true,
 						);
 
@@ -121,8 +128,8 @@ export class CheckChatStatus {
 							await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 							return;
 						} else {
-							const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
-							if (persisantAffinity !== null && persistantKey !== null) {
+							const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, this.assoc);
+							if (persistentAffinity !== null && persistentKey !== null) {
 								await this.checkCurrentChatStatus();
 							} else {
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
@@ -131,8 +138,8 @@ export class CheckChatStatus {
 						}
 					} else {
 						console.error(ErrorLogs.UNKNOWN_ERROR_IN_CHECKING_AGENT_RESPONSE, response);
-						const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
-						if (persisantAffinity !== null && persistantKey !== null) {
+						const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, this.assoc);
+						if (persistentAffinity !== null && persistentKey !== null) {
 							await this.checkCurrentChatStatus();
 						} else {
 							await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);

@@ -105,7 +105,7 @@ export const AppSettings: Array<ISetting> = [
 		packageValue: true,
 		i18nLabel: 'Enable Dialogflow Events (Optional)',
 		i18nDescription:
-			'Enabling this setting will automatically trigger a Dialogflow event based after the chat is ended with the agent. Please enter event name you want to cofigure in the following field(s).',
+			'Enabling this setting will automatically trigger a Dialogflow event based after the chat is ended with the agent. Please enter event name you want to configure in the following field(s)',
 		required: false,
 	},
 	{
@@ -114,7 +114,7 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'end_live_chat',
 		i18nLabel: 'Dialogflow Agent Ended Chat Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is sucessfully ended by agent.',
+		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is successfully ended by agent.',
 		required: false,
 	},
 	{
@@ -123,7 +123,7 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'end_live_chat',
 		i18nLabel: 'Dialogflow Customer Ended Chat Event Name (Optional)',
-		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is sucessfully ended by customer.',
+		i18nDescription: 'Enter the Dialogflow event name you want app to trigger as soon as the chat is successfully ended by customer.',
 		required: false,
 	},
 	{
@@ -213,7 +213,7 @@ export const AppSettings: Array<ISetting> = [
 		type: SettingType.STRING,
 		packageValue: 'Sorry we are unable to complete your request right now.',
 		i18nLabel: 'Technical Difficulty Message',
-		i18nDescription: 'Enter message to show to user when there is some tehnical error.',
+		i18nDescription: 'Enter message to show to user when there is some technical error.',
 		required: true,
 	},
 	{
@@ -251,7 +251,7 @@ export const AppSettings: Array<ISetting> = [
 			},
 			{
 				key: '2',
-				i18nLabel: '2_Erros_Information_and_Debug',
+				i18nLabel: '2_Errors_Information_and_Debug',
 			},
 		],
 		i18nLabel: 'Salesforce App Log Level',

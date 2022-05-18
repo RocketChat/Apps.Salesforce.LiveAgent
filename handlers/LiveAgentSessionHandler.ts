@@ -32,9 +32,9 @@ export class LiveAgentSession {
 
 			const salesforceChatApiEndpoint = await getSalesforceChatAPIEndpoint(this.read);
 			const assoc = getRoomAssoc(this.message.room.id);
-			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, assoc);
+			const { persistentAffinity, persistentKey } = await retrievePersistentTokens(this.read, assoc);
 
-			if (this.message.text !== 'Closed by visitor' && persisantAffinity !== null && persistantKey !== null) {
+			if (this.message.text !== 'Closed by visitor' && persistentAffinity !== null && persistentKey !== null) {
 				const livechatRoom: ILivechatRoom = this.message.room as ILivechatRoom;
 				const livechatAgent: IUser = livechatRoom.servedBy ? livechatRoom.servedBy : this.message.sender;
 
@@ -46,7 +46,7 @@ export class LiveAgentSession {
 				if (this.message.text) {
 					messageText = this.message.text;
 				}
-				await sendMessages(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, messageText)
+				await sendMessages(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, messageText)
 					.then(async (response) => {
 						if (response.statusCode === 403) {
 							console.error('Send Message: Chat session is expired.', getError(response));

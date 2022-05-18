@@ -23,9 +23,9 @@ export class HandoverEndpoint extends ApiEndpoint {
 		console.log(InfoLogs.HANDOVER_ENDPOINT_REQUEST_RECEIVED);
 		try {
 			const assoc = getRoomAssoc(request.content.roomId);
-			const { persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
+			const { persistentAffinity, persistentKey } = await retrievePersistentTokens(read, assoc);
 
-			if (persisantAffinity !== null && persistantKey !== null) {
+			if (persistentAffinity !== null && persistentKey !== null) {
 				console.log(ErrorLogs.HANDOVER_ENDPOINT_REQUEST_FAILED);
 				return createHttpResponse(
 					HttpStatusCode.NOT_ACCEPTABLE,
