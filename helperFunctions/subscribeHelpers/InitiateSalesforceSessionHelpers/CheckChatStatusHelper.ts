@@ -29,7 +29,7 @@ export class CheckChatStatus {
 		private LAQueuePositionMessage: string,
 		private technicalDifficultyMessage: string,
 		private assoc: RocketChatAssociationRecord,
-	) { }
+	) {}
 
 	public async checkCurrentChatStatus() {
 		const checkAgentStatusDirectCallback = new CheckAgentStatusCallback(
@@ -85,10 +85,20 @@ export class CheckChatStatus {
 						const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(this.read, this.assoc);
 						const salesforceAgentName = chatEstablishedMessage.name;
 
-						await this.persistence.updateByAssociation(this.assoc,
-							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName }, true);
+						await this.persistence.updateByAssociation(
+							this.assoc,
+							{ id, affinityToken: persisantAffinity, key: persistantKey, chasitorIdleTimeout, sneakPeekEnabled, salesforceAgentName },
+							true,
+						);
 
-						const salesforceAgentAssigned = new SalesforceAgentAssigned(this.app, this.data, this.read, this.http, this.persistence, this.modify);
+						const salesforceAgentAssigned = new SalesforceAgentAssigned(
+							this.app,
+							this.data,
+							this.read,
+							this.http,
+							this.persistence,
+							this.modify,
+						);
 						await salesforceAgentAssigned.exec();
 						return;
 					} else if (isChatAccepted === false) {
@@ -98,7 +108,10 @@ export class CheckChatStatus {
 						if (isChatRequestFail === true) {
 							console.error(getError(contentParsed));
 							if (messageArray[0].message.reason === 'Unavailable') {
-								const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
+								const NoLiveagentAvailableMessage: string = await getAppSettingValue(
+									this.read,
+									AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
+								);
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 								return;
 							}

@@ -18,7 +18,6 @@ export class OnUserTypingHandler {
 	) {}
 
 	public async exec() {
-
 		if (!this.data.roomId || !this.data.username) {
 			return;
 		}
@@ -50,21 +49,21 @@ export class OnUserTypingHandler {
 			if (sneakPeekEnabled) {
 				if (this.data.data.text || this.data.data.text === '') {
 					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.data.text)
-					.then(async () => {
-						// ChasitorSneakPeak API Success
-					})
-					.catch((error) => {
-						console.error(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
-					});
+						.then(async () => {
+							// ChasitorSneakPeak API Success
+						})
+						.catch((error) => {
+							console.error(ErrorLogs.CHASITOR_SNEAKPEAK_API_CALL_FAIL, error);
+						});
 				}
 			} else {
 				await chasitorTyping(this.http, salesforceChatApiEndpoint, persisantAffinity, persistantKey, this.data.typing)
-				.then(async () => {
-					// ChasitorTyping/ChasitorNotTyping API Success
-				})
-				.catch((error) => {
-					console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
-				});
+					.then(async () => {
+						// ChasitorTyping/ChasitorNotTyping API Success
+					})
+					.catch((error) => {
+						console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
+					});
 			}
 		}
 	}

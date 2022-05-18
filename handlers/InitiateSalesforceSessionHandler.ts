@@ -56,7 +56,7 @@ export class InitiateSalesforceSession {
 		const LcVisitor: IVisitor = this.data.room.visitor;
 		const LcVisitorName = LcVisitor.name;
 		const LcVisitorEmailsArr = LcVisitor.visitorEmails;
-		let LcVisitorEmail: string = 'No email provided';
+		let LcVisitorEmail = 'No email provided';
 		if (LcVisitorEmailsArr) {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
@@ -139,8 +139,10 @@ export class InitiateSalesforceSession {
 
 								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
 
-								if ( hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
-									const queueMessage = hasQueueUpdateMessage ? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message : getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
+								if (hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
+									const queueMessage = hasQueueUpdateMessage
+										? getForEvent(pullMessagesMessageArray, 'QueueUpdate').message
+										: getForEvent(pullMessagesMessageArray, 'ChatRequestSuccess').message;
 									const queuePosition = hasQueueUpdateMessage ? queueMessage.position : queueMessage.queuePosition;
 									if (queuePosition === 0) {
 										// User Queue Position = 0
@@ -159,7 +161,10 @@ export class InitiateSalesforceSession {
 										case 'Unavailable':
 											logHandoverFailure(ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE);
 											await this.persistence.removeByAssociation(assoc);
-											const NoLiveagentAvailableMessage: string = await getAppSettingValue(this.read, AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE);
+											const NoLiveagentAvailableMessage: string = await getAppSettingValue(
+												this.read,
+												AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
+											);
 											await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 											break;
 

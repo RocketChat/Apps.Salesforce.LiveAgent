@@ -67,7 +67,6 @@ export async function sendChatRequest(
 			customDetailJSON = JSON.parse(customDetail);
 		} catch (error) {
 			throw Error(error);
-
 		}
 	}
 
@@ -104,35 +103,35 @@ export async function sendChatRequest(
 	if (prechatDetails) {
 		sendChatRequestHttpRequest.data.prechatDetails.push(...JSON.parse(prechatDetails));
 	} else {
-		sendChatRequestHttpRequest.data.prechatDetails.push({
-			label: 'E-mail Address',
-			value: LcVisitorEmail,
-			entityFieldMaps: [
-				{
-					entityName: 'Contact',
-					fieldName: 'Email',
-					isFastFillable: false,
-					isAutoQueryable: true,
-					isExactMatchable: true,
-				},
-			],
-			transcriptFields: ['c__EmailAddress'],
-			displayToAgent: true,
-		},
-		{
-			label: 'Case Id',
-			value: salesforceId,
-			entityMaps: [
-				{
-					entityName: 'Case',
-					fieldName: 'ID',
-				},
-			],
-			transcriptFields: [
-				'CaseID',
-			],
-			displayToAgent: true,
-		});
+		sendChatRequestHttpRequest.data.prechatDetails.push(
+			{
+				label: 'E-mail Address',
+				value: LcVisitorEmail,
+				entityFieldMaps: [
+					{
+						entityName: 'Contact',
+						fieldName: 'Email',
+						isFastFillable: false,
+						isAutoQueryable: true,
+						isExactMatchable: true,
+					},
+				],
+				transcriptFields: ['c__EmailAddress'],
+				displayToAgent: true,
+			},
+			{
+				label: 'Case Id',
+				value: salesforceId,
+				entityMaps: [
+					{
+						entityName: 'Case',
+						fieldName: 'ID',
+					},
+				],
+				transcriptFields: ['CaseID'],
+				displayToAgent: true,
+			},
+		);
 	}
 
 	try {
@@ -170,7 +169,7 @@ export async function pullMessages(http: IHttp, liveAgentUrl: string, affinityTo
 	}
 }
 
-export async function closeChat(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string, reason: string = 'client') {
+export async function closeChat(http: IHttp, liveAgentUrl: string, affinityToken: string, key: string, reason = 'client') {
 	const closeLiveAgentChatEndpoint = liveAgentUrl + 'Chasitor/ChatEnd';
 	const closeLiveAgentChatHttpRequest: IHttpRequest = {
 		headers: {

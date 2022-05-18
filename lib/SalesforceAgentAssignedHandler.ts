@@ -25,7 +25,14 @@ export class SalesforceAgentAssignedClass {
 		const FindingLiveagentMessage: string = await getAppSettingValue(this.read, AppSettingId.FINDING_LIVEAGENT_MESSAGE);
 
 		if (persisantAffinity === null && persistantKey === null && this.data.agent.username === salesforceBotUsername) {
-			const initiateSalesforceSession = new InitiateSalesforceSession(this.app, this.data, this.read, this.http, this.persistence, this.modify);
+			const initiateSalesforceSession = new InitiateSalesforceSession(
+				this.app,
+				this.data,
+				this.read,
+				this.http,
+				this.persistence,
+				this.modify,
+			);
 			await sendLCMessage(this.read, this.modify, this.data.room, FindingLiveagentMessage, this.data.agent, true);
 			await initiateSalesforceSession.exec();
 		} else {

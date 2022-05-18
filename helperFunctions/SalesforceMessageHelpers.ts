@@ -9,7 +9,16 @@ import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHel
 import { sendLCMessage } from './LivechatMessageHelpers';
 import { retrievePersistentTokens } from './PersistenceHelpers';
 
-export async function messageFilter(app: IApp, modify: IModify, read: IRead, messageRoom: IRoom, LcAgent: IUser, messageArray: any, assoc, persistence) {
+export async function messageFilter(
+	app: IApp,
+	modify: IModify,
+	read: IRead,
+	messageRoom: IRoom,
+	LcAgent: IUser,
+	messageArray: any,
+	assoc,
+	persistence,
+) {
 	try {
 		messageArray.forEach(async (i) => {
 			const type = i.type;
