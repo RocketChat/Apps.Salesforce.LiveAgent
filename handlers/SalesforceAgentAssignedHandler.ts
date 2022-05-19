@@ -6,7 +6,7 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
 import { sendDebugLCMessage, sendLCMessage } from '../helperFunctions/LivechatMessageHelpers';
 import { getRoomAssoc, retrievePersistentData, retrievePersistentTokens } from '../helperFunctions/PersistenceHelpers';
-import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubsribeToLiveAgentHelper';
+import { SubscribeToLiveAgent } from '../helperFunctions/subscribeHelpers/SalesforceAgentAssignedHelpers/SubscribeToLiveAgentHelper';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class SalesforceAgentAssigned {
