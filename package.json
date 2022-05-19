@@ -14,6 +14,10 @@
     "scripts": {
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
         "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
-        "format": "prettier -w ./**/*.ts"
+        "format": "prettier -w ./**/*.ts",
+        "format:check": "prettier --list-different ./**/*.ts"
+    },
+    "engines": {
+        "node": "14.18.3"
     }
 }
