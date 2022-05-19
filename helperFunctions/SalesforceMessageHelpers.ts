@@ -27,15 +27,15 @@ export async function messageFilter(
 					const transferMessage = i.message;
 					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
 					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
-					const { id, persisantAffinity, persistantKey } = await retrievePersistentTokens(read, assoc);
+					const { id, persistentAffinity, persistentKey } = await retrievePersistentTokens(read, assoc);
 					const salesforceAgentName = transferMessage.name;
 
 					await persistence.updateByAssociation(
 						assoc,
 						{
 							id,
-							affinityToken: persisantAffinity,
-							key: persistantKey,
+							affinityToken: persistentAffinity,
+							key: persistentKey,
 							chasitorIdleTimeout,
 							sneakPeekEnabled,
 							salesforceAgentName,
