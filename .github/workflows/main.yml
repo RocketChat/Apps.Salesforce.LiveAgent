@@ -16,7 +16,7 @@ jobs:
         run: npm i
 
       - name: Install rc-apps cli
-        run: npm i -g WideChat/Rocket.Chat.Apps-cli
+        run: npm i -g @rocket.chat/apps-cli
 
       - name: Lint check
         run: npm run lint
