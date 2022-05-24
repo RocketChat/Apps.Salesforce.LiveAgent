@@ -1,5 +1,5 @@
-import { IModify, IRead } from '@rocket.chat/apps-engine/definition/accessors';
-import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
+import { IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
@@ -7,17 +7,16 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { getAppSettingValue } from '../lib/Settings';
 import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHelper';
 import { sendLCMessage } from './LivechatMessageHelpers';
-import { retrievePersistentTokens } from './PersistenceHelpers';
+import { updatePersistentData } from './PersistenceHelpers';
 
 export async function messageFilter(
-	app: IApp,
 	modify: IModify,
 	read: IRead,
+	persistence: IPersistence,
 	messageRoom: IRoom,
 	LcAgent: IUser,
+	assoc: RocketChatAssociationRecord,
 	messageArray: any,
-	assoc,
-	persistence,
 ) {
 	try {
 		messageArray.forEach(async (i) => {
@@ -25,23 +24,10 @@ export async function messageFilter(
 			switch (type) {
 				case 'ChatTransferred':
 					const transferMessage = i.message;
-					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
-					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
-					const { id, persistentAffinity, persistentKey } = await retrievePersistentTokens(read, assoc);
 					const salesforceAgentName = transferMessage.name;
-
-					await persistence.updateByAssociation(
-						assoc,
-						{
-							id,
-							affinityToken: persistentAffinity,
-							key: persistentKey,
-							chasitorIdleTimeout,
-							sneakPeekEnabled,
-							salesforceAgentName,
-						},
-						true,
-					);
+					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
+					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
+					await updatePersistentData(read, persistence, assoc, { salesforceAgentName, chasitorIdleTimeout, sneakPeekEnabled });
 					break;
 
 				case 'ChatMessage':
