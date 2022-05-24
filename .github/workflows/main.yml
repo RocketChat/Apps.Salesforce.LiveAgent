@@ -7,6 +7,21 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: python version
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9.7"
+
+      - name: Create and start virtual environment
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+
+      - name: node version
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.2
         with:
@@ -16,7 +31,7 @@ jobs:
         run: npm i
 
       - name: Install rc-apps cli
-        run: npm i -g @rocket.chat/apps-cli
+        run: npm i -g WideChat/Rocket.Chat.Apps-cli
 
       - name: Lint check
         run: npm run lint
