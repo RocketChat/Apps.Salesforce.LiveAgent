@@ -1,6 +1,6 @@
 {
     "devDependencies": {
-        "@rocket.chat/apps-engine": "WideChat/Rocket.Chat.Apps-engine.git#v1.29.2",
+        "@rocket.chat/apps-engine": "WideChat/Rocket.Chat.Apps-engine.git#v1.31.0.widechat-1",
         "@types/node": "^10.17.24",
         "@typescript-eslint/eslint-plugin": "^5.24.0",
         "@typescript-eslint/parser": "^5.24.0",
