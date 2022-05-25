@@ -16,5 +16,9 @@
         "lint:fix": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
         "format": "prettier -w ./**/*.ts",
         "format:check": "prettier --list-different ./**/*.ts"
+    },
+    "engines": {
+        "node": "12",
+        "npm": "<7"
     }
 }
