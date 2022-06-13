@@ -20,13 +20,13 @@ export async function sendLCMessage(read: IRead, modify: IModify, room: IRoom, m
 		if (!livechatRoom) {
 			throw new Error(ErrorLogs.INVALID_ROOM_ID);
 		}
-		
+
 		const assoc = getRoomAssoc(room.id);
 		const { salesforceAgentName } = await retrievePersistentData(read, assoc);
 
 		message.customFields = {
 			salesforceAgentName,
-		}
+		};
 
 		if (livechatRoom.customFields?.postChatUrl) {
 			message.customFields = {
