@@ -20,17 +20,17 @@ export async function sendLCMessage(read: IRead, modify: IModify, room: IRoom, m
 		if (!livechatRoom) {
 			throw new Error(ErrorLogs.INVALID_ROOM_ID);
 		}
-        
-        const assoc = getRoomAssoc(room.id);
-        const { salesforceAgentName } = await retrievePersistentData(read, assoc);
+		
+		const assoc = getRoomAssoc(room.id);
+		const { salesforceAgentName } = await retrievePersistentData(read, assoc);
 
-        message.customFields = {
-            salesforceAgentName,
-        }
+		message.customFields = {
+			salesforceAgentName,
+		}
 
 		if (livechatRoom.customFields?.postChatUrl) {
 			message.customFields = {
-                ...message?.customFields,
+				...message?.customFields,
 				postChatUrl: livechatRoom.customFields?.postChatUrl,
 			};
 		}
@@ -43,7 +43,6 @@ export async function sendLCMessage(read: IRead, modify: IModify, room: IRoom, m
 			};
 		}
 		messageBuilder.setData(message);
-        console.log('sending message');
 		await modify.getCreator().finish(messageBuilder);
 	} catch (error) {
 		throw new Error(error);
