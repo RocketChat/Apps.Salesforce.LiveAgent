@@ -5,6 +5,7 @@ import { IUser } from '@rocket.chat/apps-engine/definition/users';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { getAppSettingValue } from '../lib/Settings';
+import { getRoomAssoc, retrievePersistentData } from './PersistenceHelpers';
 
 export async function sendLCMessage(read: IRead, modify: IModify, room: IRoom, messageText: string, sender: IUser, disableInput?: boolean) {
 	try {
@@ -20,8 +21,16 @@ export async function sendLCMessage(read: IRead, modify: IModify, room: IRoom, m
 			throw new Error(ErrorLogs.INVALID_ROOM_ID);
 		}
 
+		const assoc = getRoomAssoc(room.id);
+		const { salesforceAgentName } = await retrievePersistentData(read, assoc);
+
+		message.customFields = {
+			salesforceAgentName,
+		};
+
 		if (livechatRoom.customFields?.postChatUrl) {
 			message.customFields = {
+				...message?.customFields,
 				postChatUrl: livechatRoom.customFields?.postChatUrl,
 			};
 		}
