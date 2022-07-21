@@ -1,3 +1,4 @@
+import { URL } from 'url';
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
@@ -135,7 +136,13 @@ export class InitiateSalesforceSession {
 								const isChatRequestSuccess = checkForEvent(pullMessagesMessageArray, 'ChatRequestSuccess');
 								const hasQueueUpdateMessage = checkForEvent(pullMessagesMessageArray, 'QueueUpdate');
 
-								const postChatUrl = checkForPostChatUrl(pullMessagesMessageArray);
+								let postChatUrl = checkForPostChatUrl(pullMessagesMessageArray);
+
+								if (postChatUrl) {
+									postChatUrl = new URL(postChatUrl);
+									postChatUrl.searchParams.append('ChatKey', encodeURIComponent(id));
+									postChatUrl = postChatUrl.href;
+								}
 
 								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
 
