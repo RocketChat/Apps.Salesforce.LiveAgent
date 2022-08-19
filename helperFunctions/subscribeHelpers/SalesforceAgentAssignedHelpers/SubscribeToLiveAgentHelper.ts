@@ -7,7 +7,7 @@ import { InfoLogs } from '../../../enum/InfoLogs';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { updateRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { pullMessages } from '../../SalesforceAPIHelpers';
-import { checkForEvent, messageFilter } from '../../SalesforceMessageHelpers';
+import { checkForEvent, messageFilter, getForEvent } from '../../SalesforceMessageHelpers';
 import { HandleEndChatCallback } from './HandleEndChatCallback';
 
 export class SubscribeToLiveAgent {
@@ -24,7 +24,7 @@ export class SubscribeToLiveAgent {
 		private technicalDifficultyMessage: string,
 		private persistentAffinity: string,
 		private persistentKey: string,
-	) {}
+	) { }
 
 	public async subscribeToLiveAgent() {
 		const handleEndChatCallback = new HandleEndChatCallback(
@@ -61,7 +61,10 @@ export class SubscribeToLiveAgent {
 
 					if (isEndChat === true) {
 						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-						await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
+						const { message: { reason: chatEndedReason } } = getForEvent(messageArray, 'ChatEnded')
+						if (chatEndedReason === 'agent') {
+							await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
+						}
 						await handleEndChatCallback.handleEndChat();
 					} else {
 						await messageFilter(this.modify, this.read, this.persistence, this.data.room, this.data.agent, this.assoc, messageArray);
