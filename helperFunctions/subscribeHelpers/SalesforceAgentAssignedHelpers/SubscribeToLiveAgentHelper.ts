@@ -24,7 +24,7 @@ export class SubscribeToLiveAgent {
 		private technicalDifficultyMessage: string,
 		private persistentAffinity: string,
 		private persistentKey: string,
-	) { }
+	) {}
 
 	public async subscribeToLiveAgent() {
 		const handleEndChatCallback = new HandleEndChatCallback(
@@ -61,7 +61,9 @@ export class SubscribeToLiveAgent {
 
 					if (isEndChat === true) {
 						console.log(InfoLogs.LIVEAGENT_SESSION_CLOSED);
-						const { message: { reason: chatEndedReason } } = getForEvent(messageArray, 'ChatEnded')
+						const {
+							message: { reason: chatEndedReason },
+						} = getForEvent(messageArray, 'ChatEnded');
 						if (chatEndedReason === 'agent') {
 							await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
 						}
