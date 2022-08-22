@@ -2,8 +2,10 @@ import { IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definitio
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
 import { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
 import { IUser } from '@rocket.chat/apps-engine/definition/users';
+import { EventName } from '../enum/Analytics';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
+import { getEventData } from '../lib/Analytics';
 import { getAppSettingValue } from '../lib/Settings';
 import { agentTypingListener, removeAgentTypingListener } from './AgentTypingHelper';
 import { sendLCMessage } from './LivechatMessageHelpers';
@@ -28,6 +30,7 @@ export async function messageFilter(
 					const sneakPeekEnabled = transferMessage.sneakPeekEnabled;
 					const chasitorIdleTimeout = transferMessage.chasitorIdleTimeout || false;
 					await updatePersistentData(read, persistence, assoc, { salesforceAgentName, chasitorIdleTimeout, sneakPeekEnabled });
+					modify.getAnalytics().sendEvent(getEventData(messageRoom.id, EventName.AGENT_TRANSFER_SUCCESSFUL));
 					break;
 
 				case 'ChatMessage':

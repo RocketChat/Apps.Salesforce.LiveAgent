@@ -2,10 +2,12 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata/RocketChatAssociations';
+import { EventName } from '../../../enum/Analytics';
 import { AppSettingId } from '../../../enum/AppSettingId';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
 import { SalesforceAgentAssigned } from '../../../handlers/SalesforceAgentAssignedHandler';
+import { getEventData } from '../../../lib/Analytics';
 import { getAppSettingValue } from '../../../lib/Settings';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { getError } from '../../Log';
@@ -78,6 +80,8 @@ export class CheckChatStatus {
 
 					const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 					if (isChatAccepted === true) {
+						//TODO: Add queue_time to analytics
+						this.modify.getAnalytics().sendEvent(getEventData(this.data.room.id, EventName.ESCALATION_SUCCESSFUL, { queue_time: '' }));
 						console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
 						const chatEstablishedMessage = messageArray[0].message;
 						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout || false;
@@ -119,6 +123,9 @@ export class CheckChatStatus {
 									this.read,
 									AppSettingId.NO_LIVEAGENT_AGENT_AVAILABLE_MESSAGE,
 								);
+								this.modify
+									.getAnalytics()
+									.sendEvent(getEventData(this.data.room.id, EventName.ESCALATION_FAILED_DUE_TO_NO_LIVEAGENT_AVAILABLE));
 								await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(NoLiveagentAvailableMessage);
 								return;
 							}

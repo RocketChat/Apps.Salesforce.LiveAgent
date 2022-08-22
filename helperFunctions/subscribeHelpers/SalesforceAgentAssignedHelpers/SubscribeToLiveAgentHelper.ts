@@ -2,8 +2,10 @@ import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/de
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext } from '@rocket.chat/apps-engine/definition/livechat';
 import { RocketChatAssociationRecord } from '@rocket.chat/apps-engine/definition/metadata';
+import { EventName } from '../../../enum/Analytics';
 import { ErrorLogs } from '../../../enum/ErrorLogs';
 import { InfoLogs } from '../../../enum/InfoLogs';
+import { getEventData } from '../../../lib/Analytics';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
 import { updateRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { pullMessages } from '../../SalesforceAPIHelpers';
@@ -66,6 +68,7 @@ export class SubscribeToLiveAgent {
 						} = getForEvent(messageArray, 'ChatEnded');
 						if (chatEndedReason === 'agent') {
 							await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
+							this.modify.getAnalytics().sendEvent(getEventData(this.data.room.id, EventName.CHAT_CLOSED_BY_AGENT));
 						}
 						await handleEndChatCallback.handleEndChat();
 					} else {
