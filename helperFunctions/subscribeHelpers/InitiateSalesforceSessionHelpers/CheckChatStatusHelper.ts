@@ -12,8 +12,9 @@ import { getAppSettingValue } from '../../../lib/Settings';
 import { sendLCMessage } from '../../LivechatMessageHelpers';
 import { getError } from '../../Log';
 import { retrievePersistentTokens } from '../../PersistenceHelpers';
+import { updateRoomCustomFields } from '../../RoomCustomFieldsHelper';
 import { pullMessages } from '../../SalesforceAPIHelpers';
-import { checkForEvent } from '../../SalesforceMessageHelpers';
+import { checkForEvent, getForEvent } from '../../SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from './CheckAgentStatusCallback';
 
 export class CheckChatStatus {
@@ -132,6 +133,13 @@ export class CheckChatStatus {
 							await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 							return;
 						} else if (isChatEnded === true) {
+							const {
+								message: { reason: chatEndedReason },
+							} = getForEvent(messageArray, 'ChatEnded');
+							if (chatEndedReason === 'agent') {
+								await updateRoomCustomFields(this.data.room.id, { agentEndedChat: true }, this.read, this.modify);
+								this.modify.getAnalytics().sendEvent(getEventData(this.data.room.id, EventName.CHAT_CLOSED_BY_AGENT));
+							}
 							await checkAgentStatusDirectCallback.checkAgentStatusCallbackError(this.technicalDifficultyMessage);
 							return;
 						} else {
