@@ -2,6 +2,7 @@ import { URL } from 'url';
 import { IHttp, IModify, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatEventContext, IVisitor } from '@rocket.chat/apps-engine/definition/livechat';
+import { EventName } from '../enum/Analytics';
 import { AppSettingId } from '../enum/AppSettingId';
 import { ErrorLogs } from '../enum/ErrorLogs';
 import { InfoLogs } from '../enum/InfoLogs';
@@ -13,6 +14,7 @@ import { getSessionTokens, pullMessages, sendChatRequest } from '../helperFuncti
 import { checkForEvent, checkForPostChatUrl, getForEvent } from '../helperFunctions/SalesforceMessageHelpers';
 import { CheckAgentStatusCallback } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckAgentStatusCallback';
 import { CheckChatStatus } from '../helperFunctions/subscribeHelpers/InitiateSalesforceSessionHelpers/CheckChatStatusHelper';
+import { getEventData } from '../lib/Analytics';
 import { getAppSettingValue } from '../lib/Settings';
 
 export class InitiateSalesforceSession {
@@ -26,6 +28,9 @@ export class InitiateSalesforceSession {
 	) {}
 
 	public async exec() {
+		const {
+			room: { id: roomId },
+		} = this.data;
 		const salesforceOrganisationId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_ORGANISATION_ID);
 		const salesforceDeploymentId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_DEPLOYMENT_ID);
 		const salesforceButtonId: string = await getAppSettingValue(this.read, AppSettingId.SALESFORCE_BUTTON_ID);
@@ -62,7 +67,7 @@ export class InitiateSalesforceSession {
 			LcVisitorEmail = LcVisitorEmailsArr[0].address;
 		}
 
-		const assoc = getRoomAssoc(this.data.room.id);
+		const assoc = getRoomAssoc(roomId);
 
 		await sendDebugLCMessage(this.read, this.modify, this.data.room, InfoLogs.INITIATING_LIVEAGENT_SESSION, this.data.agent);
 		await getSessionTokens(this.http, salesforceChatApiEndpoint)
@@ -93,7 +98,7 @@ export class InitiateSalesforceSession {
 					const handoverFailure = {
 						errorMessage,
 						error,
-						dialogflow_SessionID: this.data.room.id,
+						dialogflow_SessionID: roomId,
 						salesforce_SessionTokens: sessionTokens,
 						salesforce_ID: salesforceId,
 						salesforce_OrganizationID: salesforceOrganisationId,
@@ -101,6 +106,20 @@ export class InitiateSalesforceSession {
 					};
 					Object.keys(handoverFailure).forEach((prop) => handoverFailure[prop] === undefined && delete handoverFailure[prop]);
 					console.error('Failed to handover', JSON.stringify(handoverFailure));
+
+					let errorEventName: EventName;
+					switch (errorMessage) {
+						case ErrorLogs.ALL_LIVEAGENTS_UNAVAILABLE:
+							errorEventName = EventName.ESCALATION_FAILED_DUE_TO_NO_LIVEAGENT_AVAILABLE;
+							break;
+						case ErrorLogs.APP_CONFIGURATION_INVALID:
+						case ErrorLogs.SALESFORCE_INTERNAL_FAILURE:
+							errorEventName = EventName.ESCALATION_FAILED_DUE_TO_SALESFORCE_ERROR;
+							break;
+						default:
+							errorEventName = EventName.ESCALATION_FAILED_DUE_TO_NETWORK_OR_APP_ERROR;
+					}
+					this.modify.getAnalytics().sendEvent(getEventData(roomId, errorEventName));
 				};
 
 				await sendChatRequest(
@@ -144,7 +163,7 @@ export class InitiateSalesforceSession {
 									postChatUrl = postChatUrl.href;
 								}
 
-								await updateRoomCustomFields(this.data.room.id, { postChatUrl }, this.read, this.modify);
+								await updateRoomCustomFields(roomId, { postChatUrl }, this.read, this.modify);
 
 								if (hasQueueUpdateMessage === true || isChatRequestSuccess === true) {
 									const queueMessage = hasQueueUpdateMessage
