@@ -52,7 +52,7 @@ export class PostMessageClassInitiate {
 
 		handleTimeout(this.app, this.message, this.read, this.http, this.persistence, this.modify);
 
-		if (this.message && this.message.id) {
+		if (this.message?.id) {
 			const { salesforceAgentName } = await retrievePersistentData(this.read, assoc);
 			const user = await this.read.getUserReader().getByUsername(salesforceBotUsername);
 			const msgExtender = this.modify.getExtender().extendMessage(this.message.id, user);
