@@ -111,8 +111,14 @@ export class SalesforceLiveAgentApp
 		await postMessageClassInitiate.exec();
 	}
 
-	public async executeOnRoomUserTyping(data: IRoomUserTypingContext, read: IRead, http: IHttp, persistence: IPersistence): Promise<void> {
-		const onUserTypingHandler = new OnUserTypingHandler(this, data, read, http, persistence);
+	public async executeOnRoomUserTyping(
+		data: IRoomUserTypingContext,
+		read: IRead,
+		http: IHttp,
+		persistence: IPersistence,
+		modify: IModify,
+	): Promise<void> {
+		const onUserTypingHandler = new OnUserTypingHandler(this, data, read, http, persistence, modify);
 		await onUserTypingHandler.exec();
 	}
 
