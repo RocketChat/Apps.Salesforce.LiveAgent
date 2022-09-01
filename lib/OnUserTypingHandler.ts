@@ -1,4 +1,4 @@
-import { IHttp, IPersistence, IRead } from '@rocket.chat/apps-engine/definition/accessors';
+import { IHttp, IPersistence, IRead, IModify } from '@rocket.chat/apps-engine/definition/accessors';
 import { IApp } from '@rocket.chat/apps-engine/definition/IApp';
 import { ILivechatRoom } from '@rocket.chat/apps-engine/definition/livechat';
 import { IRoomUserTypingContext } from '@rocket.chat/apps-engine/definition/rooms';
@@ -7,6 +7,13 @@ import { ErrorLogs } from '../enum/ErrorLogs';
 import { getRoomAssoc, retrievePersistentData } from '../helperFunctions/PersistenceHelpers';
 import { chasitorSneakPeak, chasitorTyping } from '../helperFunctions/SalesforceAPIHelpers';
 import { getAppSettingValue } from '../lib/Settings';
+import { resetAppTimeout } from '../helperFunctions/TimeoutHelper';
+
+let allowTimeoutReset = true;
+
+let userStoppedTypingTimeout: NodeJS.Timeout | null = null;
+
+const TIMER_RESET_DELAY_SECONDS = 10;
 
 export class OnUserTypingHandler {
 	constructor(
@@ -15,6 +22,7 @@ export class OnUserTypingHandler {
 		private read: IRead,
 		private http: IHttp,
 		private persistence: IPersistence,
+		private modify: IModify,
 	) {}
 
 	public async exec() {
@@ -43,27 +51,38 @@ export class OnUserTypingHandler {
 			return;
 		}
 		const assoc = getRoomAssoc(this.data.roomId);
-		const { persistentAffinity, persistentKey, sneakPeekEnabled } = await retrievePersistentData(this.read, assoc);
+		const { persistentAffinity, persistentKey, sneakPeekEnabled, chasitorIdleTimeout } = await retrievePersistentData(this.read, assoc);
 
 		if (persistentAffinity !== null && persistentKey !== null) {
+			// reset the app timer when user typing handler is called for the first time in >=10 seconds
+			if (allowTimeoutReset) {
+				await resetAppTimeout(room.id, chasitorIdleTimeout, this.read, this.modify, this.persistence, this.app, assoc);
+				allowTimeoutReset = false;
+			}
+
+			// If there is an existing timer (for >=10s of NO typing handler calls), clear it (in order to reset it)
+			if (userStoppedTypingTimeout !== null) {
+				clearTimeout(userStoppedTypingTimeout);
+			}
+
+			// schedule timer to allow typing handler to reset app timer after >=10 seconds of user not typing
+			userStoppedTypingTimeout = setTimeout(async () => {
+				allowTimeoutReset = true; // allow app timer reset to be called on next user typing handler call
+				userStoppedTypingTimeout = null;
+			}, TIMER_RESET_DELAY_SECONDS * 1000);
+
 			if (sneakPeekEnabled) {
 				if (this.data.data.text || this.data.data.text === '') {
-					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, this.data.data.text)
-						.then(async () => {
-							// ChasitorSneakPeak API Success
-						})
-						.catch((error) => {
+					await chasitorSneakPeak(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, this.data.data.text).catch(
+						(error) => {
 							console.error(ErrorLogs.CHASITOR_SNEAKPEEK_API_CALL_FAIL, error);
-						});
+						},
+					);
 				}
 			} else {
-				await chasitorTyping(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, this.data.typing)
-					.then(async () => {
-						// ChasitorTyping/ChasitorNotTyping API Success
-					})
-					.catch((error) => {
-						console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
-					});
+				await chasitorTyping(this.http, salesforceChatApiEndpoint, persistentAffinity, persistentKey, this.data.typing).catch((error) => {
+					console.error(ErrorLogs.CHASITOR_TYPING_API_CALL_FAIL, error);
+				});
 			}
 		}
 	}
