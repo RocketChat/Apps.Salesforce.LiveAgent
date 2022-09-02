@@ -82,7 +82,10 @@ export class CheckChatStatus {
 					const isChatAccepted = checkForEvent(messageArray, 'ChatEstablished');
 					if (isChatAccepted === true) {
 						//TODO: Add queue_time to analytics
-						this.modify.getAnalytics().sendEvent(getEventData(this.data.room.id, EventName.ESCALATION_SUCCESSFUL, { queue_time: '' }));
+						const chatKey = this.key.split('!')[0];
+						this.modify
+							.getAnalytics()
+							.sendEvent(getEventData(this.data.room.id, EventName.ESCALATION_SUCCESSFUL, { queue_time: '', sf_chat_key: chatKey }));
 						console.log(InfoLogs.LIVEAGENT_ACCEPTED_CHAT_REQUEST);
 						const chatEstablishedMessage = messageArray[0].message;
 						const chasitorIdleTimeout = chatEstablishedMessage.chasitorIdleTimeout || false;
