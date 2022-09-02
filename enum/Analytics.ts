@@ -52,6 +52,7 @@ export const Events: Record<string, IAnalyticsEvent> = {
 		action: 'successful',
 		properties: {
 			queue_time: '',
+			sf_chat_key: '',
 		},
 	},
 	[EventName.AGENT_TRANSFER_SUCCESSFUL]: {
